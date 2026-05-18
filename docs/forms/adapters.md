@@ -5,8 +5,7 @@ title: Schema Adapters
 # Schema Adapters
 
 Form validation rarely starts from a blank page. A project may already have a
-Zod schema for an API contract, a Yup schema for an older screen, or a domain
-validator that should stay in place.
+Zod schema for an API contract or a domain validator that should stay in place.
 
 `@virentia/forms` does not ship its own rule language. Instead, adapters turn
 external schema libraries into regular `FormValidator` or `FieldValidator`
@@ -69,9 +68,7 @@ import { zodFieldValidator } from "@virentia/forms-zod";
 import { z } from "zod";
 
 const email = createField("", {
-  validate: zodFieldValidator(
-    z.string().email("Invalid email"),
-  ),
+  validate: zodFieldValidator(z.string().email("Invalid email")),
 });
 
 await email.validate();
@@ -104,60 +101,6 @@ export const emailField = primitive.extend({
 
 Now the rules live next to the field type, and a form can just use
 `emailField()`.
-
-## Yup for the whole form
-
-The Yup adapter solves the same problem through `schema.validate`.
-
-```ts
-import { createField, createForm } from "@virentia/forms";
-import { yupValidator } from "@virentia/forms-yup";
-import * as yup from "yup";
-
-const contactForm = createForm({
-  schema: {
-    name: createField(""),
-    email: createField(""),
-  },
-  validation: yupValidator(
-    yup.object({
-      name: yup.string().required("Enter a name"),
-      email: yup.string().required("Enter an email").email("Invalid email"),
-    }),
-  ),
-});
-```
-
-For form validation, the adapter runs Yup with `abortEarly: false` to collect
-errors for all fields in one pass.
-
-## Yup for one field
-
-```ts
-import { createField } from "@virentia/forms";
-import { yupFieldValidator } from "@virentia/forms-yup";
-import * as yup from "yup";
-
-const title = createField("", {
-  validate: yupFieldValidator(
-    yup.string().required("Enter a title"),
-  ),
-});
-```
-
-Field validation uses `abortEarly: true` because one field needs one message.
-If you need exact message priority, use an array of validators.
-
-```ts
-const slug = createField("", {
-  validate: [
-    yupFieldValidator(yup.string().required("Enter a slug")),
-    yupFieldValidator(
-      yup.string().matches(/^[a-z0-9-]+$/, "Use lowercase letters, digits, and hyphens"),
-    ),
-  ],
-});
-```
 
 ## Schema depending on stores
 
@@ -213,13 +156,13 @@ receive `ctx.signal` when they need to cancel network work.
 
 ## Field adapter or form adapter
 
-| Scenario | Use |
-| --- | --- |
-| Rule depends on one value | `zodFieldValidator` or `yupFieldValidator` |
-| Rule compares several fields | `zodValidator`, `yupValidator`, or a form validator |
-| Schema already describes the API payload | form adapter |
-| Field is a reusable domain primitive | field adapter inside `fieldType.extend` |
-| Rule needs Virentia stores | schema factory or manual validator with `ctx.read` |
+| Scenario                                 | Use                                                |
+| ---------------------------------------- | -------------------------------------------------- |
+| Rule depends on one value                | `zodFieldValidator`                                |
+| Rule compares several fields             | `zodValidator` or a form validator                 |
+| Schema already describes the API payload | form adapter                                       |
+| Field is a reusable domain primitive     | field adapter inside `fieldType.extend`            |
+| Rule needs Virentia stores               | schema factory or manual validator with `ctx.read` |
 
 ## Contract
 
@@ -233,18 +176,6 @@ function zodValidator<Schema extends ZodType>(
 function zodFieldValidator<Schema extends ZodType>(
   schema: Schema | ((ctx: ValidationContext) => Schema),
 ): FieldValidator<z.output<Schema>, FieldError>;
-```
-
-Yup:
-
-```ts
-function yupValidator<Schema extends AnySchema>(
-  schema: Schema | ((ctx: ValidationContext) => Schema),
-): FormValidator<InferType<Schema>, any>;
-
-function yupFieldValidator<Schema extends AnySchema>(
-  schema: Schema | ((ctx: ValidationContext) => Schema),
-): FieldValidator<InferType<Schema>, FieldError>;
 ```
 
 ## Next

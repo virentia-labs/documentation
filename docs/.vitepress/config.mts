@@ -6,6 +6,7 @@ const ruSiteDescription = "Стейт-менеджер для приложени
 const enNav = [
   { text: "Guide", link: "/guide/getting-started" },
   { text: "Core", link: "/core/" },
+  { text: "Inspector", link: "/inspector/" },
   { text: "Forms", link: "/forms/" },
   { text: "Router", link: "/router/" },
   { text: "React", link: "/react/" },
@@ -17,6 +18,7 @@ const enNav = [
 const ruNav = [
   { text: "Руководство", link: "/ru/guide/getting-started" },
   { text: "Ядро", link: "/ru/core/" },
+  { text: "Инспектор", link: "/ru/inspector/" },
   { text: "Формы", link: "/ru/forms/" },
   { text: "Роутер", link: "/ru/router/" },
   { text: "React", link: "/ru/react/" },
@@ -50,6 +52,10 @@ const enSidebar = [
       { text: "Owners and cleanup", link: "/core/owners" },
       { text: "Low-level kernel", link: "/core/kernel" },
     ],
+  },
+  {
+    text: "Inspector",
+    items: [{ text: "Overview", link: "/inspector/" }],
   },
   {
     text: "Forms",
@@ -144,6 +150,10 @@ const ruSidebar = [
       { text: "Владельцы и очистка", link: "/ru/core/owners" },
       { text: "Низкоуровневое ядро", link: "/ru/core/kernel" },
     ],
+  },
+  {
+    text: "Инспектор",
+    items: [{ text: "Обзор", link: "/ru/inspector/" }],
   },
   {
     text: "Формы",

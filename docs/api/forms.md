@@ -36,12 +36,6 @@ import {
   zodFormValidator,
   zodFieldValidator,
 } from "@virentia/forms-zod";
-
-import {
-  yupValidator,
-  yupFormValidator,
-  yupFieldValidator,
-} from "@virentia/forms-yup";
 ```
 
 ## Base types
@@ -78,8 +72,10 @@ interface CreateFieldOptions<Value, Meta extends object> {
 state, metadata, and validation lifecycle.
 
 ```ts
-interface Field<Value, Meta extends object = Record<string, never>>
-  extends NormalizedField<Value, FieldError, Value> {
+interface Field<
+  Value,
+  Meta extends object = Record<string, never>,
+> extends NormalizedField<Value, FieldError, Value> {
   readonly error: Store<FieldError>;
   readonly innerError: Store<FieldError>;
   readonly outerError: Store<FieldError>;
@@ -128,8 +124,11 @@ interface FieldContract<Value, Errors = FieldError, Fill = Value> {
   readonly view?: unknown;
 }
 
-interface NormalizedField<Value = unknown, Errors = unknown, Fill = unknown>
-  extends FieldContract<Value, Errors, Fill> {
+interface NormalizedField<
+  Value = unknown,
+  Errors = unknown,
+  Fill = unknown,
+> extends FieldContract<Value, Errors, Fill> {
   readonly errors: Store<Errors>;
   readonly innerErrors: Store<Errors>;
   readonly outerErrors: Store<Errors>;
@@ -163,25 +162,31 @@ interface CreateShapeFieldOptions {
   createField?(key: string, value: unknown): AnyField;
   validate?:
     | FieldValidator<Record<string, unknown>, Record<string, unknown>>
-    | readonly FieldValidator<Record<string, unknown>, Record<string, unknown>>[];
+    | readonly FieldValidator<
+        Record<string, unknown>,
+        Record<string, unknown>
+      >[];
   validationStrategies?: readonly ValidationStrategy[];
 }
 
-interface ShapeField<Shape extends Record<string, AnyField>>
-  extends NormalizedField<
-    ShapeValues<Shape>,
-    ShapeErrors<Shape>,
-    PartialRecursive<ShapeValues<Shape>>
-  > {
+interface ShapeField<
+  Shape extends Record<string, AnyField>,
+> extends NormalizedField<
+  ShapeValues<Shape>,
+  ShapeErrors<Shape>,
+  PartialRecursive<ShapeValues<Shape>>
+> {
   readonly fields: Store<Readonly<Record<string, AnyField>>>;
 
-  add<Key extends string, FieldValue extends AnyField>(
-    payload: { key: Key; field: FieldValue },
-  ): Promise<void>;
+  add<Key extends string, FieldValue extends AnyField>(payload: {
+    key: Key;
+    field: FieldValue;
+  }): Promise<void>;
   remove(key: keyof Shape | string): Promise<void>;
-  replace<Key extends string, FieldValue extends AnyField>(
-    payload: { key: Key; field: FieldValue },
-  ): Promise<void>;
+  replace<Key extends string, FieldValue extends AnyField>(payload: {
+    key: Key;
+    field: FieldValue;
+  }): Promise<void>;
   clear(): Promise<void>;
 }
 ```
@@ -202,16 +207,21 @@ interface CreateArrayFieldOptions<Value, ItemField extends AnyField> {
   createItem?(value: Value, index: number): ItemField;
   validate?:
     | FieldValidator<readonly Value[], ArrayFieldErrors<FieldErrors<ItemField>>>
-    | readonly FieldValidator<readonly Value[], ArrayFieldErrors<FieldErrors<ItemField>>>[];
+    | readonly FieldValidator<
+        readonly Value[],
+        ArrayFieldErrors<FieldErrors<ItemField>>
+      >[];
   validationStrategies?: readonly ValidationStrategy[];
 }
 
-interface ArrayField<Value, ItemField extends AnyField = Field<Value>>
-  extends NormalizedField<
-    readonly Value[],
-    ArrayFieldErrors<FieldErrors<ItemField>>,
-    readonly Value[]
-  > {
+interface ArrayField<
+  Value,
+  ItemField extends AnyField = Field<Value>,
+> extends NormalizedField<
+  readonly Value[],
+  ArrayFieldErrors<FieldErrors<ItemField>>,
+  readonly Value[]
+> {
   readonly items: Store<readonly ItemField[]>;
   readonly itemFields: Store<Readonly<Record<string, ItemField>>>;
   readonly length: Store<number>;
@@ -237,15 +247,17 @@ function createForm<Schema extends Record<string, any>>(
 
 interface CreateFormConfig<Schema extends Record<string, any>> {
   schema: Schema;
-  validation?:
-    | FormValidator<any, any>
-    | readonly FormValidator<any, any>[];
+  validation?: FormValidator<any, any> | readonly FormValidator<any, any>[];
   validationStrategies?: readonly ValidationStrategy[];
 }
 ```
 
 ```ts
-interface Form<Schema, Values = SchemaValues<Schema>, Errors = SchemaErrors<Schema>> {
+interface Form<
+  Schema,
+  Values = SchemaValues<Schema>,
+  Errors = SchemaErrors<Schema>,
+> {
   readonly kind: "form";
   readonly fields: NormalizeSchema<Schema>;
   readonly values: Store<Values>;
@@ -281,25 +293,27 @@ interface Form<Schema, Values = SchemaValues<Schema>, Errors = SchemaErrors<Sche
 Form helper types:
 
 ```ts
-type FieldValue<T> = T extends FieldContract<infer Value, any, any>
-  ? Value
-  : T extends readonly any[]
-    ? T
-    : T extends Date
+type FieldValue<T> =
+  T extends FieldContract<infer Value, any, any>
+    ? Value
+    : T extends readonly any[]
       ? T
-      : T extends object
-        ? { [Key in keyof T]: FieldValue<T[Key]> }
-        : T;
+      : T extends Date
+        ? T
+        : T extends object
+          ? { [Key in keyof T]: FieldValue<T[Key]> }
+          : T;
 
-type FieldErrors<T> = T extends FieldContract<any, infer Errors, any>
-  ? Errors
-  : T extends readonly any[]
-    ? FieldError
-    : T extends Date
+type FieldErrors<T> =
+  T extends FieldContract<any, infer Errors, any>
+    ? Errors
+    : T extends readonly any[]
       ? FieldError
-      : T extends object
-        ? { [Key in keyof T]: FieldErrors<T[Key]> }
-        : FieldError;
+      : T extends Date
+        ? FieldError
+        : T extends object
+          ? { [Key in keyof T]: FieldErrors<T[Key]> }
+          : FieldError;
 
 type SchemaValues<Schema> = {
   [Key in keyof Schema]: FieldValue<Schema[Key]>;
@@ -321,12 +335,12 @@ function step<Id extends string, StepForm extends AnyForm>(
 function createWizard<
   Steps extends readonly WizardStep[],
   RootForm extends AnyForm | undefined = undefined,
->(config: {
-  form?: RootForm;
-  steps: Steps;
-}): Wizard<Steps, RootForm>;
+>(config: { form?: RootForm; steps: Steps }): Wizard<Steps, RootForm>;
 
-function createWizardForm<Schema extends Record<string, any>, Steps extends readonly WizardStep[]>(
+function createWizardForm<
+  Schema extends Record<string, any>,
+  Steps extends readonly WizardStep[],
+>(
   config: CreateFormConfig<Schema> & {
     steps(form: Form<Schema>): Steps;
   },
@@ -334,7 +348,10 @@ function createWizardForm<Schema extends Record<string, any>, Steps extends read
 ```
 
 ```ts
-interface WizardStep<Id extends string = string, StepForm extends AnyForm = AnyForm> {
+interface WizardStep<
+  Id extends string = string,
+  StepForm extends AnyForm = AnyForm,
+> {
   readonly id: Id;
   readonly form: StepForm;
   readonly title?: string;
@@ -405,7 +422,9 @@ to store changes after the first run.
 ## Field types
 
 ```ts
-function defineField<FieldValue extends AnyField>(field: FieldValue): FieldValue;
+function defineField<FieldValue extends AnyField>(
+  field: FieldValue,
+): FieldValue;
 
 function fieldType<Factory extends (...args: any[]) => AnyField>(config: {
   kind?: string;
@@ -448,16 +467,6 @@ const zodFormValidator: typeof zodValidator;
 function zodFieldValidator<Schema extends ZodType>(
   schema: Schema | ((ctx: ValidationContext) => Schema),
 ): FieldValidator<z.output<Schema>, FieldError>;
-
-function yupValidator<Schema extends AnySchema>(
-  schema: Schema | ((ctx: ValidationContext) => Schema),
-): FormValidator<InferType<Schema>, any>;
-
-const yupFormValidator: typeof yupValidator;
-
-function yupFieldValidator<Schema extends AnySchema>(
-  schema: Schema | ((ctx: ValidationContext) => Schema),
-): FieldValidator<InferType<Schema>, FieldError>;
 ```
 
 ## Related

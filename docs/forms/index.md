@@ -24,7 +24,6 @@ Optional packages:
 ```sh
 pnpm add @virentia/forms-react @virentia/react react
 pnpm add @virentia/forms-zod zod
-pnpm add @virentia/forms-yup yup
 ```
 
 ## How The Section Is Structured
@@ -33,19 +32,19 @@ The forms guide is organized by mental pattern. Each page explains why the
 pattern exists, when to use it, how the API looks, and the cases people usually
 hit first.
 
-| Pattern | Use it when |
-| --- | --- |
-| [Field model](./fields) | One value needs lifecycle: fill, reset, validation, focus, metadata. |
-| [Form model](./form) | Several fields should become one values/errors payload. |
+| Pattern                              | Use it when                                                                 |
+| ------------------------------------ | --------------------------------------------------------------------------- |
+| [Field model](./fields)              | One value needs lifecycle: fill, reset, validation, focus, metadata.        |
+| [Form model](./form)                 | Several fields should become one values/errors payload.                     |
 | [Validation lifecycle](./validation) | Rules should run as functions, effects, schemas, or store-aware validators. |
-| [Error channels](./errors) | Backend errors and local validation must coexist. |
-| [Custom fields](./custom-fields) | Several internal fields should expose one domain value. |
-| [Field types](./field-types) | A field factory should carry reusable domain behavior. |
-| [Shape fields](./shape-fields) | An object has dynamic keys. |
-| [Array fields](./array-fields) | A form has ordered repeated items. |
-| [Wizard forms](./wizard) | Navigation is driven by validation of step forms. |
-| [React bindings](./react) | Components should read models and call scoped handlers. |
-| [Schema adapters](./adapters) | Zod or Yup should act as validators, not as the form runtime. |
+| [Error channels](./errors)           | Backend errors and local validation must coexist.                           |
+| [Custom fields](./custom-fields)     | Several internal fields should expose one domain value.                     |
+| [Field types](./field-types)         | A field factory should carry reusable domain behavior.                      |
+| [Shape fields](./shape-fields)       | An object has dynamic keys.                                                 |
+| [Array fields](./array-fields)       | A form has ordered repeated items.                                          |
+| [Wizard forms](./wizard)             | Navigation is driven by validation of step forms.                           |
+| [React bindings](./react)            | Components should read models and call scoped handlers.                     |
+| [Schema adapters](./adapters)        | Zod should act as validators, not as the form runtime.                      |
 
 ## First Model
 
@@ -97,7 +96,6 @@ What this gives you:
 @virentia/forms        // core models and contracts
 @virentia/forms-react  // React hooks
 @virentia/forms-zod    // Zod validators
-@virentia/forms-yup    // Yup validators
 ```
 
 Full signatures live in the [API reference](/api/forms).

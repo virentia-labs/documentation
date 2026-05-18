@@ -117,13 +117,13 @@ const form = createForm({
 });
 ```
 
-| Strategy | Runs when |
-| --- | --- |
+| Strategy | Runs when                |
+| -------- | ------------------------ |
 | `manual` | Direct `validate()` call |
-| `change` | Value changes |
-| `blur` | Field blur |
-| `focus` | Field focus |
-| `submit` | Form submit lifecycle |
+| `change` | Value changes            |
+| `blur`   | Field blur               |
+| `focus`  | Field focus              |
+| `submit` | Form submit lifecycle    |
 
 `submit()` always validates the form before emitting submit success and updating
 the snapshot.
@@ -165,5 +165,5 @@ type FormValidator<Values, Errors> =
 ## Related
 
 - [Error channels](./errors) - where validation results are stored.
-- [Schema adapters](./adapters) - Zod and Yup as validators.
+- [Schema adapters](./adapters) - Zod as validator.
 - [Field types](./field-types) - reusable validator setup.

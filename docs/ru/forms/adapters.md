@@ -5,8 +5,7 @@ title: Адаптеры схем
 # Адаптеры схем
 
 Валидация форм редко начинается с пустого листа. В проекте уже может быть
-Zod-схема для API-контракта, Yup-схема для старого экрана или доменная функция,
-которую нельзя заменить прямо сейчас.
+Zod-схема для API-контракта или доменная функция которую нельзя заменить прямо сейчас.
 
 `@virentia/forms` не встраивает собственный язык правил. Вместо этого адаптеры
 превращают внешнюю библиотеку схем в обычный `FormValidator` или
@@ -70,9 +69,7 @@ import { zodFieldValidator } from "@virentia/forms-zod";
 import { z } from "zod";
 
 const email = createField("", {
-  validate: zodFieldValidator(
-    z.string().email("Некорректный email"),
-  ),
+  validate: zodFieldValidator(z.string().email("Некорректный email")),
 });
 
 await email.validate();
@@ -105,61 +102,6 @@ export const emailField = primitive.extend({
 
 Теперь правила живут рядом с типом поля, а форма просто использует
 `emailField()`.
-
-## Yup для формы
-
-Yup-адаптер решает ту же задачу, но использует `schema.validate`.
-
-```ts
-import { createField, createForm } from "@virentia/forms";
-import { yupValidator } from "@virentia/forms-yup";
-import * as yup from "yup";
-
-const contactForm = createForm({
-  schema: {
-    name: createField(""),
-    email: createField(""),
-  },
-  validation: yupValidator(
-    yup.object({
-      name: yup.string().required("Введите имя"),
-      email: yup.string().required("Введите email").email("Некорректный email"),
-    }),
-  ),
-});
-```
-
-Для валидации формы адаптер запускает Yup с `abortEarly: false`, чтобы собрать
-ошибки по всем полям за один проход.
-
-## Yup для поля
-
-```ts
-import { createField } from "@virentia/forms";
-import { yupFieldValidator } from "@virentia/forms-yup";
-import * as yup from "yup";
-
-const title = createField("", {
-  validate: yupFieldValidator(
-    yup.string().required("Введите заголовок"),
-  ),
-});
-```
-
-Валидация поля использует `abortEarly: true`, потому что одному полю нужно
-одно сообщение. Если нужно показать разные сообщения в правильном порядке,
-используйте массив валидаторов.
-
-```ts
-const slug = createField("", {
-  validate: [
-    yupFieldValidator(yup.string().required("Введите slug")),
-    yupFieldValidator(
-      yup.string().matches(/^[a-z0-9-]+$/, "Только латиница, цифры и дефис"),
-    ),
-  ],
-});
-```
 
 ## Схема, зависящая от сторов
 
@@ -215,13 +157,13 @@ const username = createField("", {
 
 ## Когда выбирать адаптер поля, а когда адаптер формы
 
-| Сценарий | Что использовать |
-| --- | --- |
-| Правило зависит только от одного значения | `zodFieldValidator` или `yupFieldValidator` |
-| Правило сравнивает несколько полей | `zodValidator`, `yupValidator` или валидатор формы |
-| Схема уже описывает API-объект | адаптер формы |
-| Поле является переиспользуемым доменным примитивом | адаптер поля внутри `fieldType.extend` |
-| Нужно читать сторы Virentia | фабрика схемы или ручной валидатор с `ctx.read` |
+| Сценарий                                           | Что использовать                                |
+| -------------------------------------------------- | ----------------------------------------------- |
+| Правило зависит только от одного значения          | `zodFieldValidator`                             |
+| Правило сравнивает несколько полей                 | `zodValidator` или валидатор формы              |
+| Схема уже описывает API-объект                     | адаптер формы                                   |
+| Поле является переиспользуемым доменным примитивом | адаптер поля внутри `fieldType.extend`          |
+| Нужно читать сторы Virentia                        | фабрика схемы или ручной валидатор с `ctx.read` |
 
 ## Контракт
 
@@ -235,18 +177,6 @@ function zodValidator<Schema extends ZodType>(
 function zodFieldValidator<Schema extends ZodType>(
   schema: Schema | ((ctx: ValidationContext) => Schema),
 ): FieldValidator<z.output<Schema>, FieldError>;
-```
-
-Yup:
-
-```ts
-function yupValidator<Schema extends AnySchema>(
-  schema: Schema | ((ctx: ValidationContext) => Schema),
-): FormValidator<InferType<Schema>, any>;
-
-function yupFieldValidator<Schema extends AnySchema>(
-  schema: Schema | ((ctx: ValidationContext) => Schema),
-): FieldValidator<InferType<Schema>, FieldError>;
 ```
 
 ## Что дальше

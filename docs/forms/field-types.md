@@ -95,5 +95,5 @@ type FieldType<Factory extends (...args: any[]) => AnyField> = Factory & {
 ## Related
 
 - [Custom fields](./custom-fields) - structural fields with child models.
-- [Schema adapters](./adapters) - Zod/Yup validators inside field types.
+- [Schema adapters](./adapters) - Zod validator inside field types.
 - [Field model](./fields) - the primitive field factory.
