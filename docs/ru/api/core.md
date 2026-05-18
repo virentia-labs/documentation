@@ -204,6 +204,8 @@ const user = await scoped(appScope, () => loadUserFx("user:1"));
 await scoped(appScope, () => loadUserFx.abort(new Error("cancelled")));
 ```
 
+Отмена завершает активные вызовы на уровне рантайма Virentia, поэтому handler не обязан читать `signal` или вручную делать reject. Эффекты, запущенные активным эффектом, автоматически наследуют отмену родителя и отменяются с той же причиной.
+
 ## attach
 
 Создает новый эффект, который перед запуском читает source-сторы и собирает params.

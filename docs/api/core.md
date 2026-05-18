@@ -204,6 +204,8 @@ Abort running calls:
 await scoped(appScope, () => loadUserFx.abort(new Error("cancelled")));
 ```
 
+Abort settles active calls at the Virentia runtime level, so the handler does not need to observe `signal` or reject manually. Effects started by an active effect inherit parent cancellation automatically and are aborted with the same reason.
+
 Create an independent variant over the same handler:
 
 ```ts

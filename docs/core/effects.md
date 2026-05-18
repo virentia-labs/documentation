@@ -165,9 +165,33 @@ const profileLoadUserFx = requestFx.variant("profileLoadUserFx");
 
 ## Cancellation
 
-The effect handler receives an `AbortSignal`. Pass it to APIs that support cancellation: `fetch`, adapter functions, worker tasks, or long-running operations.
+Aborting an effect settles the active call immediately with the abort reason. The handler does not need to listen to `signal` or reject its own promise for Virentia lifecycle to finish.
 
-`searchFx.abort(reason)` cancels active calls of this effect. First, `aborted` runs with `{ params, reason }`; then the call finishes as a failure and goes through `failData` and `settled`. That is why the model above does not let the generic `failData` handler overwrite the `cancelled` status.
+`searchFx.abort(reason)` cancels active calls of this effect. First, `aborted` runs with `{ params, reason }`; then the call finishes as a failure and goes through `failData` and `settled`. `$pending` and `$inFlight` update from that Virentia-level cancellation even if the original handler promise is still waiting. That is why the model above does not let the generic `failData` handler overwrite the `cancelled` status.
+
+Effects started by an active effect inherit the parent cancellation automatically. If `openSearchFx` calls `searchFx`, aborting `openSearchFx` also aborts the child `searchFx` call with the same reason.
+
+```ts
+const searchFx = effect(async (text: string) => {
+  return new Promise<string[]>(() => {
+    // Virentia will still settle this call when searchFx.abort() runs.
+  });
+});
+
+const openSearchFx = effect(async (text: string) => {
+  return searchFx(text);
+});
+
+await scoped(appScope, () => {
+  const promise = openSearchFx("virentia");
+
+  void openSearchFx.abort(new Error("Search closed"));
+
+  return promise;
+}).catch(() => {});
+```
+
+The effect handler still receives an `AbortSignal`. Pass it to APIs that support cancellation, such as `fetch`, adapter functions, worker tasks, or long-running operations, when you also want the underlying work to stop.
 
 If you need to cancel one specific call, pass an external `AbortSignal` when starting it:
 

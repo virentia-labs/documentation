@@ -165,9 +165,33 @@ const profileLoadUserFx = requestFx.variant("profileLoadUserFx");
 
 ## Отмена
 
-Handler эффекта получает `AbortSignal`. Передавайте его в API, которое умеет отменяться: `fetch`, свои adapter-функции, worker-задачи или долгие операции.
+Отмена эффекта сразу завершает активный вызов с переданной причиной. Handler не обязан слушать `signal` или сам reject-ить promise, чтобы жизненный цикл Virentia завершился.
 
-`searchFx.abort(reason)` отменяет активные вызовы этого эффекта. Сначала сработает `aborted` с `{ params, reason }`, а сам вызов завершится ошибкой и пройдет через `failData` и `settled`. Поэтому в модели выше общий обработчик `failData` не перетирает статус `cancelled`.
+`searchFx.abort(reason)` отменяет активные вызовы этого эффекта. Сначала сработает `aborted` с `{ params, reason }`, а сам вызов завершится ошибкой и пройдет через `failData` и `settled`. `$pending` и `$inFlight` обновятся от этой отмены на уровне Virentia, даже если исходный promise handler-а все еще ждет. Поэтому в модели выше общий обработчик `failData` не перетирает статус `cancelled`.
+
+Эффекты, запущенные активным эффектом, автоматически наследуют отмену родителя. Если `openSearchFx` вызывает `searchFx`, отмена `openSearchFx` также отменит дочерний вызов `searchFx` с той же причиной.
+
+```ts
+const searchFx = effect(async (text: string) => {
+  return new Promise<string[]>(() => {
+    // Virentia все равно завершит этот вызов, когда выполнится searchFx.abort().
+  });
+});
+
+const openSearchFx = effect(async (text: string) => {
+  return searchFx(text);
+});
+
+await scoped(appScope, () => {
+  const promise = openSearchFx("virentia");
+
+  void openSearchFx.abort(new Error("Search closed"));
+
+  return promise;
+}).catch(() => {});
+```
+
+Handler эффекта по-прежнему получает `AbortSignal`. Передавайте его в API, которое умеет отменяться: `fetch`, свои adapter-функции, worker-задачи или долгие операции, если нужно остановить еще и внешнюю работу.
 
 Если нужно отменить один конкретный вызов, передайте внешний `AbortSignal` при запуске:
 

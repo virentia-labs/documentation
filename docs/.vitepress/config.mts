@@ -121,6 +121,7 @@ const enSidebar = [
       { text: "@virentia/react", link: "/api/react" },
       { text: "@virentia/effector", link: "/api/effector" },
       { text: "@virentia/forms", link: "/api/forms" },
+      { text: "@virentia/router", link: "/api/router" },
     ],
   },
 ];
@@ -219,6 +220,7 @@ const ruSidebar = [
       { text: "@virentia/react", link: "/ru/api/react" },
       { text: "@virentia/effector", link: "/ru/api/effector" },
       { text: "@virentia/forms", link: "/ru/api/forms" },
+      { text: "@virentia/router", link: "/ru/api/router" },
     ],
   },
 ];
