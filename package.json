@@ -1,0 +1,24 @@
+{
+  "name": "@virentia/documentation",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vitepress build docs",
+    "dev": "vitepress dev docs",
+    "preview": "vitepress preview docs",
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "@vue-flow/core": "^1.48.2",
+    "typescript": "^6.0.3",
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.34"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "packageManager": "pnpm@11.0.9"
+}
