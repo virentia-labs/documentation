@@ -12,6 +12,203 @@
   height: 26px;
 }
 
+.section-nav--bar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .section-nav--bar {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    gap: 10px;
+    margin-left: 18px;
+    min-width: 0;
+    height: var(--vp-nav-height);
+  }
+}
+
+.section-nav__switcher,
+.section-nav__group {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.section-nav__switcher-button,
+.section-nav__group-button,
+.section-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.section-nav__switcher-button {
+  padding: 0 10px;
+  border: 1px solid var(--vp-c-divider);
+  background: color-mix(in srgb, var(--vp-c-bg-soft) 78%, transparent);
+}
+
+.section-nav__switcher-button::after,
+.section-nav__group-button::after {
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  content: "";
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.18s;
+}
+
+.section-nav__switcher.is-open .section-nav__switcher-button::after,
+.section-nav__group.is-open .section-nav__group-button::after {
+  transform: translateY(1px) rotate(225deg);
+}
+
+.section-nav__switcher-button span {
+  color: var(--vp-c-text-3);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.section-nav__switcher-button strong {
+  color: var(--vp-c-text-1);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.section-nav__group-button,
+.section-nav__link {
+  padding: 0 9px;
+}
+
+.section-nav__switcher.is-open .section-nav__switcher-button,
+.section-nav__switcher-button:hover,
+.section-nav__group.is-open .section-nav__group-button,
+.section-nav__group.is-active .section-nav__group-button,
+.section-nav__group-button:hover,
+.section-nav__link:hover,
+.section-nav__link.is-active {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
+.section-nav__items {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.section-nav__items::-webkit-scrollbar {
+  display: none;
+}
+
+.section-nav__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  min-width: 218px;
+  padding: 6px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg-elv);
+  box-shadow: var(--vp-shadow-3);
+}
+
+.section-nav__switcher .section-nav__menu {
+  left: 0;
+  right: auto;
+}
+
+.section-nav__menu-link {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 7px;
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.section-nav__menu-link:hover,
+.section-nav__menu-link.is-active {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
+.section-nav--screen {
+  display: grid;
+  gap: 12px;
+}
+
+.section-nav__screen-label {
+  margin: 0;
+  color: var(--vp-c-text-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.section-nav__screen-label:not(:first-child) {
+  margin-top: 8px;
+}
+
+.section-nav__screen-sections,
+.section-nav__screen-current,
+.section-nav__screen-group {
+  display: grid;
+  gap: 4px;
+}
+
+.section-nav__screen-group > span {
+  padding: 8px 0 2px;
+  color: var(--vp-c-text-3);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.section-nav__screen-link {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 7px;
+  color: var(--vp-c-text-2);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.section-nav__screen-link:hover,
+.section-nav__screen-link.is-active {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
 .VPHero .image-container {
   transform: none;
 }
