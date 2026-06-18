@@ -1,0 +1,171 @@
+---
+title: Route views & outlets
+---
+
+# Route Views & Outlets
+
+A route view binds one route model to one component. `@virentia/router-react`
+renders the deepest opened view, wraps it in layouts, and exposes child views
+through an outlet. None of these helpers decide which route is open — they only
+map opened routes to rendered components.
+
+## createRouteView
+
+`createRouteView` connects a route (or router, or virtual route) to a component:
+
+```tsx
+import { createRouteView } from "@virentia/router-react";
+import { homeRoute, profileRoute } from "./router";
+import { HomePage } from "./home-page";
+import { ProfilePage } from "./profile-page";
+
+const HomeView = createRouteView({
+  route: homeRoute,
+  view: HomePage,
+});
+
+const ProfileView = createRouteView({
+  route: profileRoute,
+  view: ProfilePage,
+});
+```
+
+```ts
+interface CreateRouteViewProps<Params extends object | void = void> {
+  route: Route<Params> | Router | VirtualRoute<any, any>;
+  view: ComponentType;
+  layout?: LayoutComponent;
+  children?: RouteView[];
+}
+```
+
+The `view` component reads its own params from the route model with `useUnit`,
+not from props:
+
+```tsx
+import { useUnit } from "@virentia/react";
+
+function ProfilePage() {
+  const { id } = useUnit(profileRoute.params);
+
+  return <h1>Profile {id}</h1>;
+}
+```
+
+## createRoutesView
+
+`createRoutesView` renders the deepest opened view from a list. If no view is
+opened, it renders `otherwise` (or `null`):
+
+```tsx
+import { createRouteView, createRoutesView } from "@virentia/router-react";
+
+export const RoutesView = createRoutesView({
+  routes: [HomeView, ProfileView],
+  otherwise: NotFoundPage,
+});
+```
+
+```ts
+interface CreateRoutesViewProps {
+  routes: RouteView[];
+  otherwise?: ComponentType;
+}
+```
+
+## Nested views and Outlet
+
+`Outlet` is for parent routes that own a layout while child routes render inside
+it. The parent view renders `<Outlet />` where the child should appear:
+
+```tsx
+import { Outlet, createRouteView, createRoutesView } from "@virentia/router-react";
+
+const SettingsView = createRouteView({
+  route: settingsRoute,
+  view: () => (
+    <SettingsLayout>
+      <Outlet />
+    </SettingsLayout>
+  ),
+  children: [
+    createRouteView({
+      route: securityRoute,
+      view: SecurityPage,
+    }),
+  ],
+});
+
+export const RoutesView = createRoutesView({
+  routes: [SettingsView],
+});
+```
+
+Parent/child activation is decided by the route model (a child route opens its
+[parent](/router/core/routes#parent-routes) too). `Outlet` only chooses where the
+opened child view is rendered.
+
+## Layouts
+
+`layout` wraps a single route view in a component that receives `children`:
+
+```tsx
+createRouteView({
+  route: profileRoute,
+  view: ProfilePage,
+  layout: AppLayout,
+});
+```
+
+`withLayout` applies the same layout to a group of views without repeating it:
+
+```tsx
+import { withLayout } from "@virentia/router-react";
+
+const accountViews = withLayout(AccountLayout, [
+  createRouteView({ route: profileRoute, view: ProfilePage }),
+  createRouteView({ route: securityRoute, view: SecurityPage }),
+]);
+```
+
+```ts
+function withLayout(
+  layout: ComponentType<{ children: ReactNode }>,
+  views: RouteView[],
+): RouteView[];
+```
+
+Use `layout` for a one-off wrapper and `withLayout` when several sibling views
+share chrome. An `Outlet`-based parent route is the better fit when the wrapper
+itself corresponds to a route with its own state.
+
+## Lazy views
+
+`createLazyRouteView` registers the component import as a route preloader and
+renders it with `React.lazy` and `Suspense`:
+
+```tsx
+import { createLazyRouteView } from "@virentia/router-react";
+
+const ProfileView = createLazyRouteView({
+  route: profileRoute,
+  view: () => import("./profile-page"),
+  fallback: ProfileSkeleton,
+});
+```
+
+```ts
+interface CreateLazyRouteViewProps<Params extends object | void = void>
+  extends Omit<CreateRouteViewProps<Params>, "view"> {
+  view: () => Promise<{ default: ComponentType }>;
+  fallback?: ComponentType;
+}
+```
+
+Registering the import as a preloader means the route waits for the chunk before
+activation finishes, so navigation does not flash an empty screen. `fallback`
+renders through `Suspense` while the chunk loads.
+
+This covers the component import only — it is not a data-loading protocol. For
+lazy business or data models, use `lazyModel` from `@virentia/core` and start
+units from route events, commands, or `beforeOpen`.

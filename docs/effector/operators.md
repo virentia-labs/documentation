@@ -1,43 +1,92 @@
 # Effector operators
 
-Use `effector.asEffector` when an Effector chain should call a Virentia unit.
+Use `fool(unit)` when a feature boundary must be visible to both Effector and Virentia.
+
+## Virentia unit in sample
 
 ```ts
+import { event, reaction, scoped } from "@virentia/core";
+import { fool } from "@virentia/effector";
+import { createEvent, createStore, sample } from "effector";
+
+const userSelected = fool(event<string>());
+const userOpened = createEvent<{ userId: string; token: string }>();
+const $session = createStore({ token: "session-token" });
+
 sample({
-  clock: effectorSubmitted,
+  clock: userSelected,
   source: $session,
-  fn: (session, id) => ({
-    id,
+  fn: (session, userId) => ({
+    userId,
     token: session.token,
   }),
-  target: effector.asEffector(virentiaSubmitted),
+  target: userOpened,
 });
+
+await scoped(virentiaScope, () => userSelected("user:1"));
 ```
 
-The returned unit is created in Effector and can be passed to Effector APIs.
+`userSelected` is called like a Virentia event, then used by Effector as a `clock`.
 
-## Clock
-
-The same wrapper can be used as a clock:
+## Effector unit in reaction
 
 ```ts
+import { event, reaction } from "@virentia/core";
+import { fool } from "@virentia/effector";
+import { allSettled, createEvent, sample } from "effector";
+
+const routeOpened = fool(createEvent<string>());
+const profileTracked = event<{ route: string }>();
+const profileClicked = createEvent<string>();
+
 sample({
-  clock: effector.asEffector(virentiaSubmitted),
-  target: effectorSubmitted,
+  clock: profileClicked,
+  target: routeOpened,
+});
+
+reaction({
+  on: routeOpened,
+  run(route) {
+    profileTracked({ route });
+  },
+});
+
+await allSettled(profileClicked, {
+  scope: effectorScope,
+  params: "/users/1",
 });
 ```
 
-Virentia events are forwarded after the current transaction finishes.
+`routeOpened` is launched like an Effector event, then observed by Virentia as `on`.
+
+## Source and target
+
+Fooled units can also be used as Effector `source` and `target`:
+
+```ts
+const sessionChanged = fool(event<{ token: string }>());
+const userSelected = fool(createEvent<string>());
+const userOpened = fool(event<{ userId: string; token: string }>());
+
+sample({
+  clock: userSelected,
+  source: sessionChanged,
+  fn: (session, userId) => ({ userId, token: session.token }),
+  target: userOpened,
+});
+```
+
+The direction still comes from the graph. In this example Effector reads `sessionChanged`, reacts to `userSelected`, and writes to `userOpened`.
 
 ## Association
 
-Adapters need a pre-created association between a Virentia scope and an Effector scope:
+Fooled units need a pre-created association between a Virentia scope and an Effector scope:
 
 ```ts
-const association = effector.associate({
+associate({
   virentia: virentiaScope,
   effector: effectorScope,
 });
 ```
 
-The adapter reads the Effector scope from `stack.scope` while it runs and uses it to find the Virentia scope. If there is no pair, the adapter throws.
+When a Virentia unit runs inside `scoped`, the bridge uses the associated Effector scope. When an Effector unit runs inside `allSettled`, `scopeBind`, `launch`, or a Provider, the bridge uses the associated Virentia scope.

@@ -188,8 +188,8 @@ loadUserFx.aborted;
 Effect stores:
 
 ```ts
-loadUserFx.$pending;
-loadUserFx.$inFlight;
+loadUserFx.pending;
+loadUserFx.inFlight;
 ```
 
 Call inside a scope:

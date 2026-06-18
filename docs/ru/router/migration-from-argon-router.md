@@ -20,8 +20,8 @@ title: Миграция с argon-router
 
 React-привязки не импортируются из путей вроде `@virentia/router/react`.
 
-`@virentia/router-react-native` планируется, но его не стоит использовать, пока
-пакет не появился вместе с тестами React Navigation.
+[`@virentia/router-react-native`](/ru/router/react-native/) добавляет привязки
+к React Navigation для нативных приложений; в argon-router аналога не было.
 
 ## Модель выполнения
 

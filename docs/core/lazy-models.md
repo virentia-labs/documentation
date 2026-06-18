@@ -62,10 +62,27 @@ await allSettled(chat.opened, {
 });
 ```
 
+## Loading state
+
+Every lazy model exposes a `pending` store: `true` while the module is importing, `false` once it is loaded. It is per-scope (like an effect's `pending`), so each scope tracks its own loading.
+
+```ts
+const loading = allSettled(chat.opened, {
+  scope: appScope,
+  payload: { chatId: "support" },
+});
+
+// chat.pending is `true` in appScope while ./chat.model imports
+await loading;
+// chat.pending is `false` again; the model is ready
+```
+
+Drive a spinner from `chat.pending` (for example via `useUnit` in React) instead of keeping your own loading flag for the import.
+
 ::: warning
 
 Lazy models can wait for loading when an event, effect, or effect lifecycle unit is launched. Store reads stay synchronous: `chat.messages.value` cannot wait for an import.
 
-Read lazy stores after the model has been loaded by an event or effect. If a screen needs loading state before the module is loaded, keep that small shell state near the place that starts the scenario.
+Read lazy stores after the model has been loaded by an event or effect. For loading state before the module is ready, use `pending`; for anything more specific, keep that small shell state near the place that starts the scenario.
 
 :::

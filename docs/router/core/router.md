@@ -158,6 +158,45 @@ That distinction lets guards know why the activation happened and prevents the
 same `route.open` guard from running twice after history reports the matching
 location.
 
+## Router Controls
+
+`createRouter` builds its history binding, `path`/`query` stores, navigation
+commands, and query tracking on top of a lower-level object called *router
+controls*. `createRouterControls` exposes that object directly:
+
+```ts
+import { createRouterControls } from "@virentia/router";
+
+const controls = createRouterControls();
+```
+
+```ts
+interface RouterControls {
+  readonly history: Store<RouterAdapter | null>;
+  readonly locationState: StoreWritable<LocationState>;
+  readonly query: Store<Query>;
+  readonly path: Store<string>;
+
+  readonly setHistory: EventCallable<RouterAdapter>;
+  readonly navigate: EventCallable<NavigatePayload>;
+  readonly back: EventCallable<void>;
+  readonly forward: EventCallable<void>;
+  readonly dispose: EventCallable<void>;
+  readonly locationUpdated: EventCallable<LocationState>;
+
+  trackQuery<Parameters>(
+    config: Omit<QueryTrackerConfig<Parameters>, "forRoutes">,
+  ): QueryTracker<Parameters>;
+}
+```
+
+Controls are useful when several routers must share one history source: build one
+controls object and call `setHistory` on it once, instead of letting each router
+manage its own subscription. The `trackQuery` here has no `forRoutes`, because
+controls have no route table of their own — route-scoped tracking belongs on a
+router. Most applications never construct controls directly; `createRouter` does
+it for them.
+
 ## Nested Routers
 
 A nested router fits a feature that owns a URL subtree and should keep its route

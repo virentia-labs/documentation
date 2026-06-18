@@ -45,7 +45,7 @@ return <button onClick={() => model.incremented(1)}>{model.count}</button>;
 ```tsx
 const form = useUnit({
   save: saveFx,
-  pending: saveFx.$pending,
+  pending: saveFx.pending,
 });
 
 return (

@@ -35,39 +35,36 @@ describe("counter", () => {
 
 ## Effector
 
-Используйте настоящие scope Effector и Virentia. Association создается в setup-коде теста, а запуск идет обычными средствами обеих библиотек.
+Используйте настоящие scope Effector и Virentia. Association создается в setup-коде теста, а запуск идет обычными средствами того runtime, которому принадлежит действие.
 
 ```ts
 import { describe, expect, it } from "vitest";
 import { event, reaction, scope as createVirentiaScope, scoped, store } from "@virentia/core";
-import { createEffectorCompatibility } from "@virentia/effector";
+import { associate, ensureAssociation, fool } from "@virentia/effector";
 import { allSettled, createEvent, fork, sample } from "effector";
 
 describe("effector compatibility", () => {
   it("uses associated scopes", async () => {
-    const effector = createEffectorCompatibility();
     const virentia = createVirentiaScope();
     const effectorScope = fork();
-    const association = effector.associate({
+    const association = associate({
       virentia,
       effector: effectorScope,
     });
 
     const submitted = createEvent<number>();
-    const saved = event<number>();
+    const saved = fool(event<number>());
     const total = store(0);
 
     reaction({ on: saved, run: (value) => (total.value += value) });
-    sample({ clock: submitted, target: effector.asEffector(saved) });
+    sample({ clock: submitted, target: saved });
 
-    await scoped(virentia, () =>
-      allSettled(submitted, {
-        scope: effectorScope,
-        params: 12,
-      }),
-    );
+    await allSettled(submitted, {
+      scope: effectorScope,
+      params: 12,
+    });
 
-    expect(effector.ensureAssociation({ effector: effectorScope })).toBe(association);
+    expect(ensureAssociation({ effector: effectorScope })).toBe(association);
     scoped(virentia, () => {
       expect(total.value).toBe(12);
     });
@@ -75,4 +72,4 @@ describe("effector compatibility", () => {
 });
 ```
 
-Если association не создана, `@virentia/effector` бросит ошибку. Лучше создавать association в setup-коде, а не надеяться на глобальное состояние.
+Если association не создана, `@virentia/effector` бросит ошибку. Лучше создавать association в setup-коде, а не надеяться на скрытые scope.

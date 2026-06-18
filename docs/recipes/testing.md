@@ -35,39 +35,36 @@ describe("counter", () => {
 
 ## Effector
 
-Use real Effector and Virentia scopes. Create the association in test setup, then run code with the native tools of both libraries.
+Use real Effector and Virentia scopes. Create the association in test setup, then run code with the native tools of the runtime that owns the action.
 
 ```ts
 import { describe, expect, it } from "vitest";
 import { event, reaction, scope as createVirentiaScope, scoped, store } from "@virentia/core";
-import { createEffectorCompatibility } from "@virentia/effector";
+import { associate, ensureAssociation, fool } from "@virentia/effector";
 import { allSettled, createEvent, fork, sample } from "effector";
 
 describe("effector compatibility", () => {
   it("uses associated scopes", async () => {
-    const effector = createEffectorCompatibility();
     const virentia = createVirentiaScope();
     const effectorScope = fork();
-    const association = effector.associate({
+    const association = associate({
       virentia,
       effector: effectorScope,
     });
 
     const submitted = createEvent<number>();
-    const saved = event<number>();
+    const saved = fool(event<number>());
     const total = store(0);
 
     reaction({ on: saved, run: (value) => (total.value += value) });
-    sample({ clock: submitted, target: effector.asEffector(saved) });
+    sample({ clock: submitted, target: saved });
 
-    await scoped(virentia, () =>
-      allSettled(submitted, {
-        scope: effectorScope,
-        params: 12,
-      }),
-    );
+    await allSettled(submitted, {
+      scope: effectorScope,
+      params: 12,
+    });
 
-    expect(effector.ensureAssociation({ effector: effectorScope })).toBe(association);
+    expect(ensureAssociation({ effector: effectorScope })).toBe(association);
     scoped(virentia, () => {
       expect(total.value).toBe(12);
     });
@@ -75,4 +72,4 @@ describe("effector compatibility", () => {
 });
 ```
 
-If an association is missing, `@virentia/effector` throws. Create the association in setup code instead of relying on globals.
+If an association is missing, `@virentia/effector` throws. Create the association in setup code instead of relying on hidden scopes.

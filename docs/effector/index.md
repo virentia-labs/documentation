@@ -2,7 +2,7 @@
 
 `@virentia/effector` lets Virentia models work with applications that already use Effector.
 
-Existing Effector code keeps importing from `effector`; Virentia models keep importing from `@virentia/core`. This package connects their scopes and forwards calls between units.
+Existing Effector code keeps importing from `effector`; Virentia models keep importing from `@virentia/core`. This package connects their scopes and lets one boundary unit participate in both runtimes.
 
 ## Install
 
@@ -10,100 +10,141 @@ Existing Effector code keeps importing from `effector`; Virentia models keep imp
 pnpm add @virentia/effector effector @virentia/core
 ```
 
-## Create compatibility
+## Associate scopes
 
-Create the compatibility object once and keep it for the application lifetime:
-
-```ts
-import { createEffectorCompatibility } from "@virentia/effector";
-
-export const effector = createEffectorCompatibility();
-
-effector.link(virentiaSubmitted, effectorSubmitted, ({ id }) => id);
-```
-
-Isolation lives in an association between a Virentia scope and an Effector scope:
+Create one association for the Virentia scope and Effector scope that belong to the same render, test, request, or application boundary:
 
 ```ts
 import { scope } from "@virentia/core";
+import { associate } from "@virentia/effector";
 import { fork } from "effector";
-
-const association = effector.associate({
-  virentia: scope(),
-  effector: fork(),
-});
-```
-
-Effector units remain the same objects. `fork()` only creates isolated value storage for SSR, tests, and other boundaries. When an adapter runs inside the Effector graph, `@virentia/effector` reads the Effector scope from `stack.scope` and uses it to find the associated Virentia scope.
-
-Both scopes are required. If code tries to use compatibility helpers without an association, it throws instead of creating a hidden scope.
-
-The association does not call units by itself and does not participate in application execution. It only registers the scope pair and gives you a `dispose()` handle. Run code with the native tools of both runtimes:
-
-```ts
-await scoped(virentiaScope, () =>
-  allSettled(effectorSubmitted, {
-    scope: effectorScope,
-    params: "user:1",
-  }),
-);
-```
-
-In this run, the Virentia scope comes from `scoped`, and the Effector scope comes from `allSettled`. The compatibility layer only checks that this pair was associated.
-
-## Effector operators
-
-Virentia units can be used inside real Effector operators:
-
-```ts
-import { sample } from "effector";
-
-sample({
-  clock: effectorUserClicked,
-  source: $session,
-  fn: (session, userId) => ({
-    userId,
-    token: session.token,
-  }),
-  target: effector.asEffector(virentiaUserOpened),
-});
-```
-
-The wrapper is a normal Effector unit. Target support is still checked through `is.targetable`.
-
-## SSR
-
-Create one association per request and dispose it after rendering:
-
-```ts
-import { allSettled, fork } from "effector";
-import { scope, scoped } from "@virentia/core";
 
 const virentiaScope = scope();
 const effectorScope = fork();
-const association = effector.associate({
+
+const association = associate({
   virentia: virentiaScope,
   effector: effectorScope,
 });
-
-try {
-  await scoped(virentiaScope, () =>
-    allSettled(appStarted, {
-      scope: effectorScope,
-      params: request,
-    }),
-  );
-} finally {
-  association.dispose();
-}
 ```
 
-Use Virentia snapshot tools for the Virentia scope and `serialize` from Effector for the Effector scope. The compatibility layer only remembers which scopes belong together.
+Associations are stored globally in weak maps. There is no compatibility object and no `dispose()` handle. The association is reachable while its scopes are reachable.
 
-## Where the Effector scope comes from
+Both scopes are required. If a fooled unit runs without an association, the package throws instead of creating a hidden scope.
 
-`@virentia/effector` does not try to discover a “current scope” from arbitrary Effector calls. The scope is available only while the Effector graph is executing.
+## Universal units
 
-The adapter is a real Effector unit with a child node built on `step.run`. That step receives `stack`, reads `stack.scope`, and looks up an existing association. If Effector is launched without `fork`, `stack.scope` is empty; there is no isolated Effector scope to recover.
+Use `fool(unit)` at feature boundaries. The returned value is a pass-through unit that can be used by Effector and Virentia:
 
-Virentia-to-Effector adapters take the Effector scope from the association of the current Virentia scope and use `launch({ target, params, scope })`. If there is no pair, that is an integration error.
+```ts
+import { event } from "@virentia/core";
+import { fool } from "@virentia/effector";
+
+export const checkoutRequested = fool(event<{ orderId: string }>());
+```
+
+Effector features can use that unit as `clock`, `source`, or `target`. Virentia features can listen to it with `reaction`/`on` and can call it inside `run` or `scoped`.
+
+::: warning Direct calls
+`fool(original)` returns a new universal unit and does not mutate `original`. Keep and pass the returned value. Calling `original` still calls the original runtime unit, not the fooled wrapper. The bridge can observe that original call and forward it through associated scopes, but the hybrid API exists only on the value returned by `fool`.
+:::
+
+## Virentia to Effector
+
+A Virentia feature can own a command while an Effector feature consumes that command as an Effector clock:
+
+```ts
+import { event, scoped } from "@virentia/core";
+import { fool } from "@virentia/effector";
+import { createEvent, createStore, sample } from "effector";
+
+const checkoutRequested = fool(event<{ orderId: string }>());
+
+function createVirentiaCheckoutFeature() {
+  return {
+    requestCheckout: checkoutRequested,
+  };
+}
+
+function createEffectorBillingFeature() {
+  const $session = createStore({ token: "session-token" });
+  const billingStarted = createEvent<{ orderId: string; token: string }>();
+
+  sample({
+    clock: checkoutRequested,
+    source: $session,
+    fn: (session, request) => ({
+      orderId: request.orderId,
+      token: session.token,
+    }),
+    target: billingStarted,
+  });
+
+  return {
+    billingStarted,
+  };
+}
+
+const checkout = createVirentiaCheckoutFeature();
+const billing = createEffectorBillingFeature();
+
+await scoped(virentiaScope, () => checkout.requestCheckout({ orderId: "order:1" }));
+```
+
+The Virentia call runs in `virentiaScope`. The bridge uses the association to launch the Effector clock in the paired `effectorScope`.
+
+## Effector to Virentia
+
+An Effector feature can own a command while a Virentia feature listens to that same boundary unit:
+
+```ts
+import { event, reaction } from "@virentia/core";
+import { fool } from "@virentia/effector";
+import { allSettled, createEvent, sample } from "effector";
+
+const routeOpened = fool(createEvent<string>());
+
+function createEffectorRoutesFeature() {
+  const profileClicked = createEvent<string>();
+
+  sample({
+    clock: profileClicked,
+    target: routeOpened,
+  });
+
+  return {
+    profileClicked,
+  };
+}
+
+function createVirentiaAnalyticsFeature() {
+  const profileTracked = event<{ route: string }>();
+
+  reaction({
+    on: routeOpened,
+    run(route) {
+      profileTracked({ route });
+    },
+  });
+
+  return {
+    profileTracked,
+  };
+}
+
+const routes = createEffectorRoutesFeature();
+const analytics = createVirentiaAnalyticsFeature();
+
+await allSettled(routes.profileClicked, {
+  scope: effectorScope,
+  params: "/users/1",
+});
+```
+
+The Effector graph runs in `effectorScope`. The bridge uses the association to run the Virentia reaction in the paired `virentiaScope`.
+
+## Scope lookup
+
+When a fooled unit runs inside the Effector graph, the bridge reads `stack.scope` and finds the associated Virentia scope. When a fooled unit runs inside `scoped`, the bridge reads the current Virentia scope and finds the associated Effector scope.
+
+Use `scoped`, Effector `allSettled`, `scopeBind`, `launch`, or UI Providers to choose scopes. The bridge only translates between already associated scopes.

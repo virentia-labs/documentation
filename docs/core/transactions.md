@@ -198,8 +198,8 @@ If devtools or runtime diagnostics highlight several sibling writes to the same 
 Effects have lifecycle stores:
 
 ```ts
-searchFx.$pending;
-searchFx.$inFlight;
+searchFx.pending;
+searchFx.inFlight;
 ```
 
 These stores are runtime execution state. They publish immediately when async work starts or settles, even if the effect was launched inside a transaction.
@@ -214,7 +214,7 @@ reaction({
 });
 ```
 
-`searchFx.$pending` becomes `true` immediately. UI can show loading state without waiting for unrelated business-state commits.
+`searchFx.pending` becomes `true` immediately. UI can show loading state without waiting for unrelated business-state commits.
 
 Lifecycle events such as `started`, `doneData`, `failData`, and `settled` still behave like normal units. If reactions to those events write business stores, those writes are transactional.
 

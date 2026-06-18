@@ -45,7 +45,7 @@ Effects become callbacks too.
 ```tsx
 const form = useUnit({
   save: saveFx,
-  pending: saveFx.$pending,
+  pending: saveFx.pending,
 });
 
 return (

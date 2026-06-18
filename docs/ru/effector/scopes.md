@@ -1,25 +1,48 @@
 # Скоупы и сериализация
 
-Effector и Virentia хранят состояние в разных scope. `@virentia/effector` хранит явную пару scope’ов:
+Effector и Virentia хранят состояние в разных scope. `@virentia/effector` хранит явные пары scope в глобальных weak map:
 
 ```ts
-const association = effector.associate({
+import { associate, ensureAssociation } from "@virentia/effector";
+
+const association = associate({
   virentia: virentiaScope,
   effector: effectorScope,
 });
 ```
 
-Объект `effector`, созданный через `createEffectorCompatibility`, остается один. Меняется только association: ее создают на границе жизненного цикла и освобождают через `dispose()`. После `dispose()` связь удаляется из registry и больше не находится через `ensureAssociation`.
+Объекта совместимости нет, метода `dispose()` тоже нет. Association достижима, пока достижим scope Virentia или Effector.
 
 ## Без неявных scope
 
 Пакет никогда не создает недостающий scope.
 
 ```ts
-effector.ensureAssociation({ effector: effectorScope });
+ensureAssociation({ effector: effectorScope });
 ```
 
 Такой код сработает только если Effector scope уже есть в association. Иначе будет ошибка.
+
+## Направление scope
+
+Пользователь выбирает один нативный scope, а мост находит второй по association.
+
+```ts
+await scoped(virentiaScope, () => virentiaBoundary(payload));
+```
+
+Если `virentiaBoundary` нужен Effector, мост использует Effector scope, связанный с `virentiaScope`.
+
+```ts
+await allSettled(effectorBoundary, {
+  scope: effectorScope,
+  params: payload,
+});
+```
+
+Если `effectorBoundary` нужна Virentia, мост использует Virentia scope, связанный с `effectorScope`.
+
+Не передавайте оба scope вручную внутри одного вызова. Свяжите их один раз, затем стартуйте из того runtime, которому действие принадлежит естественно.
 
 ## SSR
 
@@ -30,26 +53,23 @@ export async function render(request: Request) {
   const virentiaScope = createVirentiaScope(request);
   const effectorScope = fork();
 
-  const association = effector.associate({
+  const association = associate({
     virentia: virentiaScope,
     effector: effectorScope,
   });
 
-  try {
-    await scoped(virentiaScope, () =>
-      allSettled(appStarted, {
-        scope: effectorScope,
-        params: request,
-      }),
-    );
-    return renderApp(association);
-  } finally {
-    association.dispose();
-  }
+  await scoped(virentiaScope, () =>
+    allSettled(appStarted, {
+      scope: effectorScope,
+      params: request,
+    }),
+  );
+
+  return renderApp(association);
 }
 ```
 
-Scope Virentia задается через `scoped`, scope Effector — через `allSettled`, `scopeBind` или Provider в UI. Association заранее связывает эти два scope и удаляется через `dispose()`.
+Scope Virentia задается через `scoped`, scope Effector — через `allSettled`, `scopeBind`, `launch` или Provider в UI. Association заранее связывает эти два scope.
 
 Scope Virentia сериализуется snapshot-механизмом Virentia, scope Effector — через `serialize` из Effector. Слой совместимости хранит только association между ними.
 
@@ -58,7 +78,7 @@ Scope Virentia сериализуется snapshot-механизмом Virentia
 Если порядок bootstrap мешает создать association сразу, сделайте это позже:
 
 ```ts
-effector.associate({
+associate({
   virentia: virentiaScope,
   effector: effectorScope,
 });
@@ -68,4 +88,4 @@ Effector scope не создается автоматически и не под
 
 ## Scope Effector
 
-Слой совместимости не угадывает Effector scope из глобального состояния. Adapter-юнит читает `stack.scope` в `step.run`. Для SSR и тестов это scope из `fork()`. Для React это тот же scope, который передается в Effector Provider.
+Слой совместимости не угадывает Effector scope из глобального состояния. Fooled-юнит на стороне Effector читает `stack.scope` в `step.run`. Для SSR и тестов это scope из `fork()`. Для React это тот же scope, который передается в Effector Provider.

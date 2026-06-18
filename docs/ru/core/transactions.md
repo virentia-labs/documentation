@@ -198,8 +198,8 @@ reaction({ on: changed, run: () => { count.value = 2; } });
 У эффектов есть lifecycle-сторы:
 
 ```ts
-searchFx.$pending;
-searchFx.$inFlight;
+searchFx.pending;
+searchFx.inFlight;
 ```
 
 Это состояние исполнения рантайма. Оно публикуется сразу при старте и завершении async-работы, даже если эффект запущен внутри транзакции.
@@ -214,7 +214,7 @@ reaction({
 });
 ```
 
-`searchFx.$pending` станет `true` сразу. UI сможет показать loading state, не дожидаясь коммита несвязанных бизнес-записей.
+`searchFx.pending` станет `true` сразу. UI сможет показать loading state, не дожидаясь коммита несвязанных бизнес-записей.
 
 Lifecycle-события вроде `started`, `doneData`, `failData` и `settled` при этом остаются обычными юнитами. Если реакции на эти события пишут бизнес-сторы, такие записи транзакционные.
 

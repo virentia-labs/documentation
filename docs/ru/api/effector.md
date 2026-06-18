@@ -2,63 +2,75 @@
 
 `@virentia/effector` связывает юниты Virentia с юнитами настоящего пакета `effector`.
 
-## createEffectorCompatibility
+## associate
 
 ```ts
-const effector = createEffectorCompatibility();
-```
+import { associate } from "@virentia/effector";
 
-Создает объект совместимости. Он хранит связи и адаптеры, которые будут подключены к каждой association. Создавайте его один раз на приложение.
-
-## effector.associate
-
-```ts
-const association = effector.associate({
+const association = associate({
   virentia: virentiaScope,
   effector: effectorScope,
 });
 ```
 
-Создает association для пары scope’ов. Когда adapter-юнит запускается внутри Effector-графа, он читает `stack.scope` и ищет уже созданную связь. Когда association больше не нужна, вызовите `association.dispose()`.
+Создает глобальную association для одного scope Virentia и одного scope Effector. Пакет хранит association в weak map, сразу по обоим scope.
 
-## effector.ensureAssociation
-
-```ts
-const association = effector.ensureAssociation({ effector: effectorScope });
-```
-
-Ищет существующую association. Если связи нет, бросает ошибку.
-
-Association не запускает юниты и не участвует в исполнении приложения. Запускайте Effector через `allSettled`, `scopeBind`, `launch` или UI Provider, а Virentia — через `scoped` и `allSettled` из `@virentia/core`.
-
-## effector.link
+Возвращаемый `EffectorAssociation` содержит ту же пару scope:
 
 ```ts
-const unlink = effector.link(virentiaEvent, effectorEvent, ({ id }) => id);
+association.virentia;
+association.effector;
 ```
 
-Устанавливает связь для каждой association, созданной этим объектом совместимости.
+Метода `dispose()` нет. Association достижима, пока достижимы ее scope.
 
-## effector.asEffector
+## ensureAssociation
+
+```ts
+import { ensureAssociation } from "@virentia/effector";
+
+const association = ensureAssociation({ effector: effectorScope });
+```
+
+Ищет существующую association по scope Effector, scope Virentia или по обоим сразу. Если связи нет, бросает ошибку.
+
+## effectorAssociations
+
+```ts
+import { effectorAssociations } from "@virentia/effector";
+
+effectorAssociations.byVirentia.get(virentiaScope);
+effectorAssociations.byEffector.get(effectorScope);
+```
+
+Глобальный weak-map registry. В коде приложения обычно достаточно `associate` и `ensureAssociation`; прямой доступ полезен для диагностики и интеграционных тестов.
+
+## fool
+
+```ts
+import { fool } from "@virentia/effector";
+
+const universalUnit = fool(unit);
+```
+
+Возвращает проходной универсальный юнит. Используйте возвращенное значение на границах фич:
 
 ```ts
 sample({
-  clock: effectorEvent,
-  target: effector.asEffector(virentiaEvent),
+  clock: universalUnit,
+  target: effectorTarget,
 });
-```
 
-Возвращает обертку Effector для юнита Virentia. Обертка читает Effector scope из `stack.scope` и по нему находит scope Virentia.
-
-## effector.asVirentia
-
-```ts
 reaction({
-  on: effector.asVirentia(effectorEvent),
+  on: universalUnit,
   run(payload) {},
 });
 ```
 
-Возвращает обертку Virentia для юнита Effector.
+Результат можно использовать как Effector-юнит в `clock`, `source` или `target`, и как Virentia-юнит в `reaction`, `on`, `run` и `scoped`.
 
-Если adapter не может найти association по текущему Virentia scope или Effector scope из `stack.scope`, пакет бросит ошибку.
+::: warning Прямые вызовы
+`fool(original)` не мутирует `original`. Сохраняйте и передавайте возвращенный юнит. Вызов `original` остается вызовом исходного runtime-юнита, а не fooled-обертки. Мост может увидеть этот исходный вызов и передать его через связанные scope, но гибридный API есть только у значения, которое вернул `fool`.
+:::
+
+Если fooled-юниту нужен второй runtime, но association не находится по текущему scope Virentia или scope Effector из `stack.scope`, пакет бросает ошибку.

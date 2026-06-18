@@ -57,7 +57,7 @@ const increment = useUnit(incremented);
 const model = useUnit({
   count,
   incremented,
-  pending: saveFx.$pending,
+  pending: saveFx.pending,
   save: saveFx,
 });
 ```

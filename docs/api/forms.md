@@ -332,6 +332,14 @@ function step<Id extends string, StepForm extends AnyForm>(
   config: Omit<WizardStep<Id, StepForm>, "id">,
 ): WizardStep<Id, StepForm>;
 
+function step<
+  Id extends string,
+  FormInput extends true | WizardFormStepSelection,
+>(
+  id: Id,
+  config: Omit<WizardFormStepConfig<Id, FormInput>, "id">,
+): WizardFormStepConfig<Id, FormInput>;
+
 function createWizard<
   Steps extends readonly WizardStep[],
   RootForm extends AnyForm | undefined = undefined,
@@ -339,12 +347,13 @@ function createWizard<
 
 function createWizardForm<
   Schema extends Record<string, any>,
-  Steps extends readonly WizardStep[],
+  StepsInput extends readonly WizardFormStepInput<Schema>[],
 >(
-  config: CreateFormConfig<Schema> & {
-    steps(form: Form<Schema>): Steps;
-  },
-): Wizard<Steps, Form<Schema> & AnyForm> & { readonly form: Form<Schema> };
+  config: CreateWizardFormConfig<Schema, StepsInput>,
+): Wizard<
+  ResolveWizardFormSteps<Schema, StepsInput>,
+  Form<Schema> & AnyForm
+> & { readonly form: Form<Schema> };
 ```
 
 ```ts
@@ -357,6 +366,36 @@ interface WizardStep<
   readonly title?: string;
   readonly when?: (ctx: { values: unknown }) => boolean;
 }
+
+type WizardFormStepSelection = {
+  readonly [Key: string]: true | WizardFormStepSelection;
+};
+
+type WizardFormStepConfig<
+  Id extends string = string,
+  FormInput = true | WizardFormStepSelection,
+> = {
+  readonly id: Id;
+  readonly title?: string;
+  readonly when?: (ctx: { values: unknown }) => boolean;
+} & (
+  | { readonly form: FormInput; readonly pick?: never }
+  | { readonly form?: never; readonly pick: Exclude<FormInput, true> }
+);
+
+type WizardFormStepInput<Schema extends Record<string, any>> =
+  | WizardStep<string, AnyForm>
+  | WizardFormStepConfig<
+      string,
+      true | SelectionShape<NormalizeSchema<Schema>>
+    >;
+
+type CreateWizardFormConfig<
+  Schema extends Record<string, any>,
+  StepsInput extends readonly WizardFormStepInput<Schema>[],
+> = CreateFormConfig<Schema> & {
+  steps: StepsInput | ((form: Form<Schema>) => StepsInput);
+};
 
 interface Wizard<Steps extends readonly WizardStep[], RootForm> {
   readonly kind: "wizard";

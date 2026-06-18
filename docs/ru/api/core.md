@@ -188,8 +188,8 @@ loadUserFx.aborted;
 Сторы эффекта:
 
 ```ts
-loadUserFx.$pending;
-loadUserFx.$inFlight;
+loadUserFx.pending;
+loadUserFx.inFlight;
 ```
 
 Вызов внутри scope:

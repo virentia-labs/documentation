@@ -39,7 +39,7 @@ function createChatModel({ key, mounted }: ModelContext<Props, string>) {
     },
   });
 
-  return { loading: loadFx.$pending, messages };
+  return { loading: loadFx.pending, messages };
 }
 ```
 

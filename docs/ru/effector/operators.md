@@ -1,43 +1,92 @@
 # Операторы Effector
 
-Используйте `effector.asEffector`, когда цепочка Effector должна вызвать юнит Virentia.
+Используйте `fool(unit)`, когда граница фичи должна быть видна и Effector, и Virentia.
+
+## Юнит Virentia в sample
 
 ```ts
+import { event, reaction, scoped } from "@virentia/core";
+import { fool } from "@virentia/effector";
+import { createEvent, createStore, sample } from "effector";
+
+const userSelected = fool(event<string>());
+const userOpened = createEvent<{ userId: string; token: string }>();
+const $session = createStore({ token: "session-token" });
+
 sample({
-  clock: effectorSubmitted,
+  clock: userSelected,
   source: $session,
-  fn: (session, id) => ({
-    id,
+  fn: (session, userId) => ({
+    userId,
     token: session.token,
   }),
-  target: effector.asEffector(virentiaSubmitted),
+  target: userOpened,
 });
+
+await scoped(virentiaScope, () => userSelected("user:1"));
 ```
 
-Возвращенный юнит создан в Effector, поэтому его можно передавать в API Effector.
+`userSelected` вызывается как событие Virentia, а затем используется Effector как `clock`.
 
-## Clock
-
-Эту же обертку можно использовать как clock:
+## Юнит Effector в reaction
 
 ```ts
+import { event, reaction } from "@virentia/core";
+import { fool } from "@virentia/effector";
+import { allSettled, createEvent, sample } from "effector";
+
+const routeOpened = fool(createEvent<string>());
+const profileTracked = event<{ route: string }>();
+const profileClicked = createEvent<string>();
+
 sample({
-  clock: effector.asEffector(virentiaSubmitted),
-  target: effectorSubmitted,
+  clock: profileClicked,
+  target: routeOpened,
+});
+
+reaction({
+  on: routeOpened,
+  run(route) {
+    profileTracked({ route });
+  },
+});
+
+await allSettled(profileClicked, {
+  scope: effectorScope,
+  params: "/users/1",
 });
 ```
 
-События Virentia передаются после завершения текущей транзакции.
+`routeOpened` запускается как событие Effector, а затем наблюдается Virentia через `on`.
+
+## Source и target
+
+Fooled-юниты также можно использовать как Effector `source` и `target`:
+
+```ts
+const sessionChanged = fool(event<{ token: string }>());
+const userSelected = fool(createEvent<string>());
+const userOpened = fool(event<{ userId: string; token: string }>());
+
+sample({
+  clock: userSelected,
+  source: sessionChanged,
+  fn: (session, userId) => ({ userId, token: session.token }),
+  target: userOpened,
+});
+```
+
+Направление все равно задает граф. В этом примере Effector читает `sessionChanged`, реагирует на `userSelected` и пишет в `userOpened`.
 
 ## Association
 
-Адаптерам нужна заранее созданная association между scope Virentia и scope Effector:
+Fooled-юнитам нужна заранее созданная association между scope Virentia и scope Effector:
 
 ```ts
-const association = effector.associate({
+associate({
   virentia: virentiaScope,
   effector: effectorScope,
 });
 ```
 
-Effector scope адаптер достает из `stack.scope` во время запуска и использует его для поиска scope Virentia. Если пары нет, адаптер бросит ошибку.
+Когда юнит Virentia запускается внутри `scoped`, мост использует связанный scope Effector. Когда юнит Effector запускается внутри `allSettled`, `scopeBind`, `launch` или Provider, мост использует связанный scope Virentia.

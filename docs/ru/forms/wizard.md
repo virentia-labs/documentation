@@ -188,25 +188,31 @@ const wizard = createWizardForm({
     password: createField(""),
     displayName: createField(""),
   },
-  steps(form) {
-    return [
-      step("account", {
-        form: form.pick({
-          email: true,
-          password: true,
-        }),
-      }),
-      step("profile", {
-        form: form.pick({
-          displayName: true,
-        }),
-      }),
-    ];
-  },
+  steps: [
+    step("account", {
+      pick: {
+        email: true,
+        password: true,
+      },
+    }),
+    step("profile", {
+      form: {
+        displayName: true,
+      },
+    }),
+    step("review", {
+      form: true,
+    }),
+  ],
 });
 
 wizard.form; // корневая форма
 ```
+
+В шагах `createWizardForm` поля `pick` и `form: { ... }` создают проекции
+корневой формы. Используйте `form: true`, если шаг должен валидировать всю
+корневую форму. Если у шага уже есть своя модель формы, передайте её через
+`form` в `createWizard` или верните из callback-формы `createWizardForm`.
 
 Вспомогательная функция не добавляет новую модель поведения. Она только
 сокращает паттерн общей корневой формы.

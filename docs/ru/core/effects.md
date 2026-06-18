@@ -13,9 +13,9 @@ const searchFx = effect(async (text: string, { signal }) => {
 
 ## Жизненный цикл эффекта
 
-У эффекта есть события результата и сторы состояния. `started` получает параметры вызова. `done` и `failed` получают параметры вместе с результатом или ошибкой. `doneData` и `failData` дают только результат или ошибку. `settled` и `finally` срабатывают в обоих случаях. `$pending` показывает, есть ли активная работа, а `$inFlight` хранит количество активных вызовов.
+У эффекта есть события результата и сторы состояния. `started` получает параметры вызова. `done` и `failed` получают параметры вместе с результатом или ошибкой. `doneData` и `failData` дают только результат или ошибку. `settled` и `finally` срабатывают в обоих случаях. `pending` показывает, есть ли активная работа, а `inFlight` хранит количество активных вызовов.
 
-Состояние жизненного цикла эффекта публикуется сразу при старте и завершении асинхронной работы. Оно не прячется до коммита окружающей бизнес-транзакции, потому что для UI `$pending` и `$inFlight` чаще являются состоянием исполнения, а не доменным состоянием.
+Состояние жизненного цикла эффекта публикуется сразу при старте и завершении асинхронной работы. Оно не прячется до коммита окружающей бизнес-транзакции, потому что для UI `pending` и `inFlight` чаще являются состоянием исполнения, а не доменным состоянием.
 
 Это исключение жизненного цикла описано подробнее в общей [модели транзакций](/ru/core/transactions).
 
@@ -30,8 +30,8 @@ searchFx.finally;
 searchFx.settled;
 searchFx.abort;
 searchFx.aborted;
-searchFx.$pending;
-searchFx.$inFlight;
+searchFx.pending;
+searchFx.inFlight;
 ```
 
 Модель может реагировать на них так же, как на обычные события. Например, поисковая модель может держать статус, ошибку, результаты и отмену в одном месте:
@@ -114,10 +114,10 @@ reaction({
 
 export const searchModel = {
   errorMessage,
-  loading: searchFx.$pending,
+  loading: searchFx.pending,
   query,
   queryChanged,
-  requests: searchFx.$inFlight,
+  requests: searchFx.inFlight,
   results,
   searchCancelled,
   searchSubmitted,
@@ -129,7 +129,7 @@ export const searchModel = {
 
 ## Варианты эффектов
 
-`effect.variant` нужен, когда модели требуется своя публичная операция, но сама работа уже описана в другом эффекте. Это частый случай для API-эффектов: несколько моделей могут использовать один transport handler, но держать отдельные `$pending`, `doneData`, `failData` и `aborted`.
+`effect.variant` нужен, когда модели требуется своя публичная операция, но сама работа уже описана в другом эффекте. Это частый случай для API-эффектов: несколько моделей могут использовать один transport handler, но держать отдельные `pending`, `doneData`, `failData` и `aborted`.
 
 ```ts
 import { effect, store } from "@virentia/core";
@@ -153,7 +153,7 @@ const authorizedRequestFx = requestFx.variant("authorizedRequestFx", (id: number
 
 Когда `authorizedRequestFx(42)` вызывается в scope, mapper читает `token` именно из этого scope и передает собранные params в обработчик `requestFx`.
 
-Жизненный цикл принадлежит варианту. Вызов `authorizedRequestFx` не вызывает `requestFx.doneData` и не переводит `requestFx.$pending` в `true`. При этом scoped handler override базового эффекта сохраняется: в тесте можно заменить `requestFx` один раз, и все его варианты будут использовать этот handler.
+Жизненный цикл принадлежит варианту. Вызов `authorizedRequestFx` не вызывает `requestFx.doneData` и не переводит `requestFx.pending` в `true`. При этом scoped handler override базового эффекта сохраняется: в тесте можно заменить `requestFx` один раз, и все его варианты будут использовать этот handler.
 
 Если параметры вызова уже совпадают с базовым эффектом, mapper не нужен:
 
@@ -167,7 +167,7 @@ const profileLoadUserFx = requestFx.variant("profileLoadUserFx");
 
 Отмена эффекта сразу завершает активный вызов с переданной причиной. Handler не обязан слушать `signal` или сам reject-ить promise, чтобы жизненный цикл Virentia завершился.
 
-`searchFx.abort(reason)` отменяет активные вызовы этого эффекта. Сначала сработает `aborted` с `{ params, reason }`, а сам вызов завершится ошибкой и пройдет через `failData` и `settled`. `$pending` и `$inFlight` обновятся от этой отмены на уровне Virentia, даже если исходный promise handler-а все еще ждет. Поэтому в модели выше общий обработчик `failData` не перетирает статус `cancelled`.
+`searchFx.abort(reason)` отменяет активные вызовы этого эффекта. Сначала сработает `aborted` с `{ params, reason }`, а сам вызов завершится ошибкой и пройдет через `failData` и `settled`. `pending` и `inFlight` обновятся от этой отмены на уровне Virentia, даже если исходный promise handler-а все еще ждет. Поэтому в модели выше общий обработчик `failData` не перетирает статус `cancelled`.
 
 Эффекты, запущенные активным эффектом, автоматически наследуют отмену родителя. Если `openSearchFx` вызывает `searchFx`, отмена `openSearchFx` также отменит дочерний вызов `searchFx` с той же причиной.
 

@@ -21,8 +21,8 @@ Packages are separate:
 React bindings are not exported from router subpaths such as
 `@virentia/router/react`.
 
-`@virentia/router-react-native` is planned, but should not be used until the
-package exists with React Navigation tests.
+[`@virentia/router-react-native`](/router/react-native/) adds React Navigation
+bindings for native apps; argon-router had no equivalent.
 
 ## Runtime Model
 

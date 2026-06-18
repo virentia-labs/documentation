@@ -82,6 +82,72 @@ The app and inspector communicate through `postMessage`, `BroadcastChannel`, and
 the CLI WebSocket relay at `/__virentia_devtools`. The relay is why the app can
 connect even when the inspector is a separate tab served from `127.0.0.1`.
 
+## Inspect an Effector App
+
+The same inspector works with apps built on real [effector](https://effector.dev).
+Connect from a separate bundle entry point instead of the Virentia bridge — no
+arguments required:
+
+```ts
+import { connectEffector } from "@virentia/inspector/effector";
+
+if (import.meta.env.DEV) {
+  connectEffector({ appName: "Checkout" });
+}
+```
+
+`connectEffector` reads effector's own introspection (`effector/inspect`) and
+speaks the exact same wire protocol as `installVirentiaDevtools`, so the inspector
+UI and CLI are identical. It accepts the same `appName`, `channel`, and
+`inspectorUrl` options, returns a bridge with `open()`, `sendGraph()`,
+`addUnits()`, `addScope()`, `snapshot()`, and `dispose()`, and
+`openEffectorInspector` opens the window like `openVirentiaDevtools`.
+
+The graph and timeline auto-discover units from `inspectGraph` (units created
+after connecting) and `inspect` (units that compute). Name your units
+(`createStore(0, { name })`, `createEvent("name")`, or the effector babel/swc
+plugin) for a readable graph.
+
+Two optional inputs unlock the rest, because effector's public API cannot expose
+them: it has no global registry, `inspectGraph` is forward-only and returns no
+live node, and forked scopes are not enumerable.
+
+```ts
+import { connectEffector } from "@virentia/inspector/effector";
+import { fork } from "effector";
+import * as model from "./model";
+
+const appScope = fork();
+
+connectEffector({
+  appName: "Checkout",
+  units: [model.itemAdded, model.itemCount, model.loadPriceFx],
+  scopes: [{ scope: appScope, name: "checkout tab" }],
+});
+```
+
+- `units` — pass your model's units (or a module namespace's values) to get the
+  full graph **with edges** immediately (walked from their live connections,
+  including units created before connecting) and to **trigger** them from the
+  inspector. Without `units` the graph still lists discovered units, but as
+  isolated vertices, and triggering needs a live unit reference.
+- `scopes` — the [`fork`](https://effector.dev/en/api/effector/fork/) scopes to
+  observe in the timeline and to trigger units in. Scope-less computations are
+  observed automatically; forked scopes must be passed (`{ scope, name }`, or add
+  them later with `addScope`).
+
+Two Virentia-only inspector features have no effector equivalent and degrade
+gracefully instead of breaking:
+
+- **Breakpoints** are accepted and shown, but never pause execution — effector has
+  no chain-stop mechanism.
+- **Durations** are reported as `0` ms — effector's inspect stream carries no
+  per-step timing.
+
+Everything else — the reactive graph, the call timeline (one row per user-facing
+unit, with failures flagged), and triggering events and effects with a JSON
+payload — behaves the same as the Virentia flow.
+
 ## Name the Graph
 
 Readable names are the difference between a useful graph and a pile of anonymous
@@ -125,7 +191,7 @@ nameUnit(hasItems, "cart.hasItems");
 
 `event(name)`, `effect(handler, name)`, store and computed `{ name }`, reaction
 `name`, `nameUnit`, and `nameScope` all feed the same inspector metadata. Named
-effect subunits such as `started`, `done`, and `$pending` are grouped under the
+effect subunits such as `started`, `done`, and `pending` are grouped under the
 parent effect. Internal implementation nodes are hidden from the graph.
 
 Use `describeUnit` when you need richer metadata:

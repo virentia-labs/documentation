@@ -13,9 +13,9 @@ An effect is callable, but that is not its main value. Its main value is making 
 
 ## What Effects Expose
 
-An effect exposes result events and state stores. `started` receives call params. `done` and `failed` receive params with the result or error. `doneData` and `failData` expose only the result or error. `settled` and `finally` run in both cases. `$pending` tells whether any call is active, and `$inFlight` stores the number of active calls.
+An effect exposes result events and state stores. `started` receives call params. `done` and `failed` receive params with the result or error. `doneData` and `failData` expose only the result or error. `settled` and `finally` run in both cases. `pending` tells whether any call is active, and `inFlight` stores the number of active calls.
 
-Effect lifecycle state is published immediately when async work starts or settles. It is not hidden until the surrounding business transaction commits, because UI often needs `$pending` and `$inFlight` as execution state rather than domain state.
+Effect lifecycle state is published immediately when async work starts or settles. It is not hidden until the surrounding business transaction commits, because UI often needs `pending` and `inFlight` as execution state rather than domain state.
 
 This lifecycle exception is part of the broader [transaction model](/core/transactions).
 
@@ -30,8 +30,8 @@ searchFx.finally;
 searchFx.settled;
 searchFx.abort;
 searchFx.aborted;
-searchFx.$pending;
-searchFx.$inFlight;
+searchFx.pending;
+searchFx.inFlight;
 ```
 
 The model can react to them like normal events. A search model can keep status, error, results, and cancellation in one place:
@@ -114,10 +114,10 @@ reaction({
 
 export const searchModel = {
   errorMessage,
-  loading: searchFx.$pending,
+  loading: searchFx.pending,
   query,
   queryChanged,
-  requests: searchFx.$inFlight,
+  requests: searchFx.inFlight,
   results,
   searchCancelled,
   searchSubmitted,
@@ -129,7 +129,7 @@ Loading, result, error handling, and cancellation stay in the model instead of s
 
 ## Effect variants
 
-Use `effect.variant` when a model needs its own public operation, but the actual work already exists in another effect. This is common for API effects: several models can reuse the same transport handler while keeping separate `$pending`, `doneData`, `failData`, and `aborted` units.
+Use `effect.variant` when a model needs its own public operation, but the actual work already exists in another effect. This is common for API effects: several models can reuse the same transport handler while keeping separate `pending`, `doneData`, `failData`, and `aborted` units.
 
 ```ts
 import { effect, store } from "@virentia/core";
@@ -153,7 +153,7 @@ const authorizedRequestFx = requestFx.variant("authorizedRequestFx", (id: number
 
 When `authorizedRequestFx(42)` runs in a scope, the mapper reads `token` from that scope and passes assembled params to the handler of `requestFx`.
 
-The lifecycle belongs to the variant. Calling `authorizedRequestFx` does not emit `requestFx.doneData` and does not make `requestFx.$pending` true. Scoped handler overrides of the base effect still apply, so tests can replace `requestFx` once and all variants will use that handler.
+The lifecycle belongs to the variant. Calling `authorizedRequestFx` does not emit `requestFx.doneData` and does not make `requestFx.pending` true. Scoped handler overrides of the base effect still apply, so tests can replace `requestFx` once and all variants will use that handler.
 
 If the call params already match the base effect, omit the mapper:
 
@@ -167,7 +167,7 @@ const profileLoadUserFx = requestFx.variant("profileLoadUserFx");
 
 Aborting an effect settles the active call immediately with the abort reason. The handler does not need to listen to `signal` or reject its own promise for Virentia lifecycle to finish.
 
-`searchFx.abort(reason)` cancels active calls of this effect. First, `aborted` runs with `{ params, reason }`; then the call finishes as a failure and goes through `failData` and `settled`. `$pending` and `$inFlight` update from that Virentia-level cancellation even if the original handler promise is still waiting. That is why the model above does not let the generic `failData` handler overwrite the `cancelled` status.
+`searchFx.abort(reason)` cancels active calls of this effect. First, `aborted` runs with `{ params, reason }`; then the call finishes as a failure and goes through `failData` and `settled`. `pending` and `inFlight` update from that Virentia-level cancellation even if the original handler promise is still waiting. That is why the model above does not let the generic `failData` handler overwrite the `cancelled` status.
 
 Effects started by an active effect inherit the parent cancellation automatically. If `openSearchFx` calls `searchFx`, aborting `openSearchFx` also aborts the child `searchFx` call with the same reason.
 

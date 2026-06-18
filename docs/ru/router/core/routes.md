@@ -61,7 +61,7 @@ interface Route<Params> {
 показывает, открыт ли роут сейчас. `isPending` становится `true`, пока
 выполняются предзагрузчики и `beforeOpen`.
 
-Алиасов `$params`, `$isOpened` и `$isPending` нет.
+Алиасов с dollar-prefix для `params`, `isOpened` и `isPending` нет.
 
 ## Данные для `open`
 
@@ -137,6 +137,35 @@ type BeforeOpenPayload<Params> = {
 из перенаправления. Когда `route.open` меняет URL, последующее открытие от
 history не запускает ту же проверку второй раз.
 
+## События жизненного цикла
+
+Роут предоставляет события для каждой стадии активации, чтобы другие модели
+могли реагировать без опроса сторов:
+
+| Юнит | Срабатывает, когда |
+| --- | --- |
+| `opened` | Роут становится активным, после того как `beforeOpen` завершился. Несет нормализованный payload. |
+| `openedOnClient` | То же, что `opened`, но только в браузере. |
+| `openedOnServer` | То же, что `opened`, но только при SSR. |
+| `closed` | Роут перестает быть активным. |
+| `isPending` | `Store<boolean>`, который равен `true`, пока выполняется работа `beforeOpen`. |
+
+```ts
+import { reaction } from "@virentia/core";
+
+reaction({
+  on: profileRoute.opened,
+  run({ params }) {
+    analytics.track("profile_viewed", { id: params?.id });
+  },
+});
+```
+
+`openedOnClient` и `openedOnServer` разделяют эффекты только для клиента и только
+для сервера в SSR-приложениях — например, открыть websocket только на клиенте
+или префетчить только на сервере. `isPending` удобен для UI загрузки на уровне
+роута.
+
 ## Родительские роуты
 
 Родительский роут нужен, когда общий лейаут или состояние должны быть открыты
@@ -155,67 +184,19 @@ export const securityRoute = createRoute({
 Где именно показать дочерний интерфейс, решает React `Outlet`; модель роута
 только хранит факт открытия.
 
-## Роут без пути
+## Роуты без пути
 
-`createRoute()` без `path` создает роут без собственного URL:
+`createRoute()` без `path` создает роут без собственного URL. Его все равно можно
+открывать, наблюдать, группировать и отрисовывать, но роутер не сможет построить
+для него URL, пока тот не зарегистрирован с явным путем (см.
+[Роутер и history](/ru/router/core/router#создание-роутера)).
 
 ```ts
 const modalRoute = createRoute<{ id: string }>();
-
-modalRoute.open({ params: { id: "invite" } });
 ```
 
-Такой роут полезен для модальных окон и локальных состояний, которые должны
-вести себя как роут, но не обязаны иметь отдельный путь.
-
-Если роут без пути должен открываться из URL, он регистрируется в роутере с явным
-путем.
-
-## Виртуальные роуты и `group`
-
-`createVirtualRoute` создает объект, похожий на роут, но без пути. `group` открывается,
-когда открыт хотя бы один роут из списка:
-
-```ts
-import { createVirtualRoute, group } from "@virentia/router";
-
-const modalRoute = createVirtualRoute<{ id: string }, { id: string }>();
-const settingsArea = group([settingsRoute, securityRoute]);
-```
-
-Виртуальные роуты подходят для производного состояния: например, подсветить
-раздел навигации, пока открыт любой роут внутри раздела.
-
-## Цепочки роутов
-
-`chainRoute` открывает виртуальный роут только после дополнительной проверки.
-Это удобно для закрытых экранов:
-
-```ts
-import { chainRoute, createRoute } from "@virentia/router";
-import { effect, event, reaction } from "@virentia/core";
-
-const profileRoute = createRoute({ path: "/users/:id" });
-const authorized = event<void>();
-const rejected = event<void>();
-
-const checkAuthorizationFx = effect(async ({ params }) => {
-  return params.id !== "0";
-});
-
-reaction({
-  on: checkAuthorizationFx.doneData,
-  run(isAuthorized) {
-    void (isAuthorized ? authorized : rejected)();
-  },
-});
-
-export const authorizedProfileRoute = chainRoute({
-  route: profileRoute,
-  beforeOpen: checkAuthorizationFx,
-  openOn: authorized,
-  cancelOn: rejected,
-});
-```
-
-`authorizedProfileRoute.params` получает параметры исходного роута.
+Для состояния, которое ведет себя как роут, но не участвует в сопоставлении
+URL, — модалки, производное состояние «раздел открыт» или экраны за асинхронными
+проверками — используйте виртуальные, сгруппированные и chain-роуты. Им посвящена
+отдельная страница:
+[Виртуальные, chain- и сгруппированные роуты](/ru/router/core/virtual-routes).

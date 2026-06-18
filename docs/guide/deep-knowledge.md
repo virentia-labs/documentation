@@ -40,9 +40,9 @@ An effect is not just an async function. It is a small graph around an async fun
 
 <NodeFlow kind="effect" />
 
-The start node increments `$inFlight`, updates `$pending`, and emits `started`. The execute node awaits the handler. The settle node decrements `$inFlight`, updates `$pending`, and emits success or failure units.
+The start node increments `inFlight`, updates `pending`, and emits `started`. The execute node awaits the handler. The settle node decrements `inFlight`, updates `pending`, and emits success or failure units.
 
-That lifecycle is available as normal units: `done`, `doneData`, `fail`, `failData`, `settled`, `$pending`, and `$inFlight`. Model code can react to those units exactly like it reacts to events.
+That lifecycle is available as normal units: `done`, `doneData`, `fail`, `failData`, `settled`, `pending`, and `inFlight`. Model code can react to those units exactly like it reacts to events.
 
 Abort support is tied to each running call. The handler receives an `AbortSignal`, and disposing an owner can abort effect calls created inside that owner.
 
@@ -145,7 +145,7 @@ enqueue downstream work
 
 The runtime deliberately does not keep drafts alive across `await`. A long-lived draft would make stale writes, conflict resolution, and memory lifetime much harder to explain and debug. `scoped` preserves scope and causal context through async work; it does not preserve the transaction draft.
 
-Effect lifecycle stores are an exception to domain-state batching. `$pending` and `$inFlight` are runtime execution signals, so they update immediately when async work starts or settles. Lifecycle events such as `started`, `doneData`, `failData`, and `settled` remain normal units; reactions to those events write business stores through the normal transactional path.
+Effect lifecycle stores are an exception to domain-state batching. `pending` and `inFlight` are runtime execution signals, so they update immediately when async work starts or settles. Lifecycle events such as `started`, `doneData`, `failData`, and `settled` remain normal units; reactions to those events write business stores through the normal transactional path.
 
 ## Why Not Priority Layers
 

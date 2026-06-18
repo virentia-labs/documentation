@@ -15,39 +15,57 @@ export const $userId = createStore("").on(effectorSubmitted, (_, id) => id);
 
 ```ts
 import { event, store } from "@virentia/core";
+import { fool } from "@virentia/effector";
 
-export const virentiaSubmitted = event<{ id: string }>();
+export const virentiaSubmitted = fool(event<{ id: string }>());
 export const userId = store("");
 ```
 
-После этого части связываются явно:
+После этого части связываются явно через универсальный пограничный юнит:
 
 ```ts
-import { createEffectorCompatibility } from "@virentia/effector";
+import { sample } from "effector";
 
-export const effector = createEffectorCompatibility();
-
-effector.link(virentiaSubmitted, effectorSubmitted, ({ id }) => id);
+sample({
+  clock: virentiaSubmitted,
+  fn: ({ id }) => id,
+  target: effectorSubmitted,
+});
 ```
 
-Association создается там, где известен scope Virentia:
+Association создается там, где известны оба scope:
 
 ```ts
-const association = effector.associate({
+import { associate } from "@virentia/effector";
+
+const association = associate({
   virentia: virentiaScope,
   effector: effectorScope,
 });
 ```
 
-Adapter читает Effector scope из `stack.scope`, когда запускается внутри Effector-графа, и по нему находит scope Virentia. Так приложение можно переносить постепенно. Библиотеки Effector продолжают работать с настоящим Effector, а модели Virentia остаются в своем scope.
+Когда код Virentia вызывает `virentiaSubmitted` внутри `scoped(virentiaScope)`, мост берет association и запускает Effector target в `effectorScope`. Так приложение можно переносить постепенно. Библиотеки Effector продолжают работать с настоящим Effector, а модели Virentia остаются в своем scope.
 
 ## Операторы Effector
 
-Если существующая цепочка Effector должна вызвать юнит Virentia, используйте `effector.asEffector`:
+Используйте результат `fool`, когда существующий код Effector должен читать или вызвать юнит Virentia:
 
 ```ts
 sample({
   clock: effectorSubmitted,
-  target: effector.asEffector(virentiaSubmitted),
+  target: virentiaSubmitted,
+});
+```
+
+Также можно обернуть Effector-юнит и слушать его из Virentia:
+
+```ts
+const effectorSaved = fool(createEvent<string>());
+
+reaction({
+  on: effectorSaved,
+  run(id) {
+    userId.value = id;
+  },
 });
 ```

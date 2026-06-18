@@ -85,6 +85,71 @@ WebSocket-relay CLI на `/__virentia_devtools`. Благодаря relay при
 подключиться к инспектору, даже если UI открыт отдельной вкладкой с
 `127.0.0.1`.
 
+## Инспекция Effector-приложения
+
+Тот же инспектор работает с приложениями на настоящем [effector](https://effector.dev).
+Подключайтесь через отдельную точку входа вместо моста Virentia — без аргументов:
+
+```ts
+import { connectEffector } from "@virentia/inspector/effector";
+
+if (import.meta.env.DEV) {
+  connectEffector({ appName: "Checkout" });
+}
+```
+
+`connectEffector` читает собственную интроспекцию effector (`effector/inspect`) и
+говорит ровно по тому же протоколу, что и `installVirentiaDevtools`, поэтому UI и
+CLI инспектора одинаковы. Функция принимает те же опции `appName`, `channel`,
+`inspectorUrl`, возвращает мост с `open()`, `sendGraph()`, `addUnits()`,
+`addScope()`, `snapshot()` и `dispose()`, а `openEffectorInspector` открывает окно
+как `openVirentiaDevtools`.
+
+Граф и timeline сами обнаруживают юниты через `inspectGraph` (созданные после
+подключения) и `inspect` (которые посчитались). Давайте юнитам имена
+(`createStore(0, { name })`, `createEvent("name")` или через babel/swc-плагин
+effector), чтобы граф читался.
+
+Две опции раскрывают остальное — их нельзя получить из публичного API effector: у
+него нет глобального реестра, `inspectGraph` работает только вперёд и не отдаёт
+живую ноду, а форкнутые scope нельзя перечислить.
+
+```ts
+import { connectEffector } from "@virentia/inspector/effector";
+import { fork } from "effector";
+import * as model from "./model";
+
+const appScope = fork();
+
+connectEffector({
+  appName: "Checkout",
+  units: [model.itemAdded, model.itemCount, model.loadPriceFx],
+  scopes: [{ scope: appScope, name: "checkout tab" }],
+});
+```
+
+- `units` — передайте юниты вашей модели (или значения из namespace модуля), чтобы
+  сразу получить полный граф **с рёбрами** (обход живых связей, включая юниты,
+  созданные до подключения) и возможность **триггерить** их из инспектора. Без
+  `units` граф всё равно перечисляет обнаруженные юниты, но как изолированные
+  вершины, а для триггера нужна живая ссылка на юнит.
+- `scopes` — scope из [`fork`](https://effector.dev/en/api/effector/fork/) для
+  наблюдения в timeline и вызова юнитов в scope. Активность без scope наблюдается
+  автоматически; форкнутые scope нужно передать (`{ scope, name }` или позже через
+  `addScope`).
+
+Две возможности инспектора, специфичные для Virentia, в effector не имеют аналога и
+деградируют мягко, а не ломаются:
+
+- **Брейкпоинты** принимаются и отображаются, но не останавливают выполнение — у
+  effector нет механизма остановки цепочки.
+- **Длительность** показывается как `0` мс — поток inspect у effector не несёт
+  времени по шагам.
+
+Всё остальное — реактивный граф, timeline вызовов (одна строка на пользовательский
+юнит, ошибки помечаются) и запуск событий и эффектов с JSON-payload — работает так
+же, как во Virentia.
+
 ## Имена для графа
 
 Читаемые имена превращают граф из набора безымянных узлов в полезную карту
@@ -128,7 +193,7 @@ nameUnit(hasItems, "cart.hasItems");
 
 `event(name)`, `effect(handler, name)`, `{ name }` у store/computed, `name` у
 reaction, `nameUnit` и `nameScope` пишут метаданные для одного и того же
-инспектора. Подъюниты эффектов вроде `started`, `done` и `$pending`
+инспектора. Подъюниты эффектов вроде `started`, `done` и `pending`
 группируются под родительским effect. Внутренние implementation nodes скрыты из
 графа.
 

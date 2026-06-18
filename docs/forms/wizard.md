@@ -185,25 +185,31 @@ const wizard = createWizardForm({
     password: createField(""),
     displayName: createField(""),
   },
-  steps(form) {
-    return [
-      step("account", {
-        form: form.pick({
-          email: true,
-          password: true,
-        }),
-      }),
-      step("profile", {
-        form: form.pick({
-          displayName: true,
-        }),
-      }),
-    ];
-  },
+  steps: [
+    step("account", {
+      pick: {
+        email: true,
+        password: true,
+      },
+    }),
+    step("profile", {
+      form: {
+        displayName: true,
+      },
+    }),
+    step("review", {
+      form: true,
+    }),
+  ],
 });
 
 wizard.form; // root form
 ```
+
+For `createWizardForm` steps, `pick` and `form: { ... }` create projections of
+the root form. Use `form: true` when a step should validate the whole root
+form. If a step already has its own form model, pass it through `form` in
+`createWizard`, or return it from the `createWizardForm` callback form.
 
 The helper does not introduce a new behavior model. It only shortens the shared
 root form pattern.

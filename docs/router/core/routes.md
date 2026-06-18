@@ -50,7 +50,7 @@ interface Route<Params> {
 }
 ```
 
-There are no `$params`, `$isOpened`, or `$isPending` aliases.
+There are no dollar-prefixed `params`, `isOpened`, or `isPending` aliases.
 
 ## Params And Payload
 
@@ -123,6 +123,34 @@ When `route.open` writes history, the later history activation is marked with
 `causedBy: { type: "route.open", ... }`. The same route does not run the same
 guard a second time for that activation.
 
+## Lifecycle Events
+
+A route exposes events for every stage of activation, so other models can react
+without polling stores:
+
+| Unit | Fires when |
+| --- | --- |
+| `opened` | The route becomes active, after `beforeOpen` resolves. Carries the normalized payload. |
+| `openedOnClient` | Same as `opened`, but only in the browser. |
+| `openedOnServer` | Same as `opened`, but only during SSR. |
+| `closed` | The route stops being active. |
+| `isPending` | `Store<boolean>` that is `true` while `beforeOpen` work is running. |
+
+```ts
+import { reaction } from "@virentia/core";
+
+reaction({
+  on: profileRoute.opened,
+  run({ params }) {
+    analytics.track("profile_viewed", { id: params?.id });
+  },
+});
+```
+
+`openedOnClient` and `openedOnServer` split client-only and server-only effects
+in SSR apps — for example, start a websocket only on the client, or prefetch
+only on the server. `isPending` is convenient for route-level loading UI.
+
 ## Parent Routes
 
 A route can have a parent. Opening a child opens the parent model too:
@@ -139,60 +167,18 @@ Parent routes fit parents with their own state or layout. Rendering the child
 through an outlet is a React concern; the route model only says which states are
 open together.
 
-## Pathless And Virtual Routes
+## Pathless Routes
 
 `createRoute()` without a path creates a pathless route. It can still be opened,
-observed, grouped, or used by rendering code, but a router cannot build a URL for
-it unless it is registered with an explicit path.
+observed, grouped, or rendered, but a router cannot build a URL for it unless it
+is registered with an explicit path (see
+[Router and history](/router/core/router#registering-routes)).
 
 ```ts
 const modalRoute = createRoute<{ id: string }>();
 ```
 
-`createVirtualRoute` is useful for state that behaves like a route but is not
-part of URL matching:
-
-```ts
-import { createVirtualRoute, group } from "@virentia/router";
-
-const modal = createVirtualRoute<{ id: string }, { id: string }>();
-const settingsArea = group([settingsRoute, securityRoute]);
-```
-
-Virtual routes fit groups, derived route state, and chained flows where the
-result should be renderable or observable like a route.
-
-## Chained Routes
-
-`chainRoute` creates a virtual route that opens only after extra conditions pass.
-It is useful when the URL can match first, but the screen should render only
-after authorization, feature flags, or data checks.
-
-```ts
-import { chainRoute, createRoute } from "@virentia/router";
-import { effect, event, reaction } from "@virentia/core";
-
-const profileRoute = createRoute({ path: "/users/:id" });
-const authorized = event<void>();
-const rejected = event<void>();
-
-const checkAuthorizationFx = effect(async ({ params }) => {
-  return params.id !== "0";
-});
-
-reaction({
-  on: checkAuthorizationFx.doneData,
-  run(isAuthorized) {
-    void (isAuthorized ? authorized : rejected)();
-  },
-});
-
-export const authorizedProfileRoute = chainRoute({
-  route: profileRoute,
-  beforeOpen: checkAuthorizationFx,
-  openOn: authorized,
-  cancelOn: rejected,
-});
-```
-
-The chained route receives source params through its `params` store.
+For state that behaves like a route but is not part of URL matching — modals,
+derived "section is open" state, or screens gated behind async checks — use
+virtual, grouped, and chained routes. They are covered on their own page:
+[Virtual, chained & grouped routes](/router/core/virtual-routes).

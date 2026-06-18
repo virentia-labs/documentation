@@ -158,6 +158,46 @@ interface RouterAdapter {
 Это нужно, чтобы `beforeOpen` понимал источник открытия и не выполнялся второй
 раз после клика по `Link`.
 
+## Контролы роутера
+
+`createRouter` строит свою привязку к history, сторы `path`/`query`, команды
+навигации и отслеживание query поверх более низкоуровневого объекта, который
+называется *контролы роутера*. `createRouterControls` отдает этот объект
+напрямую:
+
+```ts
+import { createRouterControls } from "@virentia/router";
+
+const controls = createRouterControls();
+```
+
+```ts
+interface RouterControls {
+  readonly history: Store<RouterAdapter | null>;
+  readonly locationState: StoreWritable<LocationState>;
+  readonly query: Store<Query>;
+  readonly path: Store<string>;
+
+  readonly setHistory: EventCallable<RouterAdapter>;
+  readonly navigate: EventCallable<NavigatePayload>;
+  readonly back: EventCallable<void>;
+  readonly forward: EventCallable<void>;
+  readonly dispose: EventCallable<void>;
+  readonly locationUpdated: EventCallable<LocationState>;
+
+  trackQuery<Parameters>(
+    config: Omit<QueryTrackerConfig<Parameters>, "forRoutes">,
+  ): QueryTracker<Parameters>;
+}
+```
+
+Контролы полезны, когда несколько роутеров должны делить один источник history:
+постройте один объект контролов и вызовите `setHistory` на нем один раз, вместо
+того чтобы каждый роутер управлял своей подпиской. У `trackQuery` здесь нет
+`forRoutes`, потому что у контролов нет собственной таблицы роутов —
+отслеживание, привязанное к роутам, относится к роутеру. Большинство приложений
+никогда не создают контролы напрямую; `createRouter` делает это за них.
+
 ## Вложенные роутеры
 
 Вложенный роутер нужен, когда раздел приложения владеет своим поддеревом URL:
