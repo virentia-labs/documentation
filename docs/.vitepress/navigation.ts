@@ -235,6 +235,30 @@ const reactRu: DefaultTheme.SidebarItem[] = [
   },
 ];
 
+const vueEn: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Vue",
+    items: [
+      { text: "Overview", link: "/vue/" },
+      { text: "useUnit", link: "/vue/use-unit" },
+      { text: "Models and components", link: "/vue/models" },
+      { text: "Cached models", link: "/vue/cache" },
+    ],
+  },
+];
+
+const vueRu: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Vue",
+    items: [
+      { text: "Обзор", link: "/ru/vue/" },
+      { text: "useUnit", link: "/ru/vue/use-unit" },
+      { text: "Модели и компоненты", link: "/ru/vue/models" },
+      { text: "Кешированные модели", link: "/ru/vue/cache" },
+    ],
+  },
+];
+
 const effectorEn: DefaultTheme.SidebarItem[] = [
   {
     text: "Effector compatibility",
@@ -295,6 +319,7 @@ const apiEn: DefaultTheme.SidebarItem[] = [
     items: [
       { text: "@virentia/core", link: "/api/core" },
       { text: "@virentia/react", link: "/api/react" },
+      { text: "@virentia/vue", link: "/api/vue" },
       { text: "@virentia/effector", link: "/api/effector" },
       { text: "@virentia/forms", link: "/api/forms" },
       { text: "@virentia/router", link: "/api/router" },
@@ -308,6 +333,7 @@ const apiRu: DefaultTheme.SidebarItem[] = [
     items: [
       { text: "@virentia/core", link: "/ru/api/core" },
       { text: "@virentia/react", link: "/ru/api/react" },
+      { text: "@virentia/vue", link: "/ru/api/vue" },
       { text: "@virentia/effector", link: "/ru/api/effector" },
       { text: "@virentia/forms", link: "/ru/api/forms" },
       { text: "@virentia/router", link: "/ru/api/router" },
@@ -325,6 +351,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
   "/forms/": formsEn,
   "/router/": routerEn,
   "/react/": reactEn,
+  "/vue/": vueEn,
   "/effector/": effectorEn,
   "/recipes/": recipesEn,
   "/api/": apiEn,
@@ -337,6 +364,7 @@ export const ruSidebar: DefaultTheme.Sidebar = {
   "/ru/forms/": formsRu,
   "/ru/router/": routerRu,
   "/ru/react/": reactRu,
+  "/ru/vue/": vueRu,
   "/ru/effector/": effectorRu,
   "/ru/recipes/": recipesRu,
   "/ru/api/": apiRu,
@@ -485,6 +513,28 @@ export const docsSections: DocsSection[] = [
         { text: "Модели", link: "/ru/react/models" },
         { text: "Кеш", link: "/ru/react/cache" },
         { text: "API", link: "/ru/api/react" },
+      ],
+    },
+  },
+  {
+    id: "vue",
+    label: { en: "Vue", ru: "Vue" },
+    link: { en: "/vue/", ru: "/ru/vue/" },
+    match: { en: ["/vue/"], ru: ["/ru/vue/"] },
+    nav: {
+      en: [
+        { text: "Overview", link: "/vue/" },
+        { text: "useUnit", link: "/vue/use-unit" },
+        { text: "Models", link: "/vue/models" },
+        { text: "Cache", link: "/vue/cache" },
+        { text: "API", link: "/api/vue" },
+      ],
+      ru: [
+        { text: "Обзор", link: "/ru/vue/" },
+        { text: "useUnit", link: "/ru/vue/use-unit" },
+        { text: "Модели", link: "/ru/vue/models" },
+        { text: "Кеш", link: "/ru/vue/cache" },
+        { text: "API", link: "/ru/api/vue" },
       ],
     },
   },
