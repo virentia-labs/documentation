@@ -55,6 +55,33 @@ scoped(appScope, () => {
 });
 ```
 
+## Seeding Scope Values
+
+A fresh scope starts each store at its initial value. To start a scope with specific values — common in tests, SSR hydration, or previews — pass them when you create the scope:
+
+```ts
+const appScope = scope({
+  values: [
+    [count, 10],
+    [query, "docs"],
+  ],
+});
+```
+
+To set a value on an existing scope imperatively, use `seedScopeStoreValue`. Only writable stores can be seeded; derived and read-only stores throw.
+
+```ts
+seedScopeStoreValue(appScope, count, 10);
+```
+
+## Reading The Current Scope
+
+`getCurrentScope()` returns the scope active in the current execution context, or `null` when no scope is open. Use it when code needs the scope itself — for example to capture it for a later callback — rather than just reading a store.
+
+```ts
+const current = getCurrentScope();
+```
+
 ## allSettled At Boundaries
 
 `scoped` is convenient for plain code. But when you start a unit at a system boundary — from a test, server loader, command, or framework adapter — `allSettled` is usually clearer.

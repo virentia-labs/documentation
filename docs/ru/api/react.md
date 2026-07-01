@@ -200,6 +200,8 @@ chatCache.delete("support", appScope);
 chatCache.clear(appScope);
 ```
 
+Аргумент `scope` необязателен у всех методов кеша (`has`, `get`, `getInstance`, `delete`, `clear`). Опустите его, чтобы искать ключ по всем scope, которые видел кеш.
+
 ## ModelContext
 
 Фабрики моделей получают context.
@@ -210,7 +212,7 @@ chatCache.clear(appScope);
 interface ModelContext<Props, Key = undefined> {
   readonly scope: Scope;
   readonly owner: Owner;
-  readonly props: StoreWritable<Props>;
+  readonly props: ReactiveWritable<Props>;
   readonly mounted: EventCallable<void>;
   readonly unmounted: EventCallable<void>;
   readonly mounts: StoreWritable<number>;

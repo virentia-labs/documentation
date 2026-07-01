@@ -381,46 +381,14 @@ export const docsSections: DocsSection[] = [
     },
     nav: {
       en: [
-        {
-          text: "Guide",
-          items: [
-            { text: "Getting started", link: "/guide/getting-started" },
-            { text: "Ideology", link: "/guide/ideology" },
-            { text: "Internals", link: "/guide/deep-knowledge" },
-          ],
-        },
-        {
-          text: "Core",
-          items: [
-            { text: "Overview", link: "/core/" },
-            { text: "Units", link: "/core/units" },
-            { text: "Stores", link: "/core/stores" },
-            { text: "Events", link: "/core/events" },
-            { text: "Effects", link: "/core/effects" },
-          ],
-        },
+        { text: "Guide", link: "/guide/getting-started" },
+        { text: "Core", link: "/core/" },
         { text: "Inspector", link: "/inspector/" },
         { text: "API", link: "/api/core" },
       ],
       ru: [
-        {
-          text: "Руководство",
-          items: [
-            { text: "Начало работы", link: "/ru/guide/getting-started" },
-            { text: "Идеология", link: "/ru/guide/ideology" },
-            { text: "Внутреннее устройство", link: "/ru/guide/deep-knowledge" },
-          ],
-        },
-        {
-          text: "Ядро",
-          items: [
-            { text: "Обзор", link: "/ru/core/" },
-            { text: "Юниты", link: "/ru/core/units" },
-            { text: "Сторы", link: "/ru/core/stores" },
-            { text: "События", link: "/ru/core/events" },
-            { text: "Эффекты", link: "/ru/core/effects" },
-          ],
-        },
+        { text: "Руководство", link: "/ru/guide/getting-started" },
+        { text: "Ядро", link: "/ru/core/" },
         { text: "Инспектор", link: "/ru/inspector/" },
         { text: "API", link: "/ru/api/core" },
       ],

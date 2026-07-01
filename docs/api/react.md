@@ -200,6 +200,8 @@ chatCache.delete("support", appScope);
 chatCache.clear(appScope);
 ```
 
+The `scope` argument is optional on every cache method (`has`, `get`, `getInstance`, `delete`, `clear`). Omit it to look the key up across every scope the cache has seen.
+
 ## ModelContext
 
 Model factories receive:
@@ -210,7 +212,7 @@ Use this context when model logic depends on props, lifecycle, the current scope
 interface ModelContext<Props, Key = undefined> {
   readonly scope: Scope;
   readonly owner: Owner;
-  readonly props: StoreWritable<Props>;
+  readonly props: ReactiveWritable<Props>;
   readonly mounted: EventCallable<void>;
   readonly unmounted: EventCallable<void>;
   readonly mounts: StoreWritable<number>;

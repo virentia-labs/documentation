@@ -71,7 +71,7 @@ const profile = store({ name: "Ada", age: 36 });
 
 scoped(appScope, () => {
   count.value += 1;
-  profile.age = 37;
+  profile.value = { ...profile.value, age: 37 };
 });
 ```
 
@@ -272,6 +272,18 @@ reaction({
 });
 ```
 
+Scope and inspector options:
+
+```ts
+reaction({
+  on: ticked,
+  scope: appScope, // Scope | readonly Scope[] — run only in these scopes
+  name: "tick", // inspector label
+  key: true, // mark as a keyed inspector node
+  run() {},
+});
+```
+
 Stop a reaction:
 
 ```ts
@@ -303,6 +315,8 @@ Useful in tests, SSR, and library helpers.
 Creates a lifecycle boundary.
 
 Use it for models created at runtime. Everything registered inside can be disposed together.
+
+The callback receives `(dispose, owner)`: use `dispose()` to tear the boundary down from inside, and `owner` to hand the boundary to nested factories.
 
 ```ts
 const model = owner(() => {

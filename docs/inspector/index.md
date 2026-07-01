@@ -98,9 +98,9 @@ if (import.meta.env.DEV) {
 
 `connectEffector` reads effector's own introspection (`effector/inspect`) and
 speaks the exact same wire protocol as `installVirentiaDevtools`, so the inspector
-UI and CLI are identical. It accepts the same `appName`, `channel`, and
-`inspectorUrl` options, returns a bridge with `open()`, `sendGraph()`,
-`addUnits()`, `addScope()`, `snapshot()`, and `dispose()`, and
+UI and CLI are identical. It accepts the same `appName`, `channel`, `inspectorUrl`, and
+`autoOpen` options, returns a bridge with `appId`, `channel`, `open()`,
+`sendGraph()`, `addUnits()`, `addScope()`, `snapshot()`, and `dispose()`, and
 `openEffectorInspector` opens the window like `openVirentiaDevtools`.
 
 The graph and timeline auto-discover units from `inspectGraph` (units created
@@ -133,8 +133,8 @@ connectEffector({
   isolated vertices, and triggering needs a live unit reference.
 - `scopes` — the [`fork`](https://effector.dev/en/api/effector/fork/) scopes to
   observe in the timeline and to trigger units in. Scope-less computations are
-  observed automatically; forked scopes must be passed (`{ scope, name }`, or add
-  them later with `addScope`).
+  observed automatically; forked scopes must be passed (a `Scope` directly or
+  `{ scope, name }`, or add them later with `addScope`).
 
 Two Virentia-only inspector features have no effector equivalent and degrade
 gracefully instead of breaking:

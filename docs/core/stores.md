@@ -32,11 +32,13 @@ Primitive stores use `.value`.
 count.value += 1;
 ```
 
-Object stores expose fields directly.
+A store holding an object is still accessed through `.value`. Update it by assigning a new value:
 
 ```ts
-profile.age += 1;
+profile.value = { ...profile.value, age: profile.value.age + 1 };
 ```
+
+For object state you want to read and write field by field, use [`reactive`](#reactive-stores) instead.
 
 Direct reads and writes need a scope in the current execution context. If you are not inside a reaction, effect handler, or another model run, open the scope with `scoped(scope, fn)`.
 
@@ -55,6 +57,27 @@ reaction({
 Inside the transaction, later code reads the current draft value. Outside the transaction, subscribers and derived stores are notified after commit.
 
 The full execution model is described in [Transactions](/core/transactions).
+
+## Reactive Stores
+
+`reactive` is a store whose object fields are read and written directly on the unit, without the `.value` indirection. Use it when the state is an object and field-level updates read more naturally than replacing the whole value.
+
+```ts
+const form = reactive({ name: "Ada", age: 36 });
+
+form.age += 1;
+form.name = "Grace";
+```
+
+A `reactive` follows the same rules as a `store`: its value lives in a scope, direct reads and writes need an active scope, and writes are transactional.
+
+Use `readonlyReactive` for an object the model exposes but updates only through its own reactions or effects. Consumers can read fields but cannot assign them.
+
+```ts
+const profile = readonlyReactive({ name: "Ada", age: 36 });
+```
+
+Both accept an optional skip token and devtools options, like `store`.
 
 ## Derived Stores
 
@@ -79,7 +102,7 @@ const users = store({ items: [] as User[] });
 const visibleUsers = computed(() => {
   const text = query.value.toLowerCase();
 
-  return users.items.filter((user) => user.name.toLowerCase().includes(text));
+  return users.value.items.filter((user) => user.name.toLowerCase().includes(text));
 });
 ```
 

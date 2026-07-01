@@ -101,8 +101,8 @@ if (import.meta.env.DEV) {
 `connectEffector` читает собственную интроспекцию effector (`effector/inspect`) и
 говорит ровно по тому же протоколу, что и `installVirentiaDevtools`, поэтому UI и
 CLI инспектора одинаковы. Функция принимает те же опции `appName`, `channel`,
-`inspectorUrl`, возвращает мост с `open()`, `sendGraph()`, `addUnits()`,
-`addScope()`, `snapshot()` и `dispose()`, а `openEffectorInspector` открывает окно
+`inspectorUrl` и `autoOpen`, возвращает мост с `appId`, `channel`, `open()`,
+`sendGraph()`, `addUnits()`, `addScope()`, `snapshot()` и `dispose()`, а `openEffectorInspector` открывает окно
 как `openVirentiaDevtools`.
 
 Граф и timeline сами обнаруживают юниты через `inspectGraph` (созданные после
@@ -135,8 +135,8 @@ connectEffector({
   вершины, а для триггера нужна живая ссылка на юнит.
 - `scopes` — scope из [`fork`](https://effector.dev/en/api/effector/fork/) для
   наблюдения в timeline и вызова юнитов в scope. Активность без scope наблюдается
-  автоматически; форкнутые scope нужно передать (`{ scope, name }` или позже через
-  `addScope`).
+  автоматически; форкнутые scope нужно передать (`Scope` напрямую или
+  `{ scope, name }`, или позже через `addScope`).
 
 Две возможности инспектора, специфичные для Virentia, в effector не имеют аналога и
 деградируют мягко, а не ломаются:

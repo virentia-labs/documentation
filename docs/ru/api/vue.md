@@ -239,7 +239,7 @@ chatCache.clear(appScope);
 interface ModelContext<Props, Key = undefined> {
   readonly scope: Scope;
   readonly owner: Owner;
-  readonly props: StoreWritable<Props>;
+  readonly props: ReactiveWritable<Props>;
   readonly mounted: EventCallable<void>;
   readonly unmounted: EventCallable<void>;
   readonly mounts: StoreWritable<number>;

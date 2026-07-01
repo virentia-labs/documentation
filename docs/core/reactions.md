@@ -9,7 +9,7 @@ const queryChanged = event<string>();
 const searchSubmitted = event<void>();
 
 const query = store("");
-const results = store({ items: [] as string[] });
+const results = reactive({ items: [] as string[] });
 
 const searchFx = effect(async (text: string) => {
   const response = await fetch(`/api/search?q=${encodeURIComponent(text)}`);
@@ -80,6 +80,36 @@ reaction({
   on: [saved, cancelled],
   run() {
     modalOpened.value = false;
+  },
+});
+```
+
+## Scoped Reactions
+
+By default a reaction runs in the same scope its source ran in, so the same model reacts independently in every scope. Pass `scope` to bind a reaction to one scope — or a list of scopes — so it runs only when its source fires in those scopes.
+
+```ts
+reaction({
+  on: ticked,
+  scope: appScope,
+  run() {
+    count.value += 1;
+  },
+});
+```
+
+Use this for wiring that belongs to a single runtime instance — a logger, a sync bridge, devtools glue — rather than to the model in general.
+
+## Inspector Metadata
+
+`name` and `key` are optional hints for the [inspector](/inspector/). `name` sets the label shown for the reaction node; `key` marks it as a keyed node so the inspector can tell apart reactions that share a name across scopes.
+
+```ts
+reaction({
+  on: ticked,
+  name: "tick-counter",
+  run() {
+    count.value += 1;
   },
 });
 ```

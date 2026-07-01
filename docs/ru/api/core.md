@@ -71,7 +71,7 @@ const profile = store({ name: "Ada", age: 36 });
 
 scoped(appScope, () => {
   count.value += 1;
-  profile.age = 37;
+  profile.value = { ...profile.value, age: 37 };
 });
 ```
 
@@ -258,6 +258,18 @@ reaction({
 });
 ```
 
+Опции scope и инспектора:
+
+```ts
+reaction({
+  on: ticked,
+  scope: appScope, // Scope | readonly Scope[] — выполнять только в этих scopes
+  name: "tick", // подпись в инспекторе
+  key: true, // пометить как keyed-узел в инспекторе
+  run() {},
+});
+```
+
 Остановить реакцию:
 
 ```ts
@@ -289,6 +301,8 @@ await allSettled(submitted, {
 Создает границу жизненного цикла.
 
 Используйте `owner` для моделей, которые создаются во время работы приложения. Все очистки, зарегистрированные внутри, можно выполнить вместе через `dispose`.
+
+Колбэк получает `(dispose, owner)`: используйте `dispose()`, чтобы свернуть границу изнутри, и `owner`, чтобы передать границу во вложенные фабрики.
 
 ```ts
 const model = owner(() => {

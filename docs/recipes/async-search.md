@@ -5,14 +5,14 @@ This recipe keeps query text, loading state, result state, and async search logi
 ## Model
 
 ```ts
-import { effect, event, reaction, store } from "@virentia/core";
+import { effect, event, reaction, store, reactive } from "@virentia/core";
 
 const queryChanged = event<string>();
 const submitted = event<void>();
 
 const query = store("");
 const status = store<"idle" | "loading" | "ready" | "failed">("idle");
-const results = store({ items: [] as string[] });
+const results = reactive({ items: [] as string[] });
 
 const searchFx = effect(async (text: string) => {
   const response = await fetch(`/api/search?q=${encodeURIComponent(text)}`);

@@ -9,7 +9,7 @@ const queryChanged = event<string>();
 const searchSubmitted = event<void>();
 
 const query = store("");
-const results = store({ items: [] as string[] });
+const results = reactive({ items: [] as string[] });
 
 const searchFx = effect(async (text: string) => {
   const response = await fetch(`/api/search?q=${encodeURIComponent(text)}`);
@@ -80,6 +80,36 @@ reaction({
   on: [saved, cancelled],
   run() {
     modalOpened.value = false;
+  },
+});
+```
+
+## Реакции в scope
+
+По умолчанию реакция выполняется в том же scope, в котором сработал её источник, поэтому одна и та же модель реагирует независимо в каждом scope. Передайте `scope`, чтобы привязать реакцию к одному scope — или к списку scopes, — тогда она выполняется только когда её источник срабатывает в этих scopes.
+
+```ts
+reaction({
+  on: ticked,
+  scope: appScope,
+  run() {
+    count.value += 1;
+  },
+});
+```
+
+Это полезно для обвязки, которая принадлежит одному запущенному экземпляру — логгер, мост синхронизации, склейка с devtools, — а не модели в целом.
+
+## Метаданные для инспектора
+
+`name` и `key` — необязательные подсказки для [инспектора](/ru/inspector/). `name` задаёт подпись узла реакции; `key` помечает её как keyed-узел, чтобы инспектор различал реакции с одинаковым именем в разных scopes.
+
+```ts
+reaction({
+  on: ticked,
+  name: "tick-counter",
+  run() {
+    count.value += 1;
   },
 });
 ```

@@ -5,7 +5,7 @@
 ## Модель
 
 ```tsx
-import { effect, event, reaction, store } from "@virentia/core";
+import { effect, event, reaction, reactive } from "@virentia/core";
 import { component, createModelCache, type ModelContext } from "@virentia/react";
 
 type Props = {
@@ -14,7 +14,7 @@ type Props = {
 
 function createChatModel({ key, mounted }: ModelContext<Props, string>) {
   const messageSubmitted = event<string>();
-  const messages = store({ items: [] as string[] });
+  const messages = reactive({ items: [] as string[] });
   const loadFx = effect(async (chatId: string) => [`loaded:${chatId}`]);
 
   reaction({
