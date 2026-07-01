@@ -341,6 +341,20 @@ const apiRu: DefaultTheme.SidebarItem[] = [
   },
 ];
 
+const skillsEn: DefaultTheme.SidebarItem[] = [
+  {
+    text: "AI",
+    items: [{ text: "Agent Skills", link: "/skills/" }],
+  },
+];
+
+const skillsRu: DefaultTheme.SidebarItem[] = [
+  {
+    text: "AI",
+    items: [{ text: "Агентские скиллы", link: "/ru/skills/" }],
+  },
+];
+
 const virentiaEn: DefaultTheme.SidebarItem[] = [...guideEn, ...coreEn, ...inspectorEn];
 const virentiaRu: DefaultTheme.SidebarItem[] = [...guideRu, ...coreRu, ...inspectorRu];
 
@@ -355,6 +369,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
   "/effector/": effectorEn,
   "/recipes/": recipesEn,
   "/api/": apiEn,
+  "/skills/": skillsEn,
 };
 
 export const ruSidebar: DefaultTheme.Sidebar = {
@@ -368,6 +383,7 @@ export const ruSidebar: DefaultTheme.Sidebar = {
   "/ru/effector/": effectorRu,
   "/ru/recipes/": recipesRu,
   "/ru/api/": apiRu,
+  "/ru/skills/": skillsRu,
 };
 
 export const docsSections: DocsSection[] = [
@@ -562,6 +578,16 @@ export const docsSections: DocsSection[] = [
     nav: {
       en: apiEn[0].items as SectionNavLink[],
       ru: apiRu[0].items as SectionNavLink[],
+    },
+  },
+  {
+    id: "skills",
+    label: { en: "Skills", ru: "Скиллы" },
+    link: { en: "/skills/", ru: "/ru/skills/" },
+    match: { en: ["/skills/"], ru: ["/ru/skills/"] },
+    nav: {
+      en: [{ text: "Agent Skills", link: "/skills/" }],
+      ru: [{ text: "Агентские скиллы", link: "/ru/skills/" }],
     },
   },
 ];
