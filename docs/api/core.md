@@ -16,6 +16,18 @@ const appScope = scope();
 
 Use one scope for an app instance, request, test, preview, or cached background model.
 
+Seed store values, effect handlers, and dependencies at creation:
+
+```ts
+const appScope = scope({
+  values: [[count, 10]],
+  handlers: [[loadFx, async (id) => localData[id]]],
+  deps: [[api, new RealApiClient()]],
+});
+```
+
+`values` are serializable state; `handlers` override effect implementations; `deps` provide per-scope dependencies (see [`dependency`](#dependency)). `handlers` and `deps` are never serialized.
+
 ## scoped
 
 Runs a function in a scope. If the function returns a promise, the same scope is kept for that promise chain until it settles.
@@ -58,6 +70,26 @@ scoped(() => {
   count.value += 1;
 });
 ```
+
+## dependency
+
+Declares a per-scope injectable — an API client, a clock, a logger. It is wiring, not state: each scope provides its own instance, and unlike a store it is never serialized or hydrated.
+
+```ts
+import { dependency, effect, provideDependency, scope } from "@virentia/core";
+
+const api = dependency<ApiClient>("api");
+
+const loadFx = effect(async (id: string) => api.value.get(id));
+
+// Provide at creation, or imperatively.
+const appScope = scope({ deps: [[api, new RealApiClient()]] });
+provideDependency(appScope, api, new RealApiClient());
+```
+
+Read `dep.value` under an active scope (effect handler, reaction body, `scoped`). Reading a dependency is not a reactive dependency. Reading one the active scope never provided throws an actionable error. `provideDependency(scope, dep, value)` sets it imperatively.
+
+See [Dependencies](/core/dependencies) for the full guide.
 
 ## store
 

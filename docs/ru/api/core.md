@@ -16,6 +16,18 @@ const appScope = scope();
 
 Обычно один scope соответствует экземпляру приложения, запросу, тесту, предпросмотру или фоновой модели в кеше.
 
+Задавайте значения сторов, обработчики эффектов и зависимости при создании:
+
+```ts
+const appScope = scope({
+  values: [[count, 10]],
+  handlers: [[loadFx, async (id) => localData[id]]],
+  deps: [[api, new RealApiClient()]],
+});
+```
+
+`values` — сериализуемое состояние; `handlers` переопределяют реализации эффектов; `deps` предоставляют per-scope зависимости (см. [`dependency`](#dependency)). `handlers` и `deps` никогда не сериализуются.
+
 ## scoped
 
 Запускает функцию в scope. Если функция возвращает promise, тот же scope сохраняется для этой promise-цепочки до ее завершения.
@@ -58,6 +70,26 @@ scoped(() => {
   count.value += 1;
 });
 ```
+
+## dependency
+
+Объявляет per-scope инъекцию — API-клиент, часы, логгер. Это обвязка, а не состояние: каждый scope предоставляет свой экземпляр, и в отличие от стора она никогда не сериализуется и не гидрируется.
+
+```ts
+import { dependency, effect, provideDependency, scope } from "@virentia/core";
+
+const api = dependency<ApiClient>("api");
+
+const loadFx = effect(async (id: string) => api.value.get(id));
+
+// Предоставьте при создании или императивно.
+const appScope = scope({ deps: [[api, new RealApiClient()]] });
+provideDependency(appScope, api, new RealApiClient());
+```
+
+Читайте `dep.value` под активным scope (обработчик эффекта, тело реакции, `scoped`). Чтение зависимости — не реактивная зависимость. Чтение той, что активный scope не предоставил, бросает понятную ошибку. `provideDependency(scope, dep, value)` задаёт её императивно.
+
+Полное руководство — [Зависимости](/ru/core/dependencies).
 
 ## store
 
