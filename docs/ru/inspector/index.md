@@ -85,6 +85,55 @@ WebSocket-relay CLI на `/__virentia_devtools`. Благодаря relay при
 подключиться к инспектору, даже если UI открыт отдельной вкладкой с
 `127.0.0.1`.
 
+## Подключение из React Native или не-браузерной среды
+
+Мост не зависит от `window` или `BroadcastChannel`, поэтому работает везде, где
+есть WHATWG `WebSocket` — React Native, web worker, Node, Deno или Bun. Укажите
+в `inspectorUrl` машину, на которой запущен relay CLI, и запустите CLI с
+`--host 0.0.0.0`, чтобы устройство могло до него достучаться по сети:
+
+```ts
+import { installVirentiaDevtools } from "@virentia/core/devtools";
+
+if (__DEV__) {
+  installVirentiaDevtools({
+    appName: "Checkout",
+    inspectorUrl: "http://192.168.1.10:5174", // хост CLI, доступный с устройства
+  });
+}
+```
+
+```sh
+pnpm exec virentia-inspector --host 0.0.0.0 --port 5174
+```
+
+Если в среде нет глобального `WebSocket` или нужен свой транспорт — соберите его
+явно и передайте как `transport`:
+
+```ts
+import {
+  createWebSocketTransport,
+  installVirentiaDevtools,
+} from "@virentia/core/devtools";
+
+installVirentiaDevtools({
+  appName: "Checkout",
+  transport: createWebSocketTransport(
+    "ws://192.168.1.10:5174/__virentia_devtools",
+    { webSocket: MyWebSocket }, // подставьте конструктор WebSocket, если глобального нет
+  ),
+});
+```
+
+`createWebSocketTransport(url, options?)` — готовый транспорт, не зависящий от
+среды, с авто-переподключением и буферизацией отправки. `url` — полный
+WebSocket-URL relay (CLI слушает путь `/__virentia_devtools`). `options` принимает
+`webSocket` (конструктор `WebSocket`, например пакет `ws`), `reconnectDelay` и
+`maxQueue`. `createRelayTransport(inspectorUrl)` собирает транспорт relay по
+умолчанию из HTTP-URL и используется мостом под капотом. Передайте
+`transport: null`, чтобы полностью отключить relay и полагаться только на
+внутристраничные транспорты.
+
 ## Инспекция Effector-приложения
 
 Тот же инспектор работает с приложениями на настоящем [effector](https://effector.dev).

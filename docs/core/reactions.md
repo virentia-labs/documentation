@@ -56,7 +56,7 @@ reaction(() => {
 
 This mode is useful when dependencies are easier to express by reading state than by listing sources. If the rule branches, the dependency list is refreshed after every run: the reaction listens to the stores read by the current branch.
 
-Dependencies are tracked **per scope**. The same reaction observes its own dependencies independently in every scope, so a change in one scope never triggers a run bound to another. A `computed` read in a reaction is invalidated per scope too, so a rule that reads different stores in different scopes stays precise instead of over-subscribing.
+By default a reaction is **global**: it re-runs whenever a store it read changes in **any** scope, and each run reads the value from the scope the change happened in. This fits the common case where the same rule holds in every scope. To bind a reaction to specific scopes and isolate its dependencies per scope, pass `scope:` explicitly — see [Scoped Reactions](#scoped-reactions). Binding is never inferred from the scope that happened to be active when the reaction was created.
 
 If a value is completely derived from other stores and does not need to be written into another store, look at `computed` first. Use a reaction when the rule should do something: write state, call an effect, send an event, or synchronize with external code.
 
@@ -126,7 +126,7 @@ This works only when you await **effects** (or `allSettled`), because effects re
 
 ## Scoped Reactions
 
-By default a reaction runs in the same scope its source ran in, so the same model reacts independently in every scope. Pass `scope` to bind a reaction to one scope — or a list of scopes — so it runs only when its source fires in those scopes.
+A reaction is global unless you pass `scope`. Pass it to bind a reaction to one scope — or a list of scopes — so it runs **only** when its source fires in those scopes, and so its automatically tracked dependencies are isolated per scope.
 
 ```ts
 reaction({
@@ -138,7 +138,12 @@ reaction({
 });
 ```
 
-Use this for wiring that belongs to a single runtime instance — a logger, a sync bridge, devtools glue — rather than to the model in general.
+Use this for two things:
+
+- **Wiring that belongs to a single runtime instance** — a logger, a sync bridge, devtools glue — rather than to the model in general.
+- **A rule whose dependencies differ between scopes.** An automatic reaction that reads different stores in different scopes (a branch driven by a per-scope flag) would, as a global reaction, share one dependency set and stop tracking a branch that another scope took. Binding it with `scope:` gives each scope its own dependency set, so every scope stays precise.
+
+Binding is always explicit. A reaction created inside `scoped(appScope, …)` is **not** silently bound to `appScope` — the ambient scope is a global that the model must not depend on. Pass `scope: appScope` when you mean it.
 
 ## Inspector Metadata
 
