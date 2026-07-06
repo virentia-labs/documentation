@@ -16,6 +16,22 @@ scoped(appScope, () => {
 
 `scoped(scope, fn)` opens a scope, runs the function, and restores the previous scope when the function finishes. If the function returns a promise, the same scope is kept for that promise chain until it settles.
 
+## When A Scope Is Missing
+
+Reading or writing a store, or calling an event or effect, with no scope in the current context throws a `Scope is required` error. The message names the unit that needed a scope and lists the ways to provide one:
+
+```text
+Scope is required to call event "submitted", but no scope is active.
+```
+
+When the failing call happens inside a running handler — a reaction that lost its scope, for example — the error also prints the chain of units that led to it:
+
+```text
+Unit path that led here: reaction "applyCheckout" → effect "chargeFx" → event "submitted".
+```
+
+Use the path to find where the scope was dropped. The usual cause is a raw `await` — a bare `fetch` or timer — between two units inside a reaction body. Wrap that work in an `effect`, which preserves the scope across its `await`.
+
 ## One Tool For Runs And Callbacks
 
 You can use `scoped` immediately:

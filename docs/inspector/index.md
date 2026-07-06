@@ -82,6 +82,54 @@ The app and inspector communicate through `postMessage`, `BroadcastChannel`, and
 the CLI WebSocket relay at `/__virentia_devtools`. The relay is why the app can
 connect even when the inspector is a separate tab served from `127.0.0.1`.
 
+## Connect from React Native or a Non-Browser Host
+
+The bridge does not depend on `window` or `BroadcastChannel`, so it runs anywhere a
+WHATWG `WebSocket` exists — React Native, a web worker, Node, Deno, or Bun. Point
+`inspectorUrl` at the machine running the CLI relay, and run the CLI with
+`--host 0.0.0.0` so the device can reach it over the network:
+
+```ts
+import { installVirentiaDevtools } from "@virentia/core/devtools";
+
+if (__DEV__) {
+  installVirentiaDevtools({
+    appName: "Checkout",
+    inspectorUrl: "http://192.168.1.10:5174", // the CLI host, reachable from the device
+  });
+}
+```
+
+```sh
+pnpm exec virentia-inspector --host 0.0.0.0 --port 5174
+```
+
+If the runtime has no global `WebSocket`, or you need a custom transport, build one
+explicitly and pass it as `transport`:
+
+```ts
+import {
+  createWebSocketTransport,
+  installVirentiaDevtools,
+} from "@virentia/core/devtools";
+
+installVirentiaDevtools({
+  appName: "Checkout",
+  transport: createWebSocketTransport(
+    "ws://192.168.1.10:5174/__virentia_devtools",
+    { webSocket: MyWebSocket }, // inject a WebSocket constructor when there is no global one
+  ),
+});
+```
+
+`createWebSocketTransport(url, options?)` is a ready-made, runtime-agnostic transport
+with auto-reconnect and send buffering. `url` is the full WebSocket URL of the relay
+(the CLI listens on the `/__virentia_devtools` path). `options` accepts `webSocket`
+(a `WebSocket` constructor, e.g. the `ws` package), `reconnectDelay`, and `maxQueue`.
+`createRelayTransport(inspectorUrl)` builds the default relay transport from an HTTP
+URL and is what the bridge uses under the hood. Pass `transport: null` to disable the
+relay entirely and rely only on in-page transports.
+
 ## Inspect an Effector App
 
 The same inspector works with apps built on real [effector](https://effector.dev).

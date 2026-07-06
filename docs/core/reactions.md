@@ -56,6 +56,8 @@ reaction(() => {
 
 This mode is useful when dependencies are easier to express by reading state than by listing sources. If the rule branches, the dependency list is refreshed after every run: the reaction listens to the stores read by the current branch.
 
+Dependencies are tracked **per scope**. The same reaction observes its own dependencies independently in every scope, so a change in one scope never triggers a run bound to another. A `computed` read in a reaction is invalidated per scope too, so a rule that reads different stores in different scopes stays precise instead of over-subscribing.
+
 If a value is completely derived from other stores and does not need to be written into another store, look at `computed` first. Use a reaction when the rule should do something: write state, call an effect, send an event, or synchronize with external code.
 
 ## Explicit on
@@ -83,6 +85,44 @@ reaction({
   },
 });
 ```
+
+## Async Reactions
+
+A reaction body can be `async`. This is for **sequencing** async steps that belong to one rule — await an effect, then continue — not for replacing effects. External async work is still an `effect`; the async body only orchestrates them.
+
+The normal way to write one is to `await` effects directly. Calling an effect inside the body runs it in the reaction's scope automatically, and awaiting it keeps that scope for the next step — so you do not pass a scope or reach for `allSettled`:
+
+```ts
+reaction({
+  on: checkoutRequested,
+  async run(order, { signal }) {
+    await reserveStockFx(order);
+    signal.throwIfAborted();
+    await chargeFx(order);
+  },
+});
+```
+
+The body receives `{ scope, signal }`:
+
+- `signal` is an `AbortSignal` that aborts when the same reaction fires again in the same scope, or when the reaction is stopped. This gives **cancel-previous (switch)** semantics: a newer run supersedes an in-flight older one. Gate steps with `signal.throwIfAborted()`.
+- `scope` is the scope the reaction fired in. You rarely need it — direct effect calls already run in it. Reach for it only when you deliberately want `allSettled(fx, { scope })`, e.g. to await a whole downstream graph rather than a single effect. (The ambient scope is preserved across an awaited **effect**, but not across a raw `await fetch()`, so external async must be an effect.)
+
+The whole async body is awaited by `allSettled` at the boundary that triggered the reaction, including any effect it launches without `await`.
+
+### Tracking Across await
+
+An automatic reaction may also be `async`. Every store it reads is a dependency — including reads **after** an `await`:
+
+```ts
+reaction(async () => {
+  const id = currentId.value; // tracked
+  await loadDetailsFx(); // await an effect
+  preview.value = details.value[id]; // details is tracked too
+});
+```
+
+This works only when you await **effects** (or `allSettled`), because effects restore the scope for the continuation. A raw `await fetch()` detaches from the scope, so external async must go through an effect. Only the reaction's own direct reads are tracked — a `computed` read inside the body contributes the computed itself, not the computed's internal dependencies. Each run is tracked in isolation, so overlapping async runs never mix dependencies; the latest run wins.
 
 ## Scoped Reactions
 
