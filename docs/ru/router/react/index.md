@@ -23,8 +23,8 @@ title: React
 
 - [Провайдер](/ru/router/react/provider) — `RouterProvider`, скоуп и подключение
   history.
-- [Представления роутов и Outlet](/ru/router/react/views) — `createRouteView`,
-  `createRoutesView`, `Outlet`, лейауты и ленивые представления.
+- [Представления роутов и Outlet](/ru/router/react/views) — `routeView`,
+  `routesView`, `Outlet`, лейауты и ленивые представления.
 - [Ссылки](/ru/router/react/links) — `Link` и `useLink`.
 - [Хуки](/ru/router/react/hooks) — `useRouter`, `useIsOpened`, `useOpenedViews`.
 
@@ -43,17 +43,17 @@ pnpm add history
 
 ```tsx
 import { ScopeProvider } from "@virentia/react";
-import { RouterProvider, createRouteView, createRoutesView } from "@virentia/router-react";
+import { RouterProvider, routeView, routesView } from "@virentia/router-react";
 import { historyAdapter } from "@virentia/router";
 import { createBrowserHistory } from "history";
 import { appScope } from "./scope";
-import { router, homeRoute, profileRoute } from "./router";
+import { appRouter, homeRoute, profileRoute } from "./router";
 import { HomePage, ProfilePage } from "./pages";
 
-const RoutesView = createRoutesView({
+const RoutesView = routesView({
   routes: [
-    createRouteView({ route: homeRoute, view: HomePage }),
-    createRouteView({ route: profileRoute, view: ProfilePage }),
+    routeView({ route: homeRoute, view: HomePage }),
+    routeView({ route: profileRoute, view: ProfilePage }),
   ],
   otherwise: NotFoundPage,
 });
@@ -61,7 +61,7 @@ const RoutesView = createRoutesView({
 export function App() {
   return (
     <ScopeProvider scope={appScope}>
-      <RouterProvider router={router} history={historyAdapter(createBrowserHistory())}>
+      <RouterProvider router={appRouter} history={historyAdapter(createBrowserHistory())}>
         <RoutesView />
       </RouterProvider>
     </ScopeProvider>

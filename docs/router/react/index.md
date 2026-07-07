@@ -21,8 +21,8 @@ It covers these UI jobs:
 
 - [Provider](/router/react/provider) — `RouterProvider`, scope, and attaching
   history.
-- [Route views & outlets](/router/react/views) — `createRouteView`,
-  `createRoutesView`, `Outlet`, layouts, and lazy views.
+- [Route views & outlets](/router/react/views) — `routeView`,
+  `routesView`, `Outlet`, layouts, and lazy views.
 - [Links](/router/react/links) — `Link` and `useLink`.
 - [Hooks](/router/react/hooks) — `useRouter`, `useIsOpened`, `useOpenedViews`.
 
@@ -40,17 +40,17 @@ browser/memory history the application owns and passes to the router.
 
 ```tsx
 import { ScopeProvider } from "@virentia/react";
-import { RouterProvider, createRouteView, createRoutesView } from "@virentia/router-react";
+import { RouterProvider, routeView, routesView } from "@virentia/router-react";
 import { historyAdapter } from "@virentia/router";
 import { createBrowserHistory } from "history";
 import { appScope } from "./scope";
-import { router, homeRoute, profileRoute } from "./router";
+import { appRouter, homeRoute, profileRoute } from "./router";
 import { HomePage, ProfilePage } from "./pages";
 
-const RoutesView = createRoutesView({
+const RoutesView = routesView({
   routes: [
-    createRouteView({ route: homeRoute, view: HomePage }),
-    createRouteView({ route: profileRoute, view: ProfilePage }),
+    routeView({ route: homeRoute, view: HomePage }),
+    routeView({ route: profileRoute, view: ProfilePage }),
   ],
   otherwise: NotFoundPage,
 });
@@ -58,7 +58,7 @@ const RoutesView = createRoutesView({
 export function App() {
   return (
     <ScopeProvider scope={appScope}>
-      <RouterProvider router={router} history={historyAdapter(createBrowserHistory())}>
+      <RouterProvider router={appRouter} history={historyAdapter(createBrowserHistory())}>
         <RoutesView />
       </RouterProvider>
     </ScopeProvider>

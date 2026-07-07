@@ -40,6 +40,10 @@ profile.value = { ...profile.value, age: profile.value.age + 1 };
 
 For object state you want to read and write field by field, use [`reactive`](#reactive-stores) instead.
 
+::: tip Deeply nested state
+For state you edit **in place, deeply** — documents, editor models, large tables patched cell by cell — see [`@virentia/mutable`](/mutable/). Its `.value` is a deep mutable draft (`doc.value.blocks[3].items[7].text = "…"`) with the same [per-keypath reactivity](/mutable/#granular-reactivity), so a derived value re-runs only for the parts it read.
+:::
+
 Direct reads and writes need a scope in the current execution context. If you are not inside a reaction, effect handler, or another model run, open the scope with `scoped(scope, fn)`.
 
 Store writes are transactional. Several writes made during one synchronous unit tree are batched into one commit, and reactions observe the committed final value.

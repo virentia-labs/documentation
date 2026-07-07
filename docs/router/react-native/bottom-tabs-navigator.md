@@ -4,7 +4,7 @@ title: Bottom tabs navigator
 
 # Bottom Tabs Navigator
 
-`createVirentiaBottomTabsNavigator` builds a `@react-navigation/bottom-tabs`
+`bottomTabsNavigator` builds a `@react-navigation/bottom-tabs`
 navigator and returns a `{ Navigator }` component. It follows route opens like
 the [stack navigator](/router/react-native/stack-navigator), and it adds one
 thing: pressing a tab opens that tab's route inside the Virentia scope.
@@ -13,12 +13,12 @@ Setup — providers, history, and route views — is shared and lives on the
 [React Native overview](/router/react-native/).
 
 ```tsx
-import { createVirentiaBottomTabsNavigator } from "@virentia/router-react-native";
-import { router, homeRoute, searchRoute } from "./router";
+import { bottomTabsNavigator } from "@virentia/router-react-native";
+import { appRouter, homeRoute, searchRoute } from "./router";
 import { HomeScreen, SearchScreen } from "./screens";
 
-const { Navigator } = createVirentiaBottomTabsNavigator({
-  router,
+const { Navigator } = bottomTabsNavigator({
+  router: appRouter,
   routes: [
     { route: homeRoute, view: HomeScreen },
     { route: searchRoute, view: SearchScreen },
@@ -44,8 +44,8 @@ A tab route that needs params or query carries an `openPayload`, passed to
 function for payloads computed at press time:
 
 ```tsx
-const { Navigator } = createVirentiaBottomTabsNavigator({
-  router,
+const { Navigator } = bottomTabsNavigator({
+  router: appRouter,
   routes: [
     { route: homeRoute, view: HomeScreen },
     {
@@ -67,10 +67,10 @@ const { Navigator } = createVirentiaBottomTabsNavigator({
 ```
 
 `openPayload` is the only addition over a plain route view; everything else
-matches `createRouteView`.
+matches `routeView`.
 
 ```ts
-interface VirentiaBottomTabsRouteView extends RouteView {
+interface BottomTabsRouteView extends RouteView {
   openPayload?: unknown | (() => unknown);
 }
 ```
@@ -78,9 +78,9 @@ interface VirentiaBottomTabsRouteView extends RouteView {
 ## Configuration
 
 ```ts
-interface VirentiaBottomTabsNavigatorConfig {
+interface BottomTabsNavigatorConfig {
   router: Router;
-  routes: VirentiaBottomTabsRouteView[];
+  routes: BottomTabsRouteView[];
   initialRouteName?: string;
   screenOptions?: BottomTabNavigationOptions;
 }
@@ -89,7 +89,7 @@ interface VirentiaBottomTabsNavigatorConfig {
 | Option | Type | Description |
 | --- | --- | --- |
 | `router` | `Router` | The router whose routes these tabs belong to |
-| `routes` | `VirentiaBottomTabsRouteView[]` | Route views, optionally with `openPayload` |
+| `routes` | `BottomTabsRouteView[]` | Route views, optionally with `openPayload` |
 | `initialRouteName` | `string` | Optional first tab name (see [Screen names](/router/react-native/#screen-names)) |
 | `screenOptions` | `BottomTabNavigationOptions` | Optional options applied to each tab |
 

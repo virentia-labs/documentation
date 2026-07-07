@@ -102,4 +102,4 @@ interface ArrayField<Value, ItemField extends AnyField = Field<Value>>
 
 - [Shape fields](./shape-fields) - dynamic objects and row shapes.
 - [Validation lifecycle](./validation) - item validation plus array validation.
-- [React bindings](./react) - rendering item fields.
+- [React bindings](/forms/react/) - rendering item fields.

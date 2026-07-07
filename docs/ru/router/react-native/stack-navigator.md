@@ -4,7 +4,7 @@ title: Stack-навигатор
 
 # Stack-навигатор
 
-`createVirentiaStackNavigator` строит навигатор `@react-navigation/stack` из
+`stackNavigator` строит навигатор `@react-navigation/stack` из
 ваших представлений роутов и возвращает компонент `{ Navigator }`. Навигатор
 следует за роутером: то представление роута, которое является самым глубоким из
 сейчас открытых, выводится на передний план стека.
@@ -13,16 +13,16 @@ title: Stack-навигатор
 навигатором и описана в [обзоре React Native](/ru/router/react-native/).
 
 ```tsx
-import { createVirentiaStackNavigator } from "@virentia/router-react-native";
-import { createRouteView } from "@virentia/router-react";
-import { router, homeRoute, profileRoute } from "./router";
+import { stackNavigator } from "@virentia/router-react-native";
+import { routeView } from "@virentia/router-react";
+import { appRouter, homeRoute, profileRoute } from "./router";
 import { HomeScreen, ProfileScreen } from "./screens";
 
-const { Navigator } = createVirentiaStackNavigator({
-  router,
+const { Navigator } = stackNavigator({
+  router: appRouter,
   routes: [
-    createRouteView({ route: homeRoute, view: HomeScreen }),
-    createRouteView({ route: profileRoute, view: ProfileScreen }),
+    routeView({ route: homeRoute, view: HomeScreen }),
+    routeView({ route: profileRoute, view: ProfileScreen }),
   ],
   initialRouteName: "/home",
   screenOptions: {
@@ -34,7 +34,7 @@ const { Navigator } = createVirentiaStackNavigator({
 ## Конфигурация
 
 ```ts
-interface VirentiaStackNavigatorConfig {
+interface StackNavigatorConfig {
   router: Router;
   routes: RouteView[];
   initialRouteName?: string;
@@ -67,16 +67,16 @@ interface VirentiaStackNavigatorConfig {
 ## Виртуальные роуты как экраны
 
 [Виртуальные роуты](/ru/router/core/virtual-routes), созданные через
-`createVirtualRoute`, поддерживаются как экраны без пути в стиле модалок. Они
+`virtualRoute`, поддерживаются как экраны без пути в стиле модалок. Они
 получают сгенерированное имя экрана (`Route{index}`), а их преобразованные
 параметры читаются из модели роута так же, как у любого другого экрана:
 
 ```tsx
-const { Navigator } = createVirentiaStackNavigator({
-  router,
+const { Navigator } = stackNavigator({
+  router: appRouter,
   routes: [
-    createRouteView({ route: homeRoute, view: HomeScreen }),
-    createRouteView({ route: detailsRoute, view: DetailsScreen }), // virtual route
+    routeView({ route: homeRoute, view: HomeScreen }),
+    routeView({ route: detailsRoute, view: DetailsScreen }), // virtual route
   ],
   initialRouteName: "/home",
 });

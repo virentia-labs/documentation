@@ -13,7 +13,7 @@ React Router data router обычно создается вне React-дерев
 создается на ту же lifetime-границу и передается в `ScopeProvider`.
 
 ```tsx
-import { allSettled, scope } from "@virentia/core";
+import { scope, scoped } from "@virentia/core";
 import { ScopeProvider } from "@virentia/react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router";
@@ -27,10 +27,7 @@ const router = createBrowserRouter([
   {
     path: "/projects/:projectId",
     async loader({ params }) {
-      await allSettled(projectOpened, {
-        scope: appScope,
-        payload: params.projectId!,
-      });
+      await scoped(appScope, () => projectOpened(params.projectId!));
 
       return null;
     },
@@ -108,7 +105,7 @@ export function ProjectPage() {
 }
 ```
 
-`allSettled` хорошо подходит для loaders и actions: React Router сообщает, что
-произошло на границе URL, а Virentia запускает весь связанный state graph в
-нужном scope.
+`scoped` хорошо подходит для loaders и actions: React Router сообщает, что
+произошло на границе URL, а промис `scoped` дожидается всего связанного state
+graph в нужном scope.
 

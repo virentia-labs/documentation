@@ -6,7 +6,7 @@
 
 ```ts
 import { describe, expect, it } from "vitest";
-import { allSettled, event, reaction, scope, scoped, store } from "@virentia/core";
+import { event, reaction, scope, scoped, store } from "@virentia/core";
 
 describe("counter", () => {
   it("increments in an isolated scope", async () => {
@@ -21,10 +21,7 @@ describe("counter", () => {
       },
     });
 
-    await allSettled(incremented, {
-      scope: testScope,
-      payload: 2,
-    });
+    await scoped(testScope, () => incremented(2));
 
     scoped(testScope, () => {
       expect(count.value).toBe(2);

@@ -24,6 +24,7 @@ Optional packages:
 ```sh
 pnpm add @virentia/forms-react @virentia/react react
 pnpm add @virentia/forms-zod zod
+pnpm add @virentia/forms-effector @virentia/effector effector
 ```
 
 ## How The Section Is Structured
@@ -43,8 +44,9 @@ hit first.
 | [Shape fields](./shape-fields)       | An object has dynamic keys.                                                 |
 | [Array fields](./array-fields)       | A form has ordered repeated items.                                          |
 | [Wizard forms](./wizard)             | Navigation is driven by validation of step forms.                           |
-| [React bindings](./react)            | Components should read models and call scoped handlers.                     |
+| [React bindings](/forms/react/)            | Components should read models and call scoped handlers.                     |
 | [Schema adapters](./adapters)        | Zod should act as validators, not as the form runtime.                      |
+| [Effector bindings](/forms/effector/)      | An Effector app should read a form and drive it through a lens.             |
 
 ## First Model
 

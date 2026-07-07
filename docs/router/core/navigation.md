@@ -8,10 +8,10 @@ Navigation is a boundary between a model decision and the URL. Virentia Router
 gives two levels of commands:
 
 - `route.open(payload)` means “open this route with these params”;
-- `router.navigate(payload)` means “write this path/query to history”.
+- `appRouter.navigate(payload)` means “write this path/query to history”.
 
 `route.open` is the usual choice when the target is known as a route object.
-`router.navigate` fits raw paths and query-only changes.
+`appRouter.navigate` fits raw paths and query-only changes.
 
 ## Opening A Route
 
@@ -46,11 +46,11 @@ await scoped(appScope, () =>
 
 ## Raw Navigation
 
-`router.navigate` performs lower-level URL updates:
+`appRouter.navigate` performs lower-level URL updates:
 
 ```ts
 await scoped(appScope, () =>
-  router.navigate({
+  appRouter.navigate({
     path: "/users/42",
     query: { tab: "posts" },
   }),
@@ -61,7 +61,7 @@ If `path` is omitted, the current path is kept and only query changes:
 
 ```ts
 await scoped(appScope, () =>
-  router.navigate({
+  appRouter.navigate({
     query: { dialog: "invite" },
   }),
 );
@@ -70,8 +70,8 @@ await scoped(appScope, () =>
 `back` and `forward` delegate to the history adapter:
 
 ```ts
-await scoped(appScope, () => router.back());
-await scoped(appScope, () => router.forward());
+await scoped(appScope, () => appRouter.back());
+await scoped(appScope, () => appRouter.forward());
 ```
 
 These are integration commands, not business events. Domain logic should decide
@@ -101,18 +101,15 @@ const { path, open } = useLink(profileRoute, { id: 42 });
 
 ## Tests And System Boundaries
 
-`allSettled` is for explicit boundaries that must wait for all async graph work:
+`scoped` is for explicit boundaries that must wait for all async graph work. Its
+promise resolves only after the async graph the callback triggers has settled:
 
 ```ts
-await allSettled(profileRoute.open, {
-  scope: appScope,
-  payload: { params: { id: 42 } },
-});
+await scoped(appScope, () => profileRoute.open({ params: { id: 42 } }));
 ```
 
-This is the right shape for tests, SSR loaders, command handlers, and adapters.
-For ordinary app code, `scoped(appScope, () => route.open(...))` reads closer to
-the model.
+This is the right shape for tests, SSR loaders, command handlers, and adapters,
+and it reads the same as ordinary app code.
 
 ## Common Cases
 
@@ -134,7 +131,7 @@ profileRoute.open({
 Redirect from a guard:
 
 ```ts
-createRoute({
+route({
   path: "/admin",
   beforeOpen: [
     async () => {
@@ -149,7 +146,7 @@ createRoute({
 Same path, changed query:
 
 ```ts
-router.navigate({
+appRouter.navigate({
   query: { filter: "open" },
 });
 ```

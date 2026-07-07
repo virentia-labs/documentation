@@ -122,4 +122,4 @@ function defineField<FieldValue extends AnyField>(field: FieldValue): FieldValue
 - [Field model](./fields) - primitive fields used inside custom fields.
 - [Field types](./field-types) - reusable custom field factories.
 - [Error channels](./errors) - how child errors are lifted.
-- [React bindings](./react) - rendering custom fields through `useField`.
+- [React bindings](/forms/react/) - rendering custom fields through `useField`.

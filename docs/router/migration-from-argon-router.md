@@ -71,7 +71,7 @@ import { scoped } from "@virentia/core";
 await scoped(appScope, () => route.open({ params: { id: "42" } }));
 ```
 
-`allSettled(route.open, { scope, payload })` is useful in tests, server loaders,
+`scoped(scope, () => route.open(payload))` is useful in tests, server loaders,
 commands, and framework adapters where the boundary should be explicit and the
 caller needs to wait for graph work to settle.
 
@@ -82,20 +82,22 @@ In React, `Link` and `useUnit(route.open)` bind calls to the provided scope.
 Virentia `beforeOpen` receives the opening payload:
 
 ```ts
-createRoute({
+route({
   path: "/profile/:id",
   beforeOpen: [
-    ({ params, query, causedBy }) => {
-      console.log(params?.id, query.tab, causedBy?.type);
+    ({ params, query }) => {
+      console.log(params?.id, query.tab);
     },
   ],
 });
 ```
 
-For `route.open`, `beforeOpen` runs before navigation. The later history
-activation is marked with `causedBy` and skips the same guard, so the guard runs
-once. This covers the old argon-router issue where clicking a link could run
-`beforeOpen` twice and briefly render a not-found view.
+For `route.open`, `beforeOpen` runs before navigation. When `route.open` writes
+history, the later history activation is recognized as the router's own echo (a
+`programmatic` origin) and skips `beforeOpen`, so the same guard does not run a
+second time for that activation. This covers the old argon-router issue where
+clicking a link could run `beforeOpen` twice and briefly render a not-found
+view.
 
 ## History
 
@@ -107,7 +109,7 @@ import { scoped } from "@virentia/core";
 import { historyAdapter } from "@virentia/router";
 
 await scoped(appScope, () =>
-  router.setHistory(historyAdapter(createBrowserHistory())),
+  appRouter.setHistory(historyAdapter(createBrowserHistory())),
 );
 ```
 
@@ -120,7 +122,7 @@ install `history` themselves.
 `safeParse` can be used:
 
 ```ts
-const dialog = router.trackQuery({
+const dialog = appRouter.trackQuery({
   parameters: {
     safeParse(query) {
       return query.dialog === "profile"
@@ -136,15 +138,15 @@ navigation for common dialog and filter flows.
 
 ## React Views
 
-`createRouteView`, `createRoutesView`, `Link`, and `Outlet` keep the same idea,
+`routeView`, `routesView`, `Link`, and `Outlet` keep the same idea,
 but are backed by Virentia scopes.
 
 `withLayout` wraps an array of route views:
 
 ```tsx
 withLayout(Layout, [
-  createRouteView({ route: routes.profile, view: ProfilePage }),
-  createRouteView({ route: routes.friends, view: FriendsPage }),
+  routeView({ route: routes.profile, view: ProfilePage }),
+  routeView({ route: routes.friends, view: FriendsPage }),
 ]);
 ```
 

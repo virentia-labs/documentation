@@ -61,15 +61,24 @@ socket.on("message", onMessage);
 
 The same object handles both jobs: run work now, or keep a callback that will return to the same scope later.
 
-If the code already runs inside a scope, you can omit the scope argument:
+If the code already runs inside a scope, you can omit the scope argument — `scoped()` captures the scope it is currently running in. This is the idiomatic way to keep a callback bound to the current scope (a timer, a listener, a socket) without naming the scope by hand:
 
 ```ts
 scoped(appScope, () => {
+  // `scoped()` picks up the active scope.
   scoped(() => {
     count.value += 1;
   });
+
+  // Capture the current scope for a later callback.
+  const onMessage = scoped().wrap((message: string) => {
+    messages.items = [...messages.items, message];
+  });
+  socket.on("message", onMessage);
 });
 ```
+
+When a callback ends up with no scope — because it was handed to a timer, listener, socket, or a raw `await` — that is [scope loss](/core/scope-loss). Wrapping it with `scoped()` is the fix.
 
 ## Seeding Scope Values
 
@@ -92,21 +101,32 @@ seedScopeStoreValue(appScope, count, 10);
 
 ## Reading The Current Scope
 
-`getCurrentScope()` returns the scope active in the current execution context, or `null` when no scope is open. Use it when code needs the scope itself — for example to capture it for a later callback — rather than just reading a store.
+`getCurrentScope()` returns the scope active in the current execution context, or `null` when no scope is open. Reach for it only when you genuinely need the scope object itself. To capture the current scope and reopen it in a later callback, prefer `scoped()` — it captures the active scope for you, so you never pass the scope around by hand.
 
 ```ts
 const current = getCurrentScope();
 ```
 
-## allSettled At Boundaries
+## Starting Units At Boundaries
 
-`scoped` is convenient for plain code. But when you start a unit at a system boundary — from a test, server loader, command, or framework adapter — `allSettled` is usually clearer.
+`scoped` is convenient for plain code. It is also the tool for starting a unit at a system boundary — from a test, server loader, command, or framework adapter: wrap the call and `await` the returned promise.
 
 ```ts
-await allSettled(incremented, {
-  scope: appScope,
-  payload: 1,
-});
+await scoped(appScope, () => incremented(1));
 ```
 
-`allSettled` shows which unit starts, which scope owns the state, and which payload enters the graph. It also waits for async work raised by that run.
+`scoped` shows which scope owns the state, and the callback shows which unit starts and which payload enters the graph. Its promise also waits for async work raised by that run.
+
+## Scope Rules
+
+The scope lives in the current execution context, so the one thing to get right is **not losing it across `await`**. The rules:
+
+1. **Reads and writes need a scope.** `store.value`, `event()`, `effect()`, and `dependency.value` all resolve against the active scope. With none active they throw `Scope is required`.
+2. **A scope is active inside** a `scoped(scope, …)` block, an effect handler, and a reaction body — and any synchronous code they call. A unit runs in the scope its source fired in.
+3. **Awaiting a unit keeps the scope.** After `await someFx()` or `await someEvent()`, the continuation runs in the same scope, so you can read stores right after. Effects and events restore the scope that was active when they were called.
+4. **A raw `await` drops the scope.** `await fetch()`, `await delay()`, `await anyPromise()` — the continuation has no scope, and the next store read throws. Wrap external async in an `effect` so the scope survives the boundary.
+5. **At system boundaries, name the scope.** From a test, loader, command, or callback handed to another library, use `scoped(scope, fn)` or `scoped(scope).wrap(cb)` instead of relying on an ambient scope.
+
+Rule of thumb: inside a reaction or effect, only ever `await` **units** — `await someFx()`, `await someEvent()`, `await scoped(...)`. The moment you `await` a bare promise, you have left the scope; move that work into an `effect`.
+
+For the concrete ways a scope goes missing — timers, listeners, sockets, raw awaits — and how to fix each, see [Scope loss](/core/scope-loss).

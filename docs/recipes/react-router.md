@@ -12,7 +12,7 @@ Create the React Router data router outside the React tree, then wrap the
 rendered app in `ScopeProvider`.
 
 ```tsx
-import { allSettled, scope } from "@virentia/core";
+import { scope, scoped } from "@virentia/core";
 import { ScopeProvider } from "@virentia/react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router";
@@ -26,10 +26,7 @@ const router = createBrowserRouter([
   {
     path: "/projects/:projectId",
     async loader({ params }) {
-      await allSettled(projectOpened, {
-        scope: appScope,
-        payload: params.projectId!,
-      });
+      await scoped(appScope, () => projectOpened(params.projectId!));
 
       return null;
     },
@@ -102,7 +99,7 @@ export function ProjectPage() {
 }
 ```
 
-Route loaders and actions are good places for `allSettled` because the boundary
-is explicit: React Router knows the URL event, and Virentia owns the state graph
-that reacts to it.
+Route loaders and actions are good places for `scoped` because the boundary
+is explicit: React Router knows the URL event, and `scoped`'s promise waits for
+the state graph that reacts to it.
 

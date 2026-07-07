@@ -4,7 +4,7 @@ title: Stack navigator
 
 # Stack Navigator
 
-`createVirentiaStackNavigator` builds a `@react-navigation/stack` navigator from
+`stackNavigator` builds a `@react-navigation/stack` navigator from
 your route views and returns a `{ Navigator }` component. The navigator follows
 the router: whichever route view is the deepest currently opened one is brought
 to the front of the stack.
@@ -13,16 +13,16 @@ Setup — providers, history, and route views — is shared with the other navig
 and lives on the [React Native overview](/router/react-native/).
 
 ```tsx
-import { createVirentiaStackNavigator } from "@virentia/router-react-native";
-import { createRouteView } from "@virentia/router-react";
-import { router, homeRoute, profileRoute } from "./router";
+import { stackNavigator } from "@virentia/router-react-native";
+import { routeView } from "@virentia/router-react";
+import { appRouter, homeRoute, profileRoute } from "./router";
 import { HomeScreen, ProfileScreen } from "./screens";
 
-const { Navigator } = createVirentiaStackNavigator({
-  router,
+const { Navigator } = stackNavigator({
+  router: appRouter,
   routes: [
-    createRouteView({ route: homeRoute, view: HomeScreen }),
-    createRouteView({ route: profileRoute, view: ProfileScreen }),
+    routeView({ route: homeRoute, view: HomeScreen }),
+    routeView({ route: profileRoute, view: ProfileScreen }),
   ],
   initialRouteName: "/home",
   screenOptions: {
@@ -34,7 +34,7 @@ const { Navigator } = createVirentiaStackNavigator({
 ## Configuration
 
 ```ts
-interface VirentiaStackNavigatorConfig {
+interface StackNavigatorConfig {
   router: Router;
   routes: RouteView[];
   initialRouteName?: string;
@@ -64,17 +64,17 @@ navigator never blanks out. This lets you open routes that are handled elsewhere
 
 ## Virtual routes as screens
 
-[Virtual routes](/router/core/virtual-routes) created with `createVirtualRoute`
+[Virtual routes](/router/core/virtual-routes) created with `virtualRoute`
 are supported as pathless, modal-style screens. They get a generated screen name
 (`Route{index}`), and their transformed params are read from the route model the
 same as any other screen:
 
 ```tsx
-const { Navigator } = createVirentiaStackNavigator({
-  router,
+const { Navigator } = stackNavigator({
+  router: appRouter,
   routes: [
-    createRouteView({ route: homeRoute, view: HomeScreen }),
-    createRouteView({ route: detailsRoute, view: DetailsScreen }), // virtual route
+    routeView({ route: homeRoute, view: HomeScreen }),
+    routeView({ route: detailsRoute, view: DetailsScreen }), // virtual route
   ],
   initialRouteName: "/home",
 });

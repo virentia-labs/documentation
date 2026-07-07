@@ -39,15 +39,15 @@ setup() {
 
 Reads the provided scope.
 
-Use it when a component needs to pass the scope into boundary helpers such as `allSettled`, caches, or external adapters.
+Use it when a component needs to pass the scope into boundary helpers such as `scoped`, caches, or external adapters.
 
 ```ts
-import { allSettled } from "@virentia/core";
+import { scoped } from "@virentia/core";
 import { useProvidedScope } from "@virentia/vue";
 
 setup() {
   const scope = useProvidedScope();
-  const onClick = () => allSettled(saved, { scope });
+  const onClick = () => scoped(scope, () => saved());
 
   return { onClick };
 }

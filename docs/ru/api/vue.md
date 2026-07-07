@@ -39,15 +39,15 @@ setup() {
 
 Читает переданный scope.
 
-Используйте, когда компоненту нужно передать scope в граничные хелперы вроде `allSettled`, кешей или внешних адаптеров.
+Используйте, когда компоненту нужно передать scope в граничные хелперы вроде `scoped`, кешей или внешних адаптеров.
 
 ```ts
-import { allSettled } from "@virentia/core";
+import { scoped } from "@virentia/core";
 import { useProvidedScope } from "@virentia/vue";
 
 setup() {
   const scope = useProvidedScope();
-  const onClick = () => allSettled(saved, { scope });
+  const onClick = () => scoped(scope, () => saved());
 
   return { onClick };
 }

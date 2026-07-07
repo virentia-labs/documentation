@@ -20,11 +20,11 @@ history напрямую.
 ## Создание роута
 
 ```ts
-import { createRoute } from "@virentia/router";
+import { route } from "@virentia/router";
 
-export const homeRoute = createRoute({ path: "/" });
+export const homeRoute = route({ path: "/" });
 
-export const profileRoute = createRoute({
+export const profileRoute = route({
   path: "/users/:id<number>",
 });
 ```
@@ -90,7 +90,7 @@ profileRoute.open({
 ```
 
 `query` используется для навигации. Она не записывается в `route.params`;
-текущая query живет в `router.query`.
+текущая query живет в `appRouter.query`.
 
 ## `beforeOpen`
 
@@ -104,14 +104,14 @@ profileRoute.open({
 
 ```ts
 import { effect } from "@virentia/core";
-import { createRoute } from "@virentia/router";
+import { route } from "@virentia/router";
 
 const loadProfileFx = effect(async (id: number) => {
   const response = await fetch(`/api/users/${id}`);
   return response.json();
 });
 
-export const profileRoute = createRoute({
+export const profileRoute = route({
   path: "/users/:id<number>",
   beforeOpen: [
     ({ params }) => {
@@ -129,13 +129,12 @@ type BeforeOpenPayload<Params> = {
   params?: Params;
   query?: Query;
   replace?: boolean;
-  causedBy?: RouteActivationCause;
 };
 ```
 
-`causedBy` показывает, откуда пришло открытие: из `route.open`, из history или
-из перенаправления. Когда `route.open` меняет URL, последующее открытие от
-history не запускает ту же проверку второй раз.
+Когда `route.open` пишет history, последующая активация из history
+распознаётся как собственное эхо роутера (origin `programmatic`) и пропускает
+`beforeOpen`, поэтому тот же guard не запускается второй раз для этой активации.
 
 ## События жизненного цикла
 
@@ -172,9 +171,9 @@ reaction({
 вместе с дочерним роутом:
 
 ```ts
-export const settingsRoute = createRoute({ path: "/settings" });
+export const settingsRoute = route({ path: "/settings" });
 
-export const securityRoute = createRoute({
+export const securityRoute = route({
   path: "/security",
   parent: settingsRoute,
 });
@@ -186,13 +185,13 @@ export const securityRoute = createRoute({
 
 ## Роуты без пути
 
-`createRoute()` без `path` создает роут без собственного URL. Его все равно можно
+`route()` без `path` создает роут без собственного URL. Его все равно можно
 открывать, наблюдать, группировать и отрисовывать, но роутер не сможет построить
 для него URL, пока тот не зарегистрирован с явным путем (см.
 [Роутер и history](/ru/router/core/router#создание-роутера)).
 
 ```ts
-const modalRoute = createRoute<{ id: string }>();
+const modalRoute = route<{ id: string }>();
 ```
 
 Для состояния, которое ведет себя как роут, но не участвует в сопоставлении

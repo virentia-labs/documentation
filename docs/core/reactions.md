@@ -90,7 +90,7 @@ reaction({
 
 A reaction body can be `async`. This is for **sequencing** async steps that belong to one rule — await an effect, then continue — not for replacing effects. External async work is still an `effect`; the async body only orchestrates them.
 
-The normal way to write one is to `await` effects directly. Calling an effect inside the body runs it in the reaction's scope automatically, and awaiting it keeps that scope for the next step — so you do not pass a scope or reach for `allSettled`:
+The normal way to write one is to `await` effects directly. Calling an effect inside the body runs it in the reaction's scope automatically, and awaiting it keeps that scope for the next step — so you do not pass a scope or wrap the call in `scoped`:
 
 ```ts
 reaction({
@@ -106,9 +106,9 @@ reaction({
 The body receives `{ scope, signal }`:
 
 - `signal` is an `AbortSignal` that aborts when the same reaction fires again in the same scope, or when the reaction is stopped. This gives **cancel-previous (switch)** semantics: a newer run supersedes an in-flight older one. Gate steps with `signal.throwIfAborted()`.
-- `scope` is the scope the reaction fired in. You rarely need it — direct effect calls already run in it. Reach for it only when you deliberately want `allSettled(fx, { scope })`, e.g. to await a whole downstream graph rather than a single effect. (The ambient scope is preserved across an awaited **effect**, but not across a raw `await fetch()`, so external async must be an effect.)
+- `scope` is the scope the reaction fired in. You rarely need it — direct effect calls already run in it. Reach for it only when you deliberately want to run something in it, e.g. `scoped(scope, () => fx())` to await a whole downstream graph rather than a single effect. (The ambient scope is preserved across an awaited **effect**, but not across a raw `await fetch()`, so external async must be an effect.)
 
-The whole async body is awaited by `allSettled` at the boundary that triggered the reaction, including any effect it launches without `await`.
+The whole async body is awaited by the `scoped` promise at the boundary that triggered the reaction, including any effect it launches without `await`.
 
 ### Tracking Across await
 
@@ -122,7 +122,7 @@ reaction(async () => {
 });
 ```
 
-This works only when you await **effects** (or `allSettled`), because effects restore the scope for the continuation. A raw `await fetch()` detaches from the scope, so external async must go through an effect. Only the reaction's own direct reads are tracked — a `computed` read inside the body contributes the computed itself, not the computed's internal dependencies. Each run is tracked in isolation, so overlapping async runs never mix dependencies; the latest run wins.
+This works only when you await **effects** (or `scoped`), because effects restore the scope for the continuation. A raw `await fetch()` detaches from the scope, so external async must go through an effect. Only the reaction's own direct reads are tracked — a `computed` read inside the body contributes the computed itself, not the computed's internal dependencies. Each run is tracked in isolation, so overlapping async runs never mix dependencies; the latest run wins.
 
 ## Scoped Reactions
 

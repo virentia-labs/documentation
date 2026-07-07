@@ -87,6 +87,6 @@ function useLink<Params extends object | void = void>(
 `useLink` — обращайтесь к хуку только тогда, когда вам нужен элемент, не
 являющийся якорем.
 
-Полная семантика команд (`route.open` против `router.navigate`, `replace` и
-границы вроде `allSettled`) описана в
+Полная семантика команд (`route.open` против `appRouter.navigate`, `replace` и
+границы вроде `scoped`) описана в
 [Навигации](/ru/router/core/navigation).

@@ -34,10 +34,7 @@ export function createCounterModel() {
 const appScope = scope();
 const counter = createCounterModel();
 
-await allSettled(counter.incremented, {
-  scope: appScope,
-  payload: 5,
-});
+await scoped(appScope, () => counter.incremented(5));
 
 scoped(appScope, () => {
   console.log(counter.count.value); // 5

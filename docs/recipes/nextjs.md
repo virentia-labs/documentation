@@ -4,7 +4,7 @@ Use this recipe when a Next.js route prepares Virentia state on the server and
 continues from that state on the client.
 
 This page uses only the public API that exists in `@virentia/core` today:
-`scope`, `allSettled`, `scoped`, and `scope({ values })`. There is no exported
+`scope`, `scoped`, and `scope({ values })`. There is no exported
 automatic full-scope serializer in the current package, so the serialized
 payload below is an app-owned adapter. When core exposes full scope
 serialization, that adapter can be replaced by the core API.
@@ -103,13 +103,14 @@ seed the browser scope.
 
 ## Server
 
-Create a fresh scope for each request. Run the model with `allSettled`, then
-serialize the state that should be available to the client.
+Create a fresh scope for each request. Run the model inside `scoped`, whose
+promise waits for the async graph the callback triggers, then serialize the
+state that should be available to the client.
 
 ```ts
 import "server-only";
 
-import { allSettled, scope } from "@virentia/core";
+import { scope, scoped } from "@virentia/core";
 import {
   dashboardOpened,
   loadDashboardFx,
@@ -129,10 +130,7 @@ export async function prepareDashboard(teamId: string) {
     ],
   });
 
-  await allSettled(dashboardOpened, {
-    scope: requestScope,
-    payload: teamId,
-  });
+  await scoped(requestScope, () => dashboardOpened(teamId));
 
   return {
     key: `dashboard:${teamId}`,

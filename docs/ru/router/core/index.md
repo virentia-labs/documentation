@@ -27,7 +27,7 @@ Virentia, поэтому любой рендерер — `@virentia/router-react
   роуты.
 - [Роутер и history](/ru/router/core/router) — регистрация роутов, подключение
   history-адаптера, поток активации, вложенные роутеры и контролы роутера.
-- [Навигация](/ru/router/core/navigation) — `route.open`, `router.navigate`,
+- [Навигация](/ru/router/core/navigation) — `route.open`, `appRouter.navigate`,
   `back`/`forward` и где их вызывать.
 - [Отслеживание query](/ru/router/core/query-tracking) — превращение состояния
   query в URL в события `entered`/`exited` модели для диалогов, фильтров и
@@ -53,13 +53,13 @@ pnpm add @virentia/core @virentia/router @virentia/router-paths
 ```ts
 import {
   // routes
-  createRoute,
-  createVirtualRoute,
+  route,
+  virtualRoute,
   chainRoute,
   group,
   // router
-  createRouter,
-  createRouterControls,
+  router,
+  routerControls,
   // history adapters
   historyAdapter,
   queryAdapter,

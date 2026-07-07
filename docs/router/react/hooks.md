@@ -5,7 +5,7 @@ title: Hooks
 # Hooks
 
 `@virentia/router-react` exposes small hooks for code that renders routes itself
-instead of using `createRoutesView`. They are mainly for local adapters,
+instead of using `routesView`. They are mainly for local adapters,
 design-system integrations, and custom navigators. Most applications can stay
 with `RouterProvider`, route views, and `Link`.
 
@@ -13,16 +13,16 @@ All hooks must be called under a [`RouterProvider`](/router/react/provider).
 
 ## useRouter
 
-Returns the router from context. Useful for reading `router.query`, calling
-`router.navigate`, or passing the router to a helper:
+Returns the router from context. Useful for reading `appRouter.query`, calling
+`appRouter.navigate`, or passing the router to a helper:
 
 ```tsx
 import { useRouter } from "@virentia/router-react";
 import { useUnit } from "@virentia/react";
 
 function CurrentQuery() {
-  const router = useRouter();
-  const query = useUnit(router.query);
+  const appRouter = useRouter();
+  const query = useUnit(appRouter.query);
 
   return <pre>{JSON.stringify(query)}</pre>;
 }
@@ -58,7 +58,7 @@ on whether a section is active.
 
 Given a list of route views, returns the ones whose routes are currently open,
 ordered from outermost to deepest. This is the primitive that custom renderers
-build on — `createRoutesView` and the React Native navigators use it to decide
+build on — `routesView` and the React Native navigators use it to decide
 what to show:
 
 ```ts

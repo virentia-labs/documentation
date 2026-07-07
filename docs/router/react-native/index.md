@@ -22,9 +22,9 @@ State stays in the route models. The navigator is only a renderer.
 ## Pages
 
 - [Stack navigator](/router/react-native/stack-navigator) —
-  `createVirentiaStackNavigator`.
+  `stackNavigator`.
 - [Bottom tabs navigator](/router/react-native/bottom-tabs-navigator) —
-  `createVirentiaBottomTabsNavigator` and tab-press opening.
+  `bottomTabsNavigator` and tab-press opening.
 
 ## Install
 
@@ -54,13 +54,13 @@ import { ScopeProvider } from "@virentia/react";
 import { RouterProvider } from "@virentia/router-react";
 import { NavigationContainer } from "@react-navigation/native";
 import { appScope } from "./scope";
-import { router } from "./router";
+import { appRouter } from "./router";
 import { Navigator } from "./navigator";
 
 export function App() {
   return (
     <ScopeProvider scope={appScope}>
-      <RouterProvider router={router}>
+      <RouterProvider router={appRouter}>
         <NavigationContainer>
           <Navigator />
         </NavigationContainer>
@@ -76,14 +76,15 @@ browser URL, so use a memory history:
 ```ts
 import { createMemoryHistory } from "history";
 import { historyAdapter } from "@virentia/router";
-import { allSettled } from "@virentia/core";
+import { scoped } from "@virentia/core";
 import { appScope } from "./scope";
-import { router } from "./router";
+import { appRouter } from "./router";
 
-await allSettled(router.setHistory, {
-  scope: appScope,
-  payload: historyAdapter(createMemoryHistory({ initialEntries: ["/home"] })),
-});
+await scoped(appScope, () =>
+  appRouter.setHistory(
+    historyAdapter(createMemoryHistory({ initialEntries: ["/home"] })),
+  ),
+);
 ```
 
 `initialEntries` sets the first opened route. If you skip history entirely, the
@@ -97,13 +98,13 @@ used by [`@virentia/router-react`](/router/react/views). Each view binds one
 route model to one screen component:
 
 ```tsx
-import { createRouteView } from "@virentia/router-react";
+import { routeView } from "@virentia/router-react";
 import { homeRoute, profileRoute } from "./router";
 import { HomeScreen, ProfileScreen } from "./screens";
 
 const routes = [
-  createRouteView({ route: homeRoute, view: HomeScreen }),
-  createRouteView({ route: profileRoute, view: ProfileScreen }),
+  routeView({ route: homeRoute, view: HomeScreen }),
+  routeView({ route: profileRoute, view: ProfileScreen }),
 ];
 ```
 
@@ -140,20 +141,20 @@ Pass these names to `initialRouteName`. Override the visible tab label through
 
 ```ts
 import {
-  createVirentiaStackNavigator,
-  createVirentiaBottomTabsNavigator,
+  stackNavigator,
+  bottomTabsNavigator,
 } from "@virentia/router-react-native";
 
 import type {
-  VirentiaStackNavigatorConfig,
-  VirentiaStackNavigatorOptions,
-  VirentiaBottomTabsNavigatorConfig,
-  VirentiaBottomTabsNavigatorOptions,
-  VirentiaBottomTabsRouteView,
+  StackNavigatorConfig,
+  StackNavigatorOptions,
+  BottomTabsNavigatorConfig,
+  BottomTabsNavigatorOptions,
+  BottomTabsRouteView,
 } from "@virentia/router-react-native";
 ```
 
-`VirentiaStackNavigatorOptions` and `VirentiaBottomTabsNavigatorOptions` are
+`StackNavigatorOptions` and `BottomTabsNavigatorOptions` are
 re-exports of the React Navigation option types, so existing screen-option code
 keeps working.
 
@@ -163,7 +164,7 @@ The navigators do not introduce a second source of truth. Keep these in route
 and router models, the same as on the web:
 
 - which route is active (`route.open`, `route.isOpened`, history);
-- params and query (`route.params`, `router.query`, query tracking);
+- params and query (`route.params`, `appRouter.query`, query tracking);
 - access checks and redirects (`beforeOpen`).
 
 The navigator reads those models, renders the matching screen, and routes tab

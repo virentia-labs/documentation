@@ -13,7 +13,7 @@ title: Виртуальные, chain- и сгруппированные роут
 Ядро моделирует это тремя хелперами, построенными на одном и том же примитиве
 виртуального роута:
 
-- `createVirtualRoute` — роут, который вы открываете и закрываете императивно;
+- `virtualRoute` — роут, который вы открываете и закрываете императивно;
 - `group` — виртуальный роут, отражающий «открыт любой из этих роутов»;
 - `chainRoute` — виртуальный роут, который открывается только после прохождения
   дополнительных асинхронных проверок.
@@ -24,14 +24,14 @@ title: Виртуальные, chain- и сгруппированные роут
 
 ## Виртуальные роуты
 
-`createVirtualRoute` создает роут без пути, управляемый исключительно
+`virtualRoute` создает роут без пути, управляемый исключительно
 собственными событиями `open` и `close`. Здесь нет сопоставления URL и нет
 `beforeOpen`; открытие происходит синхронно.
 
 ```ts
-import { createVirtualRoute } from "@virentia/router";
+import { virtualRoute } from "@virentia/router";
 
-const inviteModal = createVirtualRoute<{ teamId: string }>();
+const inviteModal = virtualRoute<{ teamId: string }>();
 
 inviteModal.open({ teamId: "42" });
 inviteModal.isOpened.value; // true
@@ -75,7 +75,7 @@ no-op, если роут не был открыт).
 входных данных:
 
 ```ts
-const details = createVirtualRoute<{ id: string }, { id: string; source: string }>({
+const details = virtualRoute<{ id: string }, { id: string; source: string }>({
   transformer: ({ id }) => ({ id, source: "virtual" }),
 });
 
@@ -89,7 +89,7 @@ details.params.value; // { id: "7", source: "virtual" }
 
 ```ts
 const isPending = computed(() => loadFx.pending.value);
-const screen = createVirtualRoute({ isPending });
+const screen = virtualRoute({ isPending });
 ```
 
 Виртуальные роуты подходят для модалок, drawer'ов, шагов мастера и любого
@@ -115,7 +115,7 @@ const settingsArea = group([profileRoute, securityRoute, billingRoute]);
 каждый роут по отдельности:
 
 ```tsx
-const SettingsLayoutView = createRouteView({
+const SettingsLayoutView = routeView({
   route: settingsArea,
   view: () => (
     <SettingsChrome>
@@ -138,10 +138,10 @@ const SettingsLayoutView = createRouteView({
 закрытым, если первым сработает `cancelOn`.
 
 ```ts
-import { chainRoute, createRoute } from "@virentia/router";
+import { chainRoute, route } from "@virentia/router";
 import { effect, event, reaction } from "@virentia/core";
 
-const profileRoute = createRoute({ path: "/users/:id" });
+const profileRoute = route({ path: "/users/:id" });
 
 const authorized = event<void>();
 const rejected = event<void>();

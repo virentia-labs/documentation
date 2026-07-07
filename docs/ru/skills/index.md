@@ -15,6 +15,8 @@ Virentia поставляет набор **агентских скиллов (Ag
 | `virentia-vue` | Рендер моделей в Vue 3 (зеркалит React; сторы возвращаются как `ref`). |
 | `virentia-forms` | `@virentia/forms` — поля, формы, валидация, каналы ошибок, визарды, zod-адаптеры, React-хуки. |
 | `virentia-router` | `@virentia/router` — роуты, history, навигация, отслеживание query, представления React/RN; миграция с argon-router. |
+| `virentia-net` | `@virentia/net-core` — слой удалённых данных: `query`/`mutation` как эффекты, `trigger`, операторы concurrency/retry, оптимистичные обновления, инвалидация. |
+| `virentia-storage` | `@virentia/storage-core` — сохранение сторов в боксы (local, session, query, memory, custom) с двусторонней синхронизацией. |
 | `virentia-effector` | `@virentia/effector` — мост к настоящим юнитам Effector (`associate`, `fool`). |
 | `virentia-inspector` | `@virentia/inspector` — мост к devtools, `connectEffector`, именование юнитов. |
 

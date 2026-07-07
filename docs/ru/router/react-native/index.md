@@ -23,9 +23,9 @@ title: React Native
 ## Страницы
 
 - [Stack-навигатор](/ru/router/react-native/stack-navigator) —
-  `createVirentiaStackNavigator`.
+  `stackNavigator`.
 - [Bottom tabs-навигатор](/ru/router/react-native/bottom-tabs-navigator) —
-  `createVirentiaBottomTabsNavigator` и открытие по нажатию на вкладку.
+  `bottomTabsNavigator` и открытие по нажатию на вкладку.
 
 ## Установка
 
@@ -55,13 +55,13 @@ import { ScopeProvider } from "@virentia/react";
 import { RouterProvider } from "@virentia/router-react";
 import { NavigationContainer } from "@react-navigation/native";
 import { appScope } from "./scope";
-import { router } from "./router";
+import { appRouter } from "./router";
 import { Navigator } from "./navigator";
 
 export function App() {
   return (
     <ScopeProvider scope={appScope}>
-      <RouterProvider router={router}>
+      <RouterProvider router={appRouter}>
         <NavigationContainer>
           <Navigator />
         </NavigationContainer>
@@ -77,14 +77,15 @@ History создает приложение, а не роутер. На нати
 ```ts
 import { createMemoryHistory } from "history";
 import { historyAdapter } from "@virentia/router";
-import { allSettled } from "@virentia/core";
+import { scoped } from "@virentia/core";
 import { appScope } from "./scope";
-import { router } from "./router";
+import { appRouter } from "./router";
 
-await allSettled(router.setHistory, {
-  scope: appScope,
-  payload: historyAdapter(createMemoryHistory({ initialEntries: ["/home"] })),
-});
+await scoped(appScope, () =>
+  appRouter.setHistory(
+    historyAdapter(createMemoryHistory({ initialEntries: ["/home"] })),
+  ),
+);
 ```
 
 `initialEntries` задает первый открытый роут. Если history не подключать
@@ -98,13 +99,13 @@ deep link и стек назад отслеживаться не будут.
 Каждое представление связывает одну модель роута с одним компонентом экрана:
 
 ```tsx
-import { createRouteView } from "@virentia/router-react";
+import { routeView } from "@virentia/router-react";
 import { homeRoute, profileRoute } from "./router";
 import { HomeScreen, ProfileScreen } from "./screens";
 
 const routes = [
-  createRouteView({ route: homeRoute, view: HomeScreen }),
-  createRouteView({ route: profileRoute, view: ProfileScreen }),
+  routeView({ route: homeRoute, view: HomeScreen }),
+  routeView({ route: profileRoute, view: ProfileScreen }),
 ];
 ```
 
@@ -141,20 +142,20 @@ function ProfileScreen() {
 
 ```ts
 import {
-  createVirentiaStackNavigator,
-  createVirentiaBottomTabsNavigator,
+  stackNavigator,
+  bottomTabsNavigator,
 } from "@virentia/router-react-native";
 
 import type {
-  VirentiaStackNavigatorConfig,
-  VirentiaStackNavigatorOptions,
-  VirentiaBottomTabsNavigatorConfig,
-  VirentiaBottomTabsNavigatorOptions,
-  VirentiaBottomTabsRouteView,
+  StackNavigatorConfig,
+  StackNavigatorOptions,
+  BottomTabsNavigatorConfig,
+  BottomTabsNavigatorOptions,
+  BottomTabsRouteView,
 } from "@virentia/router-react-native";
 ```
 
-`VirentiaStackNavigatorOptions` и `VirentiaBottomTabsNavigatorOptions` — это
+`StackNavigatorOptions` и `BottomTabsNavigatorOptions` — это
 ре-экспорты типов опций React Navigation, поэтому существующий код опций экранов
 продолжает работать.
 
@@ -164,7 +165,7 @@ import type {
 то же, что и в вебе:
 
 - какой роут активен (`route.open`, `route.isOpened`, history);
-- параметры и query (`route.params`, `router.query`, отслеживание query);
+- параметры и query (`route.params`, `appRouter.query`, отслеживание query);
 - проверки доступа и редиректы (`beforeOpen`).
 
 Навигатор читает эти модели, рисует нужный экран и направляет нажатия вкладок

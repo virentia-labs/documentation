@@ -125,7 +125,7 @@ reaction({
 ```
 
 ```tsx
-import { allSettled } from "@virentia/core";
+import { scoped } from "@virentia/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useProvidedScope } from "@virentia/react";
 import { userSaved, type User } from "./users.model";
@@ -145,10 +145,7 @@ export function SaveUserButton({ user }: { user: User }) {
   const save = useMutation({
     mutationFn: saveUser,
     async onSuccess(savedUser) {
-      await allSettled(userSaved, {
-        scope,
-        payload: savedUser,
-      });
+      await scoped(scope, () => userSaved(savedUser));
       await queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });

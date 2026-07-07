@@ -7,10 +7,10 @@ title: Навигация
 В роутере есть два способа менять адрес:
 
 - `route.open(payload)` открывает конкретный роут;
-- `router.navigate(payload)` записывает путь или query в history напрямую.
+- `appRouter.navigate(payload)` записывает путь или query в history напрямую.
 
 Обычно лучше вызывать `route.open`: так код остается привязан к роуту, а не к
-строке URL. `router.navigate` нужен для низкоуровневых случаев: поменять только
+строке URL. `appRouter.navigate` нужен для низкоуровневых случаев: поменять только
 query, перейти по уже готовому пути, вызвать back/forward.
 
 ## Открытие роута
@@ -46,11 +46,11 @@ await scoped(appScope, () =>
 
 ## Прямая навигация
 
-`router.navigate` пишет URL напрямую:
+`appRouter.navigate` пишет URL напрямую:
 
 ```ts
 await scoped(appScope, () =>
-  router.navigate({
+  appRouter.navigate({
     path: "/users/42",
     query: { tab: "posts" },
   }),
@@ -61,7 +61,7 @@ await scoped(appScope, () =>
 
 ```ts
 await scoped(appScope, () =>
-  router.navigate({
+  appRouter.navigate({
     query: { dialog: "invite" },
   }),
 );
@@ -70,8 +70,8 @@ await scoped(appScope, () =>
 `back` и `forward` вызывают соответствующие методы history-адаптера:
 
 ```ts
-await scoped(appScope, () => router.back());
-await scoped(appScope, () => router.forward());
+await scoped(appScope, () => appRouter.back());
+await scoped(appScope, () => appRouter.forward());
 ```
 
 ## Ссылки в React
@@ -99,22 +99,16 @@ const { path, open } = useLink(profileRoute, { id: 42 });
 
 ## Тесты и системные границы
 
-`allSettled` удобен там, где надо явно указать scope и дождаться всей
-асинхронной работы графа:
-
-```ts
-await allSettled(profileRoute.open, {
-  scope: appScope,
-  payload: { params: { id: 42 } },
-});
-```
-
-Такая форма подходит для тестов, серверных загрузчиков, команд и адаптеров. В обычном
-коде приложения чаще читается проще:
+`scoped` удобен там, где надо явно указать scope и дождаться всей асинхронной
+работы графа: его промис завершается только после того, как отработает
+асинхронный граф, запущенный колбэком:
 
 ```ts
 await scoped(appScope, () => profileRoute.open({ params: { id: 42 } }));
 ```
+
+Такая форма подходит для тестов, серверных загрузчиков, команд и адаптеров и
+читается так же, как обычный код приложения.
 
 ## Частые сценарии
 
@@ -136,7 +130,7 @@ profileRoute.open({
 Сделать перенаправление из проверки:
 
 ```ts
-createRoute({
+route({
   path: "/admin",
   beforeOpen: [
     async () => {
@@ -151,7 +145,7 @@ createRoute({
 Оставить путь и поменять query:
 
 ```ts
-router.navigate({
+appRouter.navigate({
   query: { filter: "open" },
 });
 ```

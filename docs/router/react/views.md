@@ -9,22 +9,22 @@ renders the deepest opened view, wraps it in layouts, and exposes child views
 through an outlet. None of these helpers decide which route is open — they only
 map opened routes to rendered components.
 
-## createRouteView
+## routeView
 
-`createRouteView` connects a route (or router, or virtual route) to a component:
+`routeView` connects a route (or router, or virtual route) to a component:
 
 ```tsx
-import { createRouteView } from "@virentia/router-react";
+import { routeView } from "@virentia/router-react";
 import { homeRoute, profileRoute } from "./router";
 import { HomePage } from "./home-page";
 import { ProfilePage } from "./profile-page";
 
-const HomeView = createRouteView({
+const HomeView = routeView({
   route: homeRoute,
   view: HomePage,
 });
 
-const ProfileView = createRouteView({
+const ProfileView = routeView({
   route: profileRoute,
   view: ProfilePage,
 });
@@ -52,15 +52,15 @@ function ProfilePage() {
 }
 ```
 
-## createRoutesView
+## routesView
 
-`createRoutesView` renders the deepest opened view from a list. If no view is
+`routesView` renders the deepest opened view from a list. If no view is
 opened, it renders `otherwise` (or `null`):
 
 ```tsx
-import { createRouteView, createRoutesView } from "@virentia/router-react";
+import { routeView, routesView } from "@virentia/router-react";
 
-export const RoutesView = createRoutesView({
+export const RoutesView = routesView({
   routes: [HomeView, ProfileView],
   otherwise: NotFoundPage,
 });
@@ -79,9 +79,9 @@ interface CreateRoutesViewProps {
 it. The parent view renders `<Outlet />` where the child should appear:
 
 ```tsx
-import { Outlet, createRouteView, createRoutesView } from "@virentia/router-react";
+import { Outlet, routeView, routesView } from "@virentia/router-react";
 
-const SettingsView = createRouteView({
+const SettingsView = routeView({
   route: settingsRoute,
   view: () => (
     <SettingsLayout>
@@ -89,14 +89,14 @@ const SettingsView = createRouteView({
     </SettingsLayout>
   ),
   children: [
-    createRouteView({
+    routeView({
       route: securityRoute,
       view: SecurityPage,
     }),
   ],
 });
 
-export const RoutesView = createRoutesView({
+export const RoutesView = routesView({
   routes: [SettingsView],
 });
 ```
@@ -110,7 +110,7 @@ opened child view is rendered.
 `layout` wraps a single route view in a component that receives `children`:
 
 ```tsx
-createRouteView({
+routeView({
   route: profileRoute,
   view: ProfilePage,
   layout: AppLayout,
@@ -123,8 +123,8 @@ createRouteView({
 import { withLayout } from "@virentia/router-react";
 
 const accountViews = withLayout(AccountLayout, [
-  createRouteView({ route: profileRoute, view: ProfilePage }),
-  createRouteView({ route: securityRoute, view: SecurityPage }),
+  routeView({ route: profileRoute, view: ProfilePage }),
+  routeView({ route: securityRoute, view: SecurityPage }),
 ]);
 ```
 
@@ -141,13 +141,13 @@ itself corresponds to a route with its own state.
 
 ## Lazy views
 
-`createLazyRouteView` registers the component import as a route preloader and
+`lazyRouteView` registers the component import as a route preloader and
 renders it with `React.lazy` and `Suspense`:
 
 ```tsx
-import { createLazyRouteView } from "@virentia/router-react";
+import { lazyRouteView } from "@virentia/router-react";
 
-const ProfileView = createLazyRouteView({
+const ProfileView = lazyRouteView({
   route: profileRoute,
   view: () => import("./profile-page"),
   fallback: ProfileSkeleton,

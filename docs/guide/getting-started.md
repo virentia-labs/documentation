@@ -48,17 +48,14 @@ A model definition is reusable. A scope stores values for a concrete instance: a
 const model = createCounterModel();
 const appScope = scope();
 
-await allSettled(model.incremented, {
-  scope: appScope,
-  payload: 2,
-});
+await scoped(appScope, () => model.incremented(2));
 
 scoped(appScope, () => {
   console.log(model.count.value); // 2
 });
 ```
 
-Use `allSettled` when you need to explicitly run an event or effect in a specific scope: in a test, server loader, command, or adapter. Use `scoped(scope, fn)` when plain code must read or write stores, including after `await`. If another library will call your callback later, keep it with `scoped(scope).wrap(fn)`.
+Use `scoped(scope, fn)` when you need to explicitly run an event or effect in a specific scope — in a test, server loader, command, or adapter — or when plain code must read or write stores, including after `await`; its promise waits for the async work the callback triggers. If another library will call your callback later, keep it with `scoped(scope).wrap(fn)`.
 
 ## UI Libraries
 

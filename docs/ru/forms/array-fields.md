@@ -102,4 +102,4 @@ interface ArrayField<Value, ItemField extends AnyField = Field<Value>>
 
 - [Shape-поля](./shape-fields) - динамические объекты и структура строки.
 - [Жизненный цикл валидации](./validation) - валидация элементов и всего массива.
-- [React-интеграция](./react) - отрисовка полей элементов.
+- [React-интеграция](/ru/forms/react/) - отрисовка полей элементов.

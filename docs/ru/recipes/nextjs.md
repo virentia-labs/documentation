@@ -4,7 +4,7 @@
 сервере и продолжает работу из этого состояния на клиенте.
 
 Здесь используется только публичный API, который сейчас есть в `@virentia/core`:
-`scope`, `allSettled`, `scoped` и `scope({ values })`. В текущем пакете нет
+`scope`, `scoped` и `scope({ values })`. В текущем пакете нет
 экспортированного автоматического serializer для всего scope, поэтому payload
 ниже - это адаптер приложения. Когда в core появится full scope serialization,
 этот адаптер можно будет заменить на API ядра.
@@ -103,13 +103,14 @@ export function createDashboardScope(state: DashboardState): Scope {
 
 ## Сервер
 
-На каждый request создавайте свежий scope. Запустите модель через `allSettled`,
-затем сериализуйте состояние, которое нужно клиенту.
+На каждый request создавайте свежий scope. Запустите модель внутри `scoped` -
+его промис дожидается асинхронного графа, запущенного колбэком, - затем
+сериализуйте состояние, которое нужно клиенту.
 
 ```ts
 import "server-only";
 
-import { allSettled, scope } from "@virentia/core";
+import { scope, scoped } from "@virentia/core";
 import {
   dashboardOpened,
   loadDashboardFx,
@@ -129,10 +130,7 @@ export async function prepareDashboard(teamId: string) {
     ],
   });
 
-  await allSettled(dashboardOpened, {
-    scope: requestScope,
-    payload: teamId,
-  });
+  await scoped(requestScope, () => dashboardOpened(teamId));
 
   return {
     key: `dashboard:${teamId}`,

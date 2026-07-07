@@ -51,13 +51,13 @@ itself — the application owns history creation and passes it in (see
 ```ts
 import {
   // routes
-  createRoute,
-  createVirtualRoute,
+  route,
+  virtualRoute,
   chainRoute,
   group,
   // router
-  createRouter,
-  createRouterControls,
+  router,
+  routerControls,
   // history adapters
   historyAdapter,
   queryAdapter,

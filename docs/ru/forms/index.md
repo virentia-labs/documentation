@@ -25,6 +25,7 @@ pnpm add @virentia/forms @virentia/core
 ```sh
 pnpm add @virentia/forms-react @virentia/react react
 pnpm add @virentia/forms-zod zod
+pnpm add @virentia/forms-effector @virentia/effector effector
 ```
 
 ## Как устроен раздел
@@ -44,8 +45,9 @@ pnpm add @virentia/forms-zod zod
 | [Shape-поля](./shape-fields)             | У объекта появляются динамические ключи.                                                  |
 | [Array-поля](./array-fields)             | В форме есть упорядоченные повторяемые элементы.                                          |
 | [Визард-формы](./wizard)                 | Навигация зависит от валидации форм шагов.                                                |
-| [React-интеграция](./react)              | Компоненты читают модели и вызывают обработчики в нужном скоупе.                          |
+| [React-интеграция](/ru/forms/react/)              | Компоненты читают модели и вызывают обработчики в нужном скоупе.                          |
 | [Адаптеры схем](./adapters)              | Zod нужны как валидаторы, а не как рантайм формы.                                         |
+| [Effector-биндинги](/ru/forms/effector/)          | Effector-приложение читает форму и управляет ей через линзу.                              |
 
 ## Первая модель
 

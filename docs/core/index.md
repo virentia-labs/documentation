@@ -39,8 +39,8 @@ const first = scope();
 const second = scope();
 const model = createCounterModel();
 
-await allSettled(model.incremented, { scope: first, payload: 1 });
-await allSettled(model.incremented, { scope: second, payload: 10 });
+await scoped(first, () => model.incremented(1));
+await scoped(second, () => model.incremented(10));
 ```
 
 One model, two states. That is the basic Virentia mechanism.

@@ -121,4 +121,4 @@ function defineField<FieldValue extends AnyField>(field: FieldValue): FieldValue
 - [Модель поля](./fields) - примитивные поля внутри кастомных полей.
 - [Типы полей](./field-types) - переиспользуемые фабрики кастомных полей.
 - [Каналы ошибок](./errors) - как поднимаются ошибки дочерних полей.
-- [React-интеграция](./react) - как отрисовывать кастомные поля через `useField`.
+- [React-интеграция](/ru/forms/react/) - как отрисовывать кастомные поля через `useField`.

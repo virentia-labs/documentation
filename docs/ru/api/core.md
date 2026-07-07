@@ -152,10 +152,7 @@ const chat = lazyModel(() =>
   import("./chat.model").then(({ createChatModel }) => createChatModel()),
 );
 
-await allSettled(chat.opened, {
-  scope: appScope,
-  payload: "chat:1",
-});
+await scoped(appScope, () => chat.opened("chat:1"));
 ```
 
 Реакции могут подписываться на ленивые события и lifecycle-юниты эффектов до загрузки модуля. Чтение сторов остается синхронным, поэтому читайте сторы ленивой модели после того, как модель уже загрузилась.
@@ -313,21 +310,6 @@ const subscription = reaction({
 subscription.stop();
 ```
 
-## allSettled
-
-Запускает юнит или ноду и ждет завершения асинхронной работы в графе.
-
-Используйте `allSettled` на явных границах: в тестах, серверных загрузчиках, командах, адаптерах фреймворков и местах, где передать `scope` понятнее, чем открывать рамку scope.
-
-```ts
-await allSettled(submitted, {
-  scope: appScope,
-  payload: { text: "hello" },
-});
-```
-
-Полезно в тестах, SSR и helpers для библиотек.
-
 ## owner
 
 Создает границу жизненного цикла.
@@ -400,19 +382,21 @@ withOwner(model.owner, () => {
 const current = getOwner();
 ```
 
-## createNode и run
+## node и run
 
-Низкоуровневый API графа для интеграций.
+Низкоуровневый API графа для интеграций, экспортируется из **`@virentia/core/internal`** (не из основного входа — см. [Низкоуровневое ядро](/ru/core/kernel)).
 
 Используйте его только для новых примитивов или адаптеров. В прикладных моделях обычно нужны сторы, события, эффекты и реакции.
 
 ```ts
-const node = createNode((ctx) => {
+import { node, run } from "@virentia/core/internal";
+
+const reader = node((ctx) => {
   console.log(ctx.value);
 });
 
 await run({
-  unit: node,
+  unit: reader,
   payload: "hello",
   scope: appScope,
 });
@@ -420,14 +404,18 @@ await run({
 
 Внутри ноды `ctx.stop()` останавливает текущую ветку, `ctx.fail(error)` останавливает ее как ошибочную, а `ctx.launch(unit, value)` добавляет другую ноду или юнит в очередь в том же scope и контексте выполнения.
 
-## createContext и withContexts
+`@virentia/core/internal` также экспортит примитивы трекинга (`trackNode`, `collectNodes`, `isTracking`), доступ к активному scope (`getActiveScope`, `requireActiveScope`, `setActiveScope`) и жизненный цикл транзакций (`writeTransactionStore`, `readTransactionStore`, …) для написания собственных сторов. См. [Низкоуровневое ядро](/ru/core/kernel).
 
-Передают метаданные через одну цепочку выполнения kernel.
+## context и withContexts
+
+Передают метаданные через одну цепочку выполнения kernel. Экспортируются из **`@virentia/core/internal`**.
 
 Используйте contexts для данных, которые относятся к одному запуску: request id, tracing, служебные флаги адаптеров. Для состояния приложения используйте сторы.
 
 ```ts
-const requestId = createContext<string>();
+import { context, withContexts } from "@virentia/core/internal";
+
+const requestId = context<string>();
 
 withContexts([requestId.setup("request-1")], () => {
   console.log(requestId.get());
@@ -437,7 +425,7 @@ withContexts([requestId.setup("request-1")], () => {
 Внутри ноды:
 
 ```ts
-const node = createNode((ctx) => {
+const reader = node((ctx) => {
   console.log(ctx.getContext(requestId));
 });
 ```

@@ -70,7 +70,7 @@ import { scoped } from "@virentia/core";
 await scoped(appScope, () => route.open({ params: { id: "42" } }));
 ```
 
-`allSettled(route.open, { scope, payload })` используется в тестах, серверных
+`scoped(scope, () => route.open(payload))` используется в тестах, серверных
 загрузчиках, командах и адаптерах, где надо явно указать scope и дождаться
 завершения работы графа.
 
@@ -81,20 +81,22 @@ await scoped(appScope, () => route.open({ params: { id: "42" } }));
 Virentia `beforeOpen` получает данные открытия:
 
 ```ts
-createRoute({
+route({
   path: "/profile/:id",
   beforeOpen: [
-    ({ params, query, causedBy }) => {
-      console.log(params?.id, query.tab, causedBy?.type);
+    ({ params, query }) => {
+      console.log(params?.id, query.tab);
     },
   ],
 });
 ```
 
-Для `route.open` `beforeOpen` выполняется до навигации. Более позднее открытие
-из history помечается через `causedBy` и пропускает ту же проверку, поэтому
-проверка срабатывает один раз. Это закрывает старый сценарий, где клик по ссылке
-мог запустить `beforeOpen` дважды и временно показать view для not found.
+Для `route.open` `beforeOpen` выполняется до навигации. Когда `route.open`
+пишет history, последующая активация из history распознаётся как собственное
+эхо роутера (origin `programmatic`) и пропускает `beforeOpen`, поэтому тот же
+guard не запускается второй раз для этой активации. Это закрывает старый
+сценарий, где клик по ссылке мог запустить `beforeOpen` дважды и временно
+показать view для not found.
 
 ## History
 
@@ -106,7 +108,7 @@ import { scoped } from "@virentia/core";
 import { historyAdapter } from "@virentia/router";
 
 await scoped(appScope, () =>
-  router.setHistory(historyAdapter(createBrowserHistory())),
+  appRouter.setHistory(historyAdapter(createBrowserHistory())),
 );
 ```
 
@@ -118,7 +120,7 @@ await scoped(appScope, () =>
 `trackQuery` больше не завязан на Zod. Подходит любой объект с `safeParse`:
 
 ```ts
-const dialog = router.trackQuery({
+const dialog = appRouter.trackQuery({
   parameters: {
     safeParse(query) {
       return query.dialog === "profile"
@@ -134,15 +136,15 @@ const dialog = router.trackQuery({
 
 ## React views
 
-`createRouteView`, `createRoutesView`, `Link` и `Outlet` сохраняют ту же идею,
+`routeView`, `routesView`, `Link` и `Outlet` сохраняют ту же идею,
 но работают через Virentia scopes.
 
 `withLayout` оборачивает массив представлений роутов:
 
 ```tsx
 withLayout(Layout, [
-  createRouteView({ route: routes.profile, view: ProfilePage }),
-  createRouteView({ route: routes.friends, view: FriendsPage }),
+  routeView({ route: routes.profile, view: ProfilePage }),
+  routeView({ route: routes.friends, view: FriendsPage }),
 ]);
 ```
 

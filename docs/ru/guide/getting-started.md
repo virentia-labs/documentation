@@ -48,17 +48,14 @@ export function createCounterModel() {
 const model = createCounterModel();
 const appScope = scope();
 
-await allSettled(model.incremented, {
-  scope: appScope,
-  payload: 2,
-});
+await scoped(appScope, () => model.incremented(2));
 
 scoped(appScope, () => {
   console.log(model.count.value); // 2
 });
 ```
 
-Используйте `allSettled`, когда событие или эффект должны выполниться в конкретном scope: в тесте, серверном загрузчике, команде или адаптере. Используйте `scoped(scope, fn)`, когда обычный код должен читать или писать сторы, в том числе после `await`. Если callback-функцию позже вызовет внешняя библиотека, сохраните ее через `scoped(scope).wrap(fn)`.
+Используйте `scoped(scope, fn)`, когда событие или эффект должны выполниться в конкретном scope — в тесте, серверном загрузчике, команде или адаптере — или когда обычный код должен читать или писать сторы, в том числе после `await`; его промис дожидается асинхронной работы, поднятой callback-функцией. Если callback-функцию позже вызовет внешняя библиотека, сохраните ее через `scoped(scope).wrap(fn)`.
 
 ## UI-библиотеки
 

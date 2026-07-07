@@ -152,10 +152,7 @@ const chat = lazyModel(() =>
   import("./chat.model").then(({ createChatModel }) => createChatModel()),
 );
 
-await allSettled(chat.opened, {
-  scope: appScope,
-  payload: "chat:1",
-});
+await scoped(appScope, () => chat.opened("chat:1"));
 ```
 
 Reactions can subscribe to lazy events and effect lifecycle units before the module is loaded. Store reads stay synchronous, so read lazy stores after the model has already been loaded.
@@ -327,21 +324,6 @@ const subscription = reaction({
 subscription.stop();
 ```
 
-## allSettled
-
-Runs a unit or raw node and waits for async graph work.
-
-Use it at explicit boundaries: tests, server loaders, commands, framework adapters, and places where passing `scope` is clearer than opening a scope frame.
-
-```ts
-await allSettled(submitted, {
-  scope: appScope,
-  payload: { text: "hello" },
-});
-```
-
-Useful in tests, SSR, and library helpers.
-
 ## owner
 
 Creates a lifecycle boundary.
@@ -416,19 +398,21 @@ Read the current owner when writing helpers:
 const current = getOwner();
 ```
 
-## createNode and run
+## node and run
 
-Low-level graph API for integrations.
+Low-level graph API for integrations, exported from **`@virentia/core/internal`** (not the main entry — see [Low-level Kernel](/core/kernel)).
 
 Use this only when building new primitives or adapters. Application models should use stores, events, effects, and reactions.
 
 ```ts
-const node = createNode((ctx) => {
+import { node, run } from "@virentia/core/internal";
+
+const reader = node((ctx) => {
   console.log(ctx.value);
 });
 
 await run({
-  unit: node,
+  unit: reader,
   payload: "hello",
   scope: appScope,
 });
@@ -436,14 +420,18 @@ await run({
 
 Inside a node, `ctx.stop()` stops the current branch, `ctx.fail(error)` stops it as a failed branch, and `ctx.launch(unit, value)` enqueues another node or unit in the same scope and execution context.
 
-## createContext and withContexts
+`@virentia/core/internal` also exports the tracking primitives (`trackNode`, `collectNodes`, `isTracking`), active-scope access (`getActiveScope`, `requireActiveScope`, `setActiveScope`), and the transaction lifecycle (`writeTransactionStore`, `readTransactionStore`, …) used to author custom stores. See [Low-level Kernel](/core/kernel).
 
-Pass execution metadata through kernel work.
+## context and withContexts
+
+Pass execution metadata through kernel work. Exported from **`@virentia/core/internal`**.
 
 Use contexts for metadata that belongs to one execution chain, such as request IDs, tracing data, or integration-specific flags. Use stores for application state.
 
 ```ts
-const requestId = createContext<string>();
+import { context, withContexts } from "@virentia/core/internal";
+
+const requestId = context<string>();
 
 withContexts([requestId.setup("request-1")], () => {
   console.log(requestId.get());
@@ -453,7 +441,7 @@ withContexts([requestId.setup("request-1")], () => {
 Inside a node:
 
 ```ts
-const node = createNode((ctx) => {
+const reader = node((ctx) => {
   console.log(ctx.getContext(requestId));
 });
 ```

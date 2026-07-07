@@ -10,23 +10,23 @@ title: Представления роутов и Outlet
 Ни один из этих хелперов не решает, какой роут открыт, — они только сопоставляют
 открытые роуты с отрисованными компонентами.
 
-## createRouteView
+## routeView
 
-`createRouteView` связывает роут (или роутер, или виртуальный роут) с
+`routeView` связывает роут (или роутер, или виртуальный роут) с
 компонентом:
 
 ```tsx
-import { createRouteView } from "@virentia/router-react";
+import { routeView } from "@virentia/router-react";
 import { homeRoute, profileRoute } from "./router";
 import { HomePage } from "./home-page";
 import { ProfilePage } from "./profile-page";
 
-const HomeView = createRouteView({
+const HomeView = routeView({
   route: homeRoute,
   view: HomePage,
 });
 
-const ProfileView = createRouteView({
+const ProfileView = routeView({
   route: profileRoute,
   view: ProfilePage,
 });
@@ -54,15 +54,15 @@ function ProfilePage() {
 }
 ```
 
-## createRoutesView
+## routesView
 
-`createRoutesView` отрисовывает самое глубокое открытое представление из списка.
+`routesView` отрисовывает самое глубокое открытое представление из списка.
 Если ни одно представление не открыто, он отрисовывает `otherwise` (или `null`):
 
 ```tsx
-import { createRouteView, createRoutesView } from "@virentia/router-react";
+import { routeView, routesView } from "@virentia/router-react";
 
-export const RoutesView = createRoutesView({
+export const RoutesView = routesView({
   routes: [HomeView, ProfileView],
   otherwise: NotFoundPage,
 });
@@ -82,9 +82,9 @@ interface CreateRoutesViewProps {
 туда, где должен появиться дочерний роут:
 
 ```tsx
-import { Outlet, createRouteView, createRoutesView } from "@virentia/router-react";
+import { Outlet, routeView, routesView } from "@virentia/router-react";
 
-const SettingsView = createRouteView({
+const SettingsView = routeView({
   route: settingsRoute,
   view: () => (
     <SettingsLayout>
@@ -92,14 +92,14 @@ const SettingsView = createRouteView({
     </SettingsLayout>
   ),
   children: [
-    createRouteView({
+    routeView({
       route: securityRoute,
       view: SecurityPage,
     }),
   ],
 });
 
-export const RoutesView = createRoutesView({
+export const RoutesView = routesView({
   routes: [SettingsView],
 });
 ```
@@ -114,7 +114,7 @@ export const RoutesView = createRoutesView({
 `children`:
 
 ```tsx
-createRouteView({
+routeView({
   route: profileRoute,
   view: ProfilePage,
   layout: AppLayout,
@@ -128,8 +128,8 @@ createRouteView({
 import { withLayout } from "@virentia/router-react";
 
 const accountViews = withLayout(AccountLayout, [
-  createRouteView({ route: profileRoute, view: ProfilePage }),
-  createRouteView({ route: securityRoute, view: SecurityPage }),
+  routeView({ route: profileRoute, view: ProfilePage }),
+  routeView({ route: securityRoute, view: SecurityPage }),
 ]);
 ```
 
@@ -146,13 +146,13 @@ function withLayout(
 
 ## Ленивые представления
 
-`createLazyRouteView` регистрирует import компонента как предзагрузчик роута и
+`lazyRouteView` регистрирует import компонента как предзагрузчик роута и
 отрисовывает его через `React.lazy` и `Suspense`:
 
 ```tsx
-import { createLazyRouteView } from "@virentia/router-react";
+import { lazyRouteView } from "@virentia/router-react";
 
-const ProfileView = createLazyRouteView({
+const ProfileView = lazyRouteView({
   route: profileRoute,
   view: () => import("./profile-page"),
   fallback: ProfileSkeleton,

@@ -27,12 +27,12 @@ export function App() {
 
 Reads the provided scope.
 
-Use it when a component needs to pass the scope into boundary helpers such as `allSettled`, caches, or external adapters.
+Use it when a component needs to pass the scope into boundary helpers such as `scoped`, caches, or external adapters.
 
 ```tsx
 function SaveButton({ saved }: { saved: EventCallable<void> }) {
   const scope = useProvidedScope();
-  const onClick = () => allSettled(saved, { scope });
+  const onClick = () => scoped(scope, () => saved());
 
   return <button onClick={onClick}>Save</button>;
 }

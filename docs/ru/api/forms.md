@@ -514,4 +514,4 @@ function zodFieldValidator<Schema extends ZodType>(
 - [Формы](/ru/forms/) - руководство по модели формы.
 - [Поля](/ru/forms/fields) - кастомные поля и `fieldType.extend`.
 - [Валидация](/ru/forms/validation) - жизненный цикл валидаторов.
-- [React](/ru/forms/react) - хуки и обработчики, привязанные к скоупу.
+- [React](/ru/forms/react/) - хуки и обработчики, привязанные к скоупу.

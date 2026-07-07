@@ -65,11 +65,8 @@ reaction({
 ```ts
 const appScope = scope();
 
-await allSettled(queryChanged, {
-  scope: appScope,
-  payload: "virentia",
-});
-await allSettled(submitted, { scope: appScope });
+await scoped(appScope, () => queryChanged("virentia"));
+await scoped(appScope, () => submitted());
 
 scoped(appScope, () => {
   console.log(status.value); // ready

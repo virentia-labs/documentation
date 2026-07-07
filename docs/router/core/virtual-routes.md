@@ -12,7 +12,7 @@ params, and can be rendered — but they are not matched from the address bar.
 The core models this with three helpers built on the same virtual route
 primitive:
 
-- `createVirtualRoute` — a route that you open and close imperatively;
+- `virtualRoute` — a route that you open and close imperatively;
 - `group` — a virtual route that mirrors "any of these routes is open";
 - `chainRoute` — a virtual route that opens only after extra async checks pass.
 
@@ -21,14 +21,14 @@ ordinary routes and are accepted anywhere a `Route` is.
 
 ## Virtual routes
 
-`createVirtualRoute` creates a pathless route driven entirely by its own `open`
+`virtualRoute` creates a pathless route driven entirely by its own `open`
 and `close` events. There is no URL matching and no `beforeOpen`; opening it is
 synchronous.
 
 ```ts
-import { createVirtualRoute } from "@virentia/router";
+import { virtualRoute } from "@virentia/router";
 
-const inviteModal = createVirtualRoute<{ teamId: string }>();
+const inviteModal = virtualRoute<{ teamId: string }>();
 
 inviteModal.open({ teamId: "42" });
 inviteModal.isOpened.value; // true
@@ -70,7 +70,7 @@ By default `params` stores the open payload as-is. A `transformer` derives the
 stored params from the payload — handy for normalizing or enriching input:
 
 ```ts
-const details = createVirtualRoute<{ id: string }, { id: string; source: string }>({
+const details = virtualRoute<{ id: string }, { id: string; source: string }>({
   transformer: ({ id }) => ({ id, source: "virtual" }),
 });
 
@@ -84,7 +84,7 @@ when the virtual route should reflect external loading state (this is how
 
 ```ts
 const isPending = computed(() => loadFx.pending.value);
-const screen = createVirtualRoute({ isPending });
+const screen = virtualRoute({ isPending });
 ```
 
 Virtual routes fit modals, drawers, wizard steps, and any "is this open?" state
@@ -108,7 +108,7 @@ while the user is anywhere in a section, without subscribing to every route
 individually:
 
 ```tsx
-const SettingsLayoutView = createRouteView({
+const SettingsLayoutView = routeView({
   route: settingsArea,
   view: () => (
     <SettingsChrome>
@@ -130,10 +130,10 @@ extra `beforeOpen` work, and opens its own virtual route only when an `openOn`
 signal fires — or stays closed if `cancelOn` fires first.
 
 ```ts
-import { chainRoute, createRoute } from "@virentia/router";
+import { chainRoute, route } from "@virentia/router";
 import { effect, event, reaction } from "@virentia/core";
 
-const profileRoute = createRoute({ path: "/users/:id" });
+const profileRoute = route({ path: "/users/:id" });
 
 const authorized = event<void>();
 const rejected = event<void>();

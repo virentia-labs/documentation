@@ -21,16 +21,16 @@ import {
 
 import {
   chainRoute,
-  createRoute,
-  createRouter,
-  createRouterControls,
-  createVirtualRoute,
+  route,
+  router,
+  routerControls,
+  virtualRoute,
   group,
   historyAdapter,
   is,
   queryAdapter,
   trackQueryFactory,
-  type CreateRouteConfig,
+  type RouteConfig,
   type CreateRouterConfig,
   type HistoryLike,
   type NavigatePayload,
@@ -50,9 +50,9 @@ import {
 } from "@virentia/router";
 
 import {
-  createLazyRouteView,
-  createRouteView,
-  createRoutesView,
+  lazyRouteView,
+  routeView,
+  routesView,
   Link,
   Outlet,
   RouterProvider,
@@ -114,16 +114,16 @@ function convertPath(path: string, mode: "express"): string;
 
 ## Роуты
 
-`createRoute` создаёт роут с путём или роут без пути. Роуты с путём выводят
+`route` создаёт роут с путём или роут без пути. Роуты с путём выводят
 тип параметров из шаблона.
 
 ```ts
-function createRoute<
+function route<
   Path extends string,
   Params extends object | void = ParseUrlParams<Path>,
->(config: CreateRouteConfig<Path>): PathRoute<Params>;
+>(config: RouteConfig<Path>): PathRoute<Params>;
 
-function createRoute<Params extends object | void = void>(
+function route<Params extends object | void = void>(
   config?: {
     parent?: Route<any>;
     beforeOpen?: RouteBeforeOpen<any>[];
@@ -175,27 +175,22 @@ type RouteOpenedPayload<Params> = [Params] extends [void]
 ```
 
 Обработчики `beforeOpen` получают нормализованную нагрузку открытия: параметры
-роута, query-данные и причину активации.
+роута и query-данные.
 
 ```ts
 type RouteBeforeOpen<Params extends object | void = void> =
   | EventCallable<InternalOpenedPayload<Params>>
   | Effect<InternalOpenedPayload<Params>, any, any>
   | ((payload: InternalOpenedPayload<Params>) => unknown | PromiseLike<unknown>);
-
-type RouteActivationCause =
-  | { type: "route.open"; route: Route<any>; id: symbol }
-  | { type: "history"; source: "initial" | "push" | "replace" | "pop" }
-  | { type: "redirect"; from: Route<any>; id: symbol };
 ```
 
 ## Роутер
 
-`createRouter` связывает роуты с шаблонами путей и подключает их к контролам
+`router` связывает роуты с шаблонами путей и подключает их к контролам
 роутера.
 
 ```ts
-function createRouter(config: CreateRouterConfig): Router;
+function router(config: CreateRouterConfig): Router;
 
 interface CreateRouterConfig {
   base?: string;
@@ -239,18 +234,17 @@ interface NavigatePayload {
   path?: string;
   query?: Query;
   replace?: boolean;
-  causedBy?: RouteActivationCause;
 }
 ```
 
 ## Контролы роутера
 
-`createRouterControls` отдаёт низкоуровневые юниты, на которых строится
-`createRouter`. Они полезны, когда один источник history нужен нескольким
+`routerControls` отдаёт низкоуровневые юниты, на которых строится
+`router`. Они полезны, когда один источник history нужен нескольким
 роутерам.
 
 ```ts
-function createRouterControls(): RouterControls;
+function routerControls(): RouterControls;
 
 interface RouterControls {
   readonly history: Store<RouterAdapter | null>;
@@ -333,6 +327,10 @@ interface QueryTrackerConfig<Parameters> {
 interface QueryTracker<Parameters> {
   readonly entered: Event<Parameters>;
   readonly exited: Event<void>;
+  readonly enteredExternally: Event<Parameters>;
+  readonly enteredProgrammatically: Event<Parameters>;
+  readonly exitedExternally: Event<void>;
+  readonly exitedProgrammatically: Event<void>;
   readonly enter: EventCallable<Parameters>;
   readonly exit: EventCallable<{ ignoreParams: string[] } | void>;
 }
@@ -347,7 +345,7 @@ interface QueryTracker<Parameters> {
 Виртуальные роуты описывают производное состояние без шаблона пути.
 
 ```ts
-function createVirtualRoute<T = void, TransformerResult = void>(
+function virtualRoute<T = void, TransformerResult = void>(
   options?: {
     isPending?: Store<boolean>;
     transformer?: (payload: T) => TransformerResult;
@@ -429,15 +427,15 @@ function RouterProvider(props: {
 Представления описывают, какой компонент относится к какому роуту.
 
 ```ts
-function createRouteView<Params extends object | void = void>(
+function routeView<Params extends object | void = void>(
   props: CreateRouteViewProps<Params>,
 ): RouteView;
 
-function createLazyRouteView<Params extends object | void = void>(
+function lazyRouteView<Params extends object | void = void>(
   props: CreateLazyRouteViewProps<Params>,
 ): RouteView;
 
-function createRoutesView(props: CreateRoutesViewProps): ComponentType;
+function routesView(props: CreateRoutesViewProps): ComponentType;
 
 interface CreateRouteViewProps<Params extends object | void = void> {
   route: Route<Params> | Router | VirtualRoute<any, any>;

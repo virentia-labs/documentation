@@ -4,7 +4,7 @@ title: Bottom tabs-навигатор
 
 # Bottom tabs-навигатор
 
-`createVirentiaBottomTabsNavigator` строит навигатор
+`bottomTabsNavigator` строит навигатор
 `@react-navigation/bottom-tabs` и возвращает компонент `{ Navigator }`. Он
 следует за открытием роутов так же, как
 [stack-навигатор](/ru/router/react-native/stack-navigator), и добавляет одну
@@ -14,12 +14,12 @@ title: Bottom tabs-навигатор
 [обзоре React Native](/ru/router/react-native/).
 
 ```tsx
-import { createVirentiaBottomTabsNavigator } from "@virentia/router-react-native";
-import { router, homeRoute, searchRoute } from "./router";
+import { bottomTabsNavigator } from "@virentia/router-react-native";
+import { appRouter, homeRoute, searchRoute } from "./router";
 import { HomeScreen, SearchScreen } from "./screens";
 
-const { Navigator } = createVirentiaBottomTabsNavigator({
-  router,
+const { Navigator } = bottomTabsNavigator({
+  router: appRouter,
   routes: [
     { route: homeRoute, view: HomeScreen },
     { route: searchRoute, view: SearchScreen },
@@ -46,8 +46,8 @@ const { Navigator } = createVirentiaBottomTabsNavigator({
 статичного payload или функцию для payload, вычисляемого в момент нажатия:
 
 ```tsx
-const { Navigator } = createVirentiaBottomTabsNavigator({
-  router,
+const { Navigator } = bottomTabsNavigator({
+  router: appRouter,
   routes: [
     { route: homeRoute, view: HomeScreen },
     {
@@ -69,10 +69,10 @@ const { Navigator } = createVirentiaBottomTabsNavigator({
 ```
 
 `openPayload` — единственное дополнение к обычному представлению роута; все
-остальное совпадает с `createRouteView`.
+остальное совпадает с `routeView`.
 
 ```ts
-interface VirentiaBottomTabsRouteView extends RouteView {
+interface BottomTabsRouteView extends RouteView {
   openPayload?: unknown | (() => unknown);
 }
 ```
@@ -80,9 +80,9 @@ interface VirentiaBottomTabsRouteView extends RouteView {
 ## Конфигурация
 
 ```ts
-interface VirentiaBottomTabsNavigatorConfig {
+interface BottomTabsNavigatorConfig {
   router: Router;
-  routes: VirentiaBottomTabsRouteView[];
+  routes: BottomTabsRouteView[];
   initialRouteName?: string;
   screenOptions?: BottomTabNavigationOptions;
 }
@@ -91,7 +91,7 @@ interface VirentiaBottomTabsNavigatorConfig {
 | Опция | Тип | Описание |
 | --- | --- | --- |
 | `router` | `Router` | Роутер, которому принадлежат эти вкладки |
-| `routes` | `VirentiaBottomTabsRouteView[]` | Представления роутов, опционально с `openPayload` |
+| `routes` | `BottomTabsRouteView[]` | Представления роутов, опционально с `openPayload` |
 | `initialRouteName` | `string` | Необязательное имя первой вкладки (см. [Имена экранов](/ru/router/react-native/#имена-экранов)) |
 | `screenOptions` | `BottomTabNavigationOptions` | Необязательные опции, применяемые к каждой вкладке |
 

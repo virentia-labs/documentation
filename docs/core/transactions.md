@@ -35,7 +35,7 @@ The useful result is `count + 2`, not two separate UI renders and two separate c
 A transaction starts when a unit is launched:
 
 ```ts
-await allSettled(submitted, { scope: appScope });
+await scoped(appScope, () => submitted());
 ```
 
 The same rule applies to direct unit calls inside an active scope:

@@ -72,7 +72,7 @@ const diagrams: Record<FlowKind, FlowDiagram> = {
     description:
       "Every queued work item carries a payload and a scope, so the graph can update the right state instance.",
     nodes: [
-      node("boundary", 0, 142, "Boundary", ["allSettled", "event call"], "neutral"),
+      node("boundary", 0, 142, "Boundary", ["scoped", "event call"], "neutral"),
       node("event", 250, 142, "event.node", ["receives payload"], "green"),
       node("queue", 500, 142, "Kernel Queue", ["node", "payload", "scope"], "blue"),
       node("reaction", 780, 24, "reaction.node", ["runs rule"], "amber"),

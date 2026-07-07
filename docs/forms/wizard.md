@@ -273,7 +273,7 @@ interface Wizard<Steps, RootForm> {
 ## Next
 
 - [Validation](./validation) - what happens inside `step.form.validate()`.
-- [React](./react) - how to connect a wizard to the UI.
+- [React](/forms/react/) - how to connect a wizard to the UI.
 - [Form model](./form) - why a step can be any form projection.
 - [API reference](/api/forms) - `Wizard`, `WizardStep`, and
   `createWizardForm`.

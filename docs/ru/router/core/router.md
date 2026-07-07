@@ -5,8 +5,8 @@ title: Роутер и history
 # Роутер и history
 
 Роутер регистрирует роуты и связывает их с URL. Он читает текущий location,
-находит подходящие роуты, запускает их `beforeOpen`, обновляет `router.path`,
-`router.query` и `router.activeRoutes`.
+находит подходящие роуты, запускает их `beforeOpen`, обновляет `appRouter.path`,
+`appRouter.query` и `appRouter.activeRoutes`.
 
 Роут может существовать без роутера. Роутер нужен, когда роут должен открываться
 из URL, строить ссылки или реагировать на back/forward.
@@ -14,10 +14,10 @@ title: Роутер и history
 ## Создание роутера
 
 ```ts
-import { createRouter } from "@virentia/router";
+import { router } from "@virentia/router";
 import { homeRoute, profileRoute } from "./routes";
 
-export const router = createRouter({
+export const appRouter = router({
   routes: [homeRoute, profileRoute],
 });
 ```
@@ -51,7 +51,7 @@ interface Router {
 Обычный роутер приложения создается на уровне модуля:
 
 ```ts
-export const router = createRouter({ routes });
+export const appRouter = router({ routes });
 ```
 
 Ему не нужен `owner`: данные живут в Virentia scope, а сам роутер описывает
@@ -60,7 +60,7 @@ export const router = createRouter({ routes });
 `owner` нужен только для роутера, который создается и удаляется во время работы:
 виджет предпросмотра, встроенное приложение, временный экран или тестовое
 мини-приложение. В таком случае `owner` очищает созданный граф, а
-`router.dispose` отписывает history-слушатель.
+`appRouter.dispose` отписывает history-слушатель.
 
 ## Подключение history
 
@@ -70,13 +70,13 @@ export const router = createRouter({ routes });
 import { scoped, scope } from "@virentia/core";
 import { createBrowserHistory } from "history";
 import { historyAdapter } from "@virentia/router";
-import { router } from "./router";
+import { appRouter } from "./router";
 
 const appScope = scope();
 const browserHistory = createBrowserHistory();
 
 await scoped(appScope, () =>
-  router.setHistory(historyAdapter(browserHistory)),
+  appRouter.setHistory(historyAdapter(browserHistory)),
 );
 ```
 
@@ -84,7 +84,7 @@ await scoped(appScope, () =>
 
 ```tsx
 <ScopeProvider scope={appScope}>
-  <RouterProvider router={router} history={historyAdapter(browserHistory)}>
+  <RouterProvider router={appRouter} history={historyAdapter(browserHistory)}>
     <App />
   </RouterProvider>
 </ScopeProvider>
@@ -96,10 +96,9 @@ await scoped(appScope, () =>
 В тестах, серверных загрузчиках и адаптерах фреймворка можно использовать:
 
 ```ts
-await allSettled(router.setHistory, {
-  scope: appScope,
-  payload: historyAdapter(browserHistory),
-});
+await scoped(appScope, () =>
+  appRouter.setHistory(historyAdapter(browserHistory)),
+);
 ```
 
 ## RouterAdapter
@@ -133,42 +132,35 @@ interface RouterAdapter {
 Когда history сообщает новый location, роутер:
 
 1. парсит pathname по шаблонам зарегистрированных роутов;
-2. парсит `search` в `router.query`;
+2. парсит `search` в `appRouter.query`;
 3. запускает предзагрузчики и `beforeOpen` найденных роутов;
 4. открывает родительские роуты и самый глубокий совпавший роут;
 5. закрывает роуты, которые больше не подходят;
-6. записывает список открытых роутов в `router.activeRoutes`.
+6. записывает список открытых роутов в `appRouter.activeRoutes`.
 
-Открытие из браузерной history получает:
+Каждая активация несёт информацию о том, откуда пришло изменение location:
 
-```ts
-{
-  causedBy: { type: "history", source: "initial" | "push" | "replace" | "pop" }
-}
-```
+- `external` — изменение из history: первичная загрузка, `push`/`replace` или
+  `pop` (назад/вперёд). Роутер реагирует на него и запускает guard'ы `beforeOpen`.
+- `programmatic` — эхо инициированной роутером `navigate`/`route.open`, guard'ы
+  которой уже отработали, поэтому активация их пропускает.
 
-Открытие через `route.open` получает:
-
-```ts
-{
-  causedBy: { type: "route.open", route, id }
-}
-```
-
-Это нужно, чтобы `beforeOpen` понимал источник открытия и не выполнялся второй
-раз после клика по `Link`.
+Origin определяется структурно — роутер узнаёт эхо URL, который сам только что
+записал, — а не передаётся через payload. Это не даёт одному и тому же guard'у
+`route.open` сработать дважды после того, как history сообщит о совпадающем
+location.
 
 ## Контролы роутера
 
-`createRouter` строит свою привязку к history, сторы `path`/`query`, команды
+`router` строит свою привязку к history, сторы `path`/`query`, команды
 навигации и отслеживание query поверх более низкоуровневого объекта, который
-называется *контролы роутера*. `createRouterControls` отдает этот объект
+называется *контролы роутера*. `routerControls` отдает этот объект
 напрямую:
 
 ```ts
-import { createRouterControls } from "@virentia/router";
+import { routerControls } from "@virentia/router";
 
-const controls = createRouterControls();
+const controls = routerControls();
 ```
 
 ```ts
@@ -196,19 +188,19 @@ interface RouterControls {
 того чтобы каждый роутер управлял своей подпиской. У `trackQuery` здесь нет
 `forRoutes`, потому что у контролов нет собственной таблицы роутов —
 отслеживание, привязанное к роутам, относится к роутеру. Большинство приложений
-никогда не создают контролы напрямую; `createRouter` делает это за них.
+никогда не создают контролы напрямую; `router` делает это за них.
 
 ## Вложенные роутеры
 
 Вложенный роутер нужен, когда раздел приложения владеет своим поддеревом URL:
 
 ```ts
-const settingsRouter = createRouter({
+const settingsRouter = router({
   base: "/settings",
   routes: [generalRoute, securityRoute],
 });
 
-export const appRouter = createRouter({
+export const appRouter = router({
   routes: [homeRoute, settingsRouter],
 });
 ```

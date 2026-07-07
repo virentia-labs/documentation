@@ -56,10 +56,7 @@ reaction({
 When a lazy unit is launched, Virentia pauses the placeholder branch, waits for the module, connects existing listeners to the real unit, and launches the real unit with the same payload and scope.
 
 ```ts
-await allSettled(chat.opened, {
-  scope: appScope,
-  payload: { chatId: "support" },
-});
+await scoped(appScope, () => chat.opened({ chatId: "support" }));
 ```
 
 ## Loading state
@@ -67,10 +64,7 @@ await allSettled(chat.opened, {
 Every lazy model exposes a `pending` store: `true` while the module is importing, `false` once it is loaded. It is per-scope (like an effect's `pending`), so each scope tracks its own loading.
 
 ```ts
-const loading = allSettled(chat.opened, {
-  scope: appScope,
-  payload: { chatId: "support" },
-});
+const loading = scoped(appScope, () => chat.opened({ chatId: "support" }));
 
 // chat.pending is `true` in appScope while ./chat.model imports
 await loading;

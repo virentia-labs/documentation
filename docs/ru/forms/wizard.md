@@ -276,7 +276,7 @@ interface Wizard<Steps, RootForm> {
 ## Что дальше
 
 - [Валидация](./validation) - что именно происходит при `step.form.validate()`.
-- [React](./react) - как привязать визард к интерфейсу.
+- [React](/ru/forms/react/) - как привязать визард к интерфейсу.
 - [Модель формы](./form) - почему шаг может быть любой проекцией формы.
 - [API-справка](/ru/api/forms) - типы `Wizard`, `WizardStep`,
   `createWizardForm`.

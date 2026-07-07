@@ -15,6 +15,8 @@ The assistant loads every skill's `name` + `description` up front; the full body
 | `virentia-vue` | Rendering models in Vue 3 (mirrors React; stores come back as refs). |
 | `virentia-forms` | `@virentia/forms` — fields, forms, validation, error channels, wizards, zod adapters, React hooks. |
 | `virentia-router` | `@virentia/router` — routes, history, navigation, query tracking, React/RN views; argon-router migration. |
+| `virentia-net` | `@virentia/net-core` — remote-data layer: `query`/`mutation` as effects, `trigger`, concurrency/retry operators, optimistic updates, invalidation. |
+| `virentia-storage` | `@virentia/storage-core` — persist stores into boxes (local, session, query, memory, custom) with two-way sync. |
 | `virentia-effector` | `@virentia/effector` — bridge real Effector units (`associate`, `fool`). |
 | `virentia-inspector` | `@virentia/inspector` — devtools bridge, `connectEffector`, unit naming. |
 

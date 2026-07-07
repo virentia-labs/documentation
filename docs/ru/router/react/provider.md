@@ -28,14 +28,14 @@ import { createBrowserHistory } from "history";
 import { historyAdapter } from "@virentia/router";
 import type { ReactNode } from "react";
 import { appScope } from "./scope";
-import { router } from "./router";
+import { appRouter } from "./router";
 
 const routerHistory = historyAdapter(createBrowserHistory());
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ScopeProvider scope={appScope}>
-      <RouterProvider router={router} history={routerHistory}>
+      <RouterProvider router={appRouter} history={routerHistory}>
         {children}
       </RouterProvider>
     </ScopeProvider>
@@ -49,7 +49,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
 ## Подключение history
 
 Когда вы передаете `history`, `RouterProvider` при монтировании вызывает
-`router.setHistory` в скоупе провайдера. Это обычное место для подключения
+`appRouter.setHistory` в скоупе провайдера. Это обычное место для подключения
 history в приложении, управляемом React.
 
 Если history создается и подключается вне React — в серверном загрузчике, в
@@ -57,13 +57,13 @@ history в приложении, управляемом React.
 `router`:
 
 ```tsx
-<RouterProvider router={router}>
+<RouterProvider router={appRouter}>
   <App />
 </RouterProvider>
 ```
 
 Тогда роутер использует ту history, которая была установлена через
-`router.setHistory` в другом месте. Контракт history-адаптера и не-React-способы
+`appRouter.setHistory` в другом месте. Контракт history-адаптера и не-React-способы
 его подключения описаны в
 [Роутер и history](/ru/router/core/router#подключение-history).
 
@@ -72,5 +72,5 @@ history в приложении, управляемом React.
 [Вложенный роутер](/ru/router/core/router#вложенные-роутеры) отрисовывается со
 своим собственным `RouterProvider` только если поддереву нужен другой роутер в
 контексте. Большинство приложений предоставляют единственный корневой роутер;
-дочерние роутеры, зарегистрированные через `createRouter`, получают history от
+дочерние роутеры, зарегистрированные через `router`, получают history от
 родителя и не нуждаются в собственном провайдере.

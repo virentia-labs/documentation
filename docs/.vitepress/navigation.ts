@@ -52,6 +52,7 @@ const coreEn: DefaultTheme.SidebarItem[] = [
       { text: "Transactions", link: "/core/transactions" },
       { text: "Lazy models", link: "/core/lazy-models" },
       { text: "Scopes", link: "/core/scopes" },
+      { text: "Scope loss", link: "/core/scope-loss" },
       { text: "Dependencies", link: "/core/dependencies" },
       { text: "Owners and cleanup", link: "/core/owners" },
       { text: "Low-level kernel", link: "/core/kernel" },
@@ -72,6 +73,7 @@ const coreRu: DefaultTheme.SidebarItem[] = [
       { text: "Транзакции", link: "/ru/core/transactions" },
       { text: "Ленивые модели", link: "/ru/core/lazy-models" },
       { text: "Скоупы", link: "/ru/core/scopes" },
+      { text: "Потеря scope", link: "/ru/core/scope-loss" },
       { text: "Зависимости", link: "/ru/core/dependencies" },
       { text: "Владельцы и очистка", link: "/ru/core/owners" },
       { text: "Низкоуровневое ядро", link: "/ru/core/kernel" },
@@ -95,7 +97,7 @@ const inspectorRu: DefaultTheme.SidebarItem[] = [
 
 const formsEn: DefaultTheme.SidebarItem[] = [
   {
-    text: "Forms",
+    text: "Core",
     items: [
       { text: "Overview", link: "/forms/" },
       { text: "Field model", link: "/forms/fields" },
@@ -107,15 +109,34 @@ const formsEn: DefaultTheme.SidebarItem[] = [
       { text: "Shape fields", link: "/forms/shape-fields" },
       { text: "Array fields", link: "/forms/array-fields" },
       { text: "Wizard forms", link: "/forms/wizard" },
-      { text: "React", link: "/forms/react" },
       { text: "Schema adapters", link: "/forms/adapters" },
+    ],
+  },
+  {
+    text: "React",
+    items: [
+      { text: "Overview", link: "/forms/react/" },
+      { text: "useField", link: "/forms/react/use-field" },
+      { text: "useForm", link: "/forms/react/use-form" },
+      { text: "useWizard", link: "/forms/react/use-wizard" },
+    ],
+  },
+  {
+    text: "Effector",
+    items: [
+      { text: "Overview", link: "/forms/effector/" },
+      { text: "Field", link: "/forms/effector/field" },
+      { text: "Array field", link: "/forms/effector/array-field" },
+      { text: "Shape field", link: "/forms/effector/shape-field" },
+      { text: "Custom field", link: "/forms/effector/custom-field" },
+      { text: "Recipes", link: "/forms/effector/recipes" },
     ],
   },
 ];
 
 const formsRu: DefaultTheme.SidebarItem[] = [
   {
-    text: "Формы",
+    text: "Ядро",
     items: [
       { text: "Обзор", link: "/ru/forms/" },
       { text: "Модель поля", link: "/ru/forms/fields" },
@@ -127,8 +148,27 @@ const formsRu: DefaultTheme.SidebarItem[] = [
       { text: "Shape-поля", link: "/ru/forms/shape-fields" },
       { text: "Array-поля", link: "/ru/forms/array-fields" },
       { text: "Визард-формы", link: "/ru/forms/wizard" },
-      { text: "React", link: "/ru/forms/react" },
       { text: "Адаптеры схем", link: "/ru/forms/adapters" },
+    ],
+  },
+  {
+    text: "React",
+    items: [
+      { text: "Обзор", link: "/ru/forms/react/" },
+      { text: "useField", link: "/ru/forms/react/use-field" },
+      { text: "useForm", link: "/ru/forms/react/use-form" },
+      { text: "useWizard", link: "/ru/forms/react/use-wizard" },
+    ],
+  },
+  {
+    text: "Effector",
+    items: [
+      { text: "Обзор", link: "/ru/forms/effector/" },
+      { text: "Поле", link: "/ru/forms/effector/field" },
+      { text: "Array-поле", link: "/ru/forms/effector/array-field" },
+      { text: "Shape-поле", link: "/ru/forms/effector/shape-field" },
+      { text: "Кастомное поле", link: "/ru/forms/effector/custom-field" },
+      { text: "Рецепты", link: "/ru/forms/effector/recipes" },
     ],
   },
 ];
@@ -261,6 +301,28 @@ const vueRu: DefaultTheme.SidebarItem[] = [
   },
 ];
 
+const storageEn: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Storage",
+    items: [
+      { text: "Overview", link: "/storage/" },
+      { text: "Storage boxes", link: "/storage/boxes" },
+      { text: "Persistence", link: "/storage/persist" },
+    ],
+  },
+];
+
+const storageRu: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Storage",
+    items: [
+      { text: "Обзор", link: "/ru/storage/" },
+      { text: "Боксы хранилищ", link: "/ru/storage/boxes" },
+      { text: "Сохранение", link: "/ru/storage/persist" },
+    ],
+  },
+];
+
 const effectorEn: DefaultTheme.SidebarItem[] = [
   {
     text: "Effector compatibility",
@@ -279,6 +341,50 @@ const effectorRu: DefaultTheme.SidebarItem[] = [
       { text: "Обзор", link: "/ru/effector/" },
       { text: "Операторы", link: "/ru/effector/operators" },
       { text: "Скоупы и сериализация", link: "/ru/effector/scopes" },
+    ],
+  },
+];
+
+const mutableEn: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Mutable",
+    items: [{ text: "Overview", link: "/mutable/" }],
+  },
+];
+
+const mutableRu: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Mutable",
+    items: [{ text: "Обзор", link: "/ru/mutable/" }],
+  },
+];
+
+const netEn: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Net",
+    items: [
+      { text: "Overview", link: "/net/" },
+      { text: "Query", link: "/net/query" },
+      { text: "Mutation", link: "/net/mutation" },
+      { text: "Triggers", link: "/net/triggers" },
+      { text: "Operators", link: "/net/operators" },
+      { text: "Adapters", link: "/net/adapters" },
+      { text: "Defaults", link: "/net/defaults" },
+    ],
+  },
+];
+
+const netRu: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Net",
+    items: [
+      { text: "Обзор", link: "/ru/net/" },
+      { text: "Query", link: "/ru/net/query" },
+      { text: "Mutation", link: "/ru/net/mutation" },
+      { text: "Триггеры", link: "/ru/net/triggers" },
+      { text: "Операторы", link: "/ru/net/operators" },
+      { text: "Адаптеры", link: "/ru/net/adapters" },
+      { text: "Дефолты", link: "/ru/net/defaults" },
     ],
   },
 ];
@@ -320,11 +426,13 @@ const apiEn: DefaultTheme.SidebarItem[] = [
     text: "API",
     items: [
       { text: "@virentia/core", link: "/api/core" },
+      { text: "@virentia/net-core", link: "/api/net" },
       { text: "@virentia/react", link: "/api/react" },
       { text: "@virentia/vue", link: "/api/vue" },
       { text: "@virentia/effector", link: "/api/effector" },
       { text: "@virentia/forms", link: "/api/forms" },
       { text: "@virentia/router", link: "/api/router" },
+      { text: "@virentia/storage-core", link: "/api/storage" },
     ],
   },
 ];
@@ -334,11 +442,13 @@ const apiRu: DefaultTheme.SidebarItem[] = [
     text: "API",
     items: [
       { text: "@virentia/core", link: "/ru/api/core" },
+      { text: "@virentia/net-core", link: "/ru/api/net" },
       { text: "@virentia/react", link: "/ru/api/react" },
       { text: "@virentia/vue", link: "/ru/api/vue" },
       { text: "@virentia/effector", link: "/ru/api/effector" },
       { text: "@virentia/forms", link: "/ru/api/forms" },
       { text: "@virentia/router", link: "/ru/api/router" },
+      { text: "@virentia/storage-core", link: "/ru/api/storage" },
     ],
   },
 ];
@@ -368,7 +478,10 @@ export const enSidebar: DefaultTheme.Sidebar = {
   "/router/": routerEn,
   "/react/": reactEn,
   "/vue/": vueEn,
+  "/storage/": storageEn,
   "/effector/": effectorEn,
+  "/mutable/": mutableEn,
+  "/net/": netEn,
   "/recipes/": recipesEn,
   "/api/": apiEn,
   "/skills/": skillsEn,
@@ -382,7 +495,10 @@ export const ruSidebar: DefaultTheme.Sidebar = {
   "/ru/router/": routerRu,
   "/ru/react/": reactRu,
   "/ru/vue/": vueRu,
+  "/ru/storage/": storageRu,
   "/ru/effector/": effectorRu,
+  "/ru/mutable/": mutableRu,
+  "/ru/net/": netRu,
   "/ru/recipes/": recipesRu,
   "/ru/api/": apiRu,
   "/ru/skills/": skillsRu,
@@ -423,7 +539,9 @@ export const docsSections: DocsSection[] = [
         { text: "Fields", link: "/forms/fields" },
         { text: "Form", link: "/forms/form" },
         { text: "Validation", link: "/forms/validation" },
-        { text: "React", link: "/forms/react" },
+        { text: "Adapters", link: "/forms/adapters" },
+        { text: "React", link: "/forms/react/" },
+        { text: "Effector", link: "/forms/effector/" },
         { text: "API", link: "/api/forms" },
       ],
       ru: [
@@ -431,7 +549,9 @@ export const docsSections: DocsSection[] = [
         { text: "Поля", link: "/ru/forms/fields" },
         { text: "Форма", link: "/ru/forms/form" },
         { text: "Валидация", link: "/ru/forms/validation" },
-        { text: "React", link: "/ru/forms/react" },
+        { text: "Адаптеры", link: "/ru/forms/adapters" },
+        { text: "React", link: "/ru/forms/react/" },
+        { text: "Effector", link: "/ru/forms/effector/" },
         { text: "API", link: "/ru/api/forms" },
       ],
     },
@@ -521,6 +641,64 @@ export const docsSections: DocsSection[] = [
         { text: "Модели", link: "/ru/vue/models" },
         { text: "Кеш", link: "/ru/vue/cache" },
         { text: "API", link: "/ru/api/vue" },
+      ],
+    },
+  },
+  {
+    id: "storage",
+    label: { en: "Storage", ru: "Storage" },
+    link: { en: "/storage/", ru: "/ru/storage/" },
+    match: { en: ["/storage/"], ru: ["/ru/storage/"] },
+    nav: {
+      en: [
+        { text: "Overview", link: "/storage/" },
+        { text: "Boxes", link: "/storage/boxes" },
+        { text: "Persistence", link: "/storage/persist" },
+        { text: "API", link: "/api/storage" },
+      ],
+      ru: [
+        { text: "Обзор", link: "/ru/storage/" },
+        { text: "Боксы", link: "/ru/storage/boxes" },
+        { text: "Сохранение", link: "/ru/storage/persist" },
+        { text: "API", link: "/ru/api/storage" },
+      ],
+    },
+  },
+  {
+    id: "mutable",
+    label: { en: "Mutable", ru: "Mutable" },
+    link: { en: "/mutable/", ru: "/ru/mutable/" },
+    match: { en: ["/mutable/"], ru: ["/ru/mutable/"] },
+    nav: {
+      en: [{ text: "Overview", link: "/mutable/" }],
+      ru: [{ text: "Обзор", link: "/ru/mutable/" }],
+    },
+  },
+  {
+    id: "net",
+    label: { en: "Net", ru: "Net" },
+    link: { en: "/net/", ru: "/ru/net/" },
+    match: { en: ["/net/"], ru: ["/ru/net/"] },
+    nav: {
+      en: [
+        { text: "Overview", link: "/net/" },
+        { text: "Query", link: "/net/query" },
+        { text: "Mutation", link: "/net/mutation" },
+        { text: "Triggers", link: "/net/triggers" },
+        { text: "Operators", link: "/net/operators" },
+        { text: "Adapters", link: "/net/adapters" },
+        { text: "Defaults", link: "/net/defaults" },
+        { text: "API", link: "/api/net" },
+      ],
+      ru: [
+        { text: "Обзор", link: "/ru/net/" },
+        { text: "Query", link: "/ru/net/query" },
+        { text: "Mutation", link: "/ru/net/mutation" },
+        { text: "Триггеры", link: "/ru/net/triggers" },
+        { text: "Операторы", link: "/ru/net/operators" },
+        { text: "Адаптеры", link: "/ru/net/adapters" },
+        { text: "Дефолты", link: "/ru/net/defaults" },
+        { text: "API", link: "/ru/api/net" },
       ],
     },
   },

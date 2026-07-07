@@ -513,4 +513,4 @@ function zodFieldValidator<Schema extends ZodType>(
 - [Forms](/forms/) - guided form model docs.
 - [Fields](/forms/fields) - custom fields and `fieldType.extend`.
 - [Validation](/forms/validation) - validator lifecycle.
-- [React](/forms/react) - hooks and scope-aware handlers.
+- [React](/forms/react/) - hooks and scope-aware handlers.

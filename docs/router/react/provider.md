@@ -28,14 +28,14 @@ import { createBrowserHistory } from "history";
 import { historyAdapter } from "@virentia/router";
 import type { ReactNode } from "react";
 import { appScope } from "./scope";
-import { router } from "./router";
+import { appRouter } from "./router";
 
 const routerHistory = historyAdapter(createBrowserHistory());
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ScopeProvider scope={appScope}>
-      <RouterProvider router={router} history={routerHistory}>
+      <RouterProvider router={appRouter} history={routerHistory}>
         {children}
       </RouterProvider>
     </ScopeProvider>
@@ -48,7 +48,7 @@ React renders from.
 
 ## Attaching history
 
-When you pass `history`, `RouterProvider` calls `router.setHistory` on mount in
+When you pass `history`, `RouterProvider` calls `appRouter.setHistory` on mount in
 the provider's scope. This is the usual place to connect history in a
 React-driven app.
 
@@ -56,13 +56,13 @@ If history is created and attached outside React — in a server loader, a start
 command, or a test — omit the prop and pass only `router`:
 
 ```tsx
-<RouterProvider router={router}>
+<RouterProvider router={appRouter}>
   <App />
 </RouterProvider>
 ```
 
 The router then uses whatever history was set through
-`router.setHistory` elsewhere. See
+`appRouter.setHistory` elsewhere. See
 [Router and history](/router/core/router#connecting-history) for the history
 adapter contract and the non-React ways to attach it.
 
@@ -70,5 +70,5 @@ adapter contract and the non-React ways to attach it.
 
 A [nested router](/router/core/router#nested-routers) is rendered with its own
 `RouterProvider` only if a subtree needs a different router in context. Most apps
-provide a single root router; child routers registered through `createRouter`
+provide a single root router; child routers registered through `router`
 receive history from their parent and do not need their own provider.

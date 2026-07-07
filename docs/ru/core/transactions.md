@@ -35,7 +35,7 @@ reaction({
 Транзакция начинается при запуске юнита:
 
 ```ts
-await allSettled(submitted, { scope: appScope });
+await scoped(appScope, () => submitted());
 ```
 
 То же правило работает для прямых вызовов юнитов внутри активного scope:

@@ -32,7 +32,7 @@ export function App() {
 ```tsx
 function SaveButton({ saved }: { saved: EventCallable<void> }) {
   const scope = useProvidedScope();
-  const onClick = () => allSettled(saved, { scope });
+  const onClick = () => scoped(scope, () => saved());
 
   return <button onClick={onClick}>Save</button>;
 }

@@ -16,10 +16,10 @@ other models, and rendered by one or more UI adapters.
 Routes usually live at module level when the app shape is stable:
 
 ```ts
-import { createRoute } from "@virentia/router";
+import { route } from "@virentia/router";
 
-export const homeRoute = createRoute({ path: "/" });
-export const profileRoute = createRoute({
+export const homeRoute = route({ path: "/" });
+export const profileRoute = route({
   path: "/users/:id<number>",
 });
 ```
@@ -80,7 +80,7 @@ profileRoute.open({
 ```
 
 `query` is merged into the URL navigation request. It is not stored in
-`route.params`; router-level query state lives in `router.query`.
+`route.params`; router-level query state lives in `appRouter.query`.
 
 ## beforeOpen
 
@@ -89,17 +89,17 @@ authorization checks, data preloading, redirects, or analytics that must happen
 before activation.
 
 ```ts
-import { createRoute } from "@virentia/router";
+import { route } from "@virentia/router";
 import { effect } from "@virentia/core";
 
 const loadProfileFx = effect(async ({ params }: { params: { id: number } }) => {
   return fetch(`/api/users/${params.id}`).then((response) => response.json());
 });
 
-export const profileRoute = createRoute({
+export const profileRoute = route({
   path: "/users/:id<number>",
   beforeOpen: [
-    ({ params, query, causedBy }) => {
+    ({ params, query }) => {
       if (!params) return;
 
       return loadProfileFx({ params });
@@ -115,13 +115,12 @@ type BeforeOpenPayload<Params> = {
   params?: Params;
   query?: Query;
   replace?: boolean;
-  causedBy?: RouteActivationCause;
 };
 ```
 
-When `route.open` writes history, the later history activation is marked with
-`causedBy: { type: "route.open", ... }`. The same route does not run the same
-guard a second time for that activation.
+When `route.open` writes history, the later history activation is recognized as
+the router's own echo (a `programmatic` origin) and skips `beforeOpen`, so the
+same guard does not run a second time for that activation.
 
 ## Lifecycle Events
 
@@ -156,8 +155,8 @@ only on the server. `isPending` is convenient for route-level loading UI.
 A route can have a parent. Opening a child opens the parent model too:
 
 ```ts
-export const settingsRoute = createRoute({ path: "/settings" });
-export const securityRoute = createRoute({
+export const settingsRoute = route({ path: "/settings" });
+export const securityRoute = route({
   path: "/security",
   parent: settingsRoute,
 });
@@ -169,13 +168,13 @@ open together.
 
 ## Pathless Routes
 
-`createRoute()` without a path creates a pathless route. It can still be opened,
+`route()` without a path creates a pathless route. It can still be opened,
 observed, grouped, or rendered, but a router cannot build a URL for it unless it
 is registered with an explicit path (see
 [Router and history](/router/core/router#registering-routes)).
 
 ```ts
-const modalRoute = createRoute<{ id: string }>();
+const modalRoute = route<{ id: string }>();
 ```
 
 For state that behaves like a route but is not part of URL matching — modals,

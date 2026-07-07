@@ -17,10 +17,10 @@ and browser navigation need a registered router.
 The router is usually declared next to the route declarations:
 
 ```ts
-import { createRouter } from "@virentia/router";
+import { router } from "@virentia/router";
 import { homeRoute, profileRoute } from "./routes";
 
-export const router = createRouter({
+export const appRouter = router({
   routes: [homeRoute, profileRoute],
 });
 ```
@@ -54,7 +54,7 @@ also includes routes from nested routers.
 Application routers are normally static graph objects:
 
 ```ts
-export const router = createRouter({ routes });
+export const appRouter = router({ routes });
 ```
 
 They do not need an `owner` by default. Values live in a scope; the router model
@@ -63,7 +63,7 @@ itself describes the stable app shape.
 `owner` is only needed when the router is created for a temporary runtime scenario:
 embedded preview, disposable widget, cached screen instance, or test helper that
 creates and destroys a whole mini-app. In those cases the owner should dispose
-the temporary graph, and `router.dispose` should release the history
+the temporary graph, and `appRouter.dispose` should release the history
 subscription.
 
 ## Connecting History
@@ -75,13 +75,13 @@ creation and pass a structural adapter:
 import { scoped, scope } from "@virentia/core";
 import { createBrowserHistory } from "history";
 import { historyAdapter } from "@virentia/router";
-import { router } from "./router";
+import { appRouter } from "./router";
 
 const appScope = scope();
 const browserHistory = createBrowserHistory();
 
 await scoped(appScope, () =>
-  router.setHistory(historyAdapter(browserHistory)),
+  appRouter.setHistory(historyAdapter(browserHistory)),
 );
 ```
 
@@ -89,7 +89,7 @@ In React, the provider is usually the boundary:
 
 ```tsx
 <ScopeProvider scope={appScope}>
-  <RouterProvider router={router} history={historyAdapter(browserHistory)}>
+  <RouterProvider router={appRouter} history={historyAdapter(browserHistory)}>
     <App />
   </RouterProvider>
 </ScopeProvider>
@@ -98,7 +98,7 @@ In React, the provider is usually the boundary:
 `setHistory` captures the current Virentia scope. Later callbacks from
 `history.listen` return to the same scope before they update router stores.
 
-`allSettled(router.setHistory, { scope, payload })` is useful in tests, server
+`scoped(scope, () => appRouter.setHistory(payload))` is useful in tests, server
 loaders, commands, and framework adapters where the boundary should be explicit.
 
 ## History Adapter Type
@@ -132,42 +132,34 @@ on Virentia router adapter types, not create history internally.
 When history changes, the router:
 
 1. parses the path against registered route templates;
-2. parses query string into `router.query`;
+2. parses query string into `appRouter.query`;
 3. runs route preloaders and `beforeOpen`;
 4. opens matching parent and child routes;
 5. closes routes that no longer match;
-6. writes `router.activeRoutes`.
+6. writes `appRouter.activeRoutes`.
 
-Direct URL and browser navigation activations carry:
+Each activation carries where the location change came from:
 
-```ts
-{
-  causedBy: { type: "history", source: "initial" | "push" | "replace" | "pop" }
-}
-```
+- `external` — a history-driven change: initial load, `push`/`replace`, or a
+  back/forward `pop`. The router reacts to it and runs `beforeOpen` guards.
+- `programmatic` — the echo of a router-initiated `navigate`/`route.open` whose
+  guards already ran, so activation skips them.
 
-Opening a route programmatically carries:
-
-```ts
-{
-  causedBy: { type: "route.open", route, id }
-}
-```
-
-That distinction lets guards know why the activation happened and prevents the
+The origin is classified structurally — the router recognizes the history echo
+of the URL it just wrote — not threaded through the payload. This prevents the
 same `route.open` guard from running twice after history reports the matching
 location.
 
 ## Router Controls
 
-`createRouter` builds its history binding, `path`/`query` stores, navigation
+`router` builds its history binding, `path`/`query` stores, navigation
 commands, and query tracking on top of a lower-level object called *router
-controls*. `createRouterControls` exposes that object directly:
+controls*. `routerControls` exposes that object directly:
 
 ```ts
-import { createRouterControls } from "@virentia/router";
+import { routerControls } from "@virentia/router";
 
-const controls = createRouterControls();
+const controls = routerControls();
 ```
 
 ```ts
@@ -194,7 +186,7 @@ Controls are useful when several routers must share one history source: build on
 controls object and call `setHistory` on it once, instead of letting each router
 manage its own subscription. The `trackQuery` here has no `forRoutes`, because
 controls have no route table of their own — route-scoped tracking belongs on a
-router. Most applications never construct controls directly; `createRouter` does
+router. Most applications never construct controls directly; `router` does
 it for them.
 
 ## Nested Routers
@@ -203,12 +195,12 @@ A nested router fits a feature that owns a URL subtree and should keep its route
 table close to the feature:
 
 ```ts
-const settingsRouter = createRouter({
+const settingsRouter = router({
   base: "/settings",
   routes: [generalRoute, securityRoute],
 });
 
-export const appRouter = createRouter({
+export const appRouter = router({
   routes: [homeRoute, settingsRouter],
 });
 ```

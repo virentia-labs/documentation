@@ -84,7 +84,7 @@ While `first()` is called, the kernel is already inside a node. Virentia creates
 Graph edges still use the current drain queue. A node can enqueue downstream work through `node.next` or `ctx.launch`.
 
 ```ts
-const gate = createNode((ctx) => {
+const gate = node((ctx) => {
   ctx.stop();
   ctx.launch(nextNode, "value");
 });
@@ -162,7 +162,7 @@ Warnings about read-after-write between sibling reactions and several sibling wr
 
 ## Boundaries And Scope Context
 
-`allSettled(unit, { scope })` is the cleanest boundary because scope is explicit. It creates graph work with the given scope and waits until async graph work settles.
+Running a unit inside `scoped(scope, () => unit(payload))` is the cleanest boundary because the scope is explicit. It runs the unit's graph work in the given scope, and the returned promise waits until the async graph work it triggers settles.
 
 `scoped(scope, fn)` is a short execution frame. It puts the scope into the current execution context so store reads and writes can happen in plain code. When the callback returns, the previous scope context is restored.
 

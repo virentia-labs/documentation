@@ -85,5 +85,5 @@ open command, already scoped to the provider's router. `Link` is implemented on
 top of `useLink` — reach for the hook only when you need a non-anchor element.
 
 The full command semantics (`route.open` vs `router.navigate`, `replace`, and
-boundaries like `allSettled`) are described in
+boundaries like `scoped`) are described in
 [Navigation](/router/core/navigation).

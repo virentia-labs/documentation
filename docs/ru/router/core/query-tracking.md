@@ -4,11 +4,11 @@ title: Отслеживание query
 
 # Отслеживание query
 
-`router.trackQuery` связывает query-параметры URL с событиями модели. Это нужно,
+`appRouter.trackQuery` связывает query-параметры URL с событиями модели. Это нужно,
 когда часть интерфейса хранится в строке запроса: диалог, фильтр, вкладка,
 сортировка или состояние встроенного виджета.
 
-`router.query` подходит для прямого чтения. `router.trackQuery` нужен, когда
+`appRouter.query` подходит для прямого чтения. `appRouter.trackQuery` нужен, когда
 вход или выход из query-состояния должен запускать код модели.
 
 ## API трекера
@@ -17,6 +17,10 @@ title: Отслеживание query
 interface QueryTracker<Parameters> {
   entered: Event<Parameters>;
   exited: Event<void>;
+  enteredExternally: Event<Parameters>;
+  enteredProgrammatically: Event<Parameters>;
+  exitedExternally: Event<void>;
+  exitedProgrammatically: Event<void>;
   enter: EventCallable<Parameters>;
   exit: EventCallable<{ ignoreParams: string[] } | void>;
 }
@@ -40,7 +44,7 @@ inline-схему.
 Частый сценарий — диалог, который открывается через query:
 
 ```ts
-const inviteDialog = router.trackQuery({
+const inviteDialog = appRouter.trackQuery({
   forRoutes: [teamRoute],
   parameters: {
     safeParse(query) {
@@ -68,7 +72,7 @@ inviteDialog.exit();
 Фильтры удобно читать из query, чтобы перезагрузка страницы сохраняла состояние:
 
 ```ts
-const issueFilter = router.trackQuery({
+const issueFilter = appRouter.trackQuery({
   forRoutes: [issuesRoute],
   parameters: {
     safeParse(query) {
@@ -119,7 +123,7 @@ inviteDialog.exit({ ignoreParams: ["tab", "sort"] });
 ```ts
 const refreshed = event<void>();
 
-const preview = router.trackQuery({
+const preview = appRouter.trackQuery({
   check: refreshed,
   parameters: previewSchema,
 });
@@ -127,3 +131,26 @@ const preview = router.trackQuery({
 
 Это полезно, если парсер дорогой или host-страница меняет query часто, а модель
 не должна реагировать на каждое изменение.
+
+## Origin: внешние и программные изменения
+
+`entered`/`exited` срабатывают на любой переход. Когда важен источник изменения,
+каждое из них разделено по origin:
+
+- `enteredExternally` / `exitedExternally` — query изменился снаружи: первичная
+  загрузка, назад/вперёд или вручную отредактированный URL.
+- `enteredProgrammatically` / `exitedProgrammatically` — query изменил сам роутер:
+  через `enter`/`exit` либо `navigate`/`route.open`.
+
+Origin определяется структурно: роутер узнаёт history-эхо URL, который сам только
+что записал. Ничего не передаётся через payload.
+
+```ts
+const inviteDialog = appRouter.trackQuery({ forRoutes: [teamRoute], parameters });
+
+// диалог открыт по ссылке или кнопкой назад/вперёд:
+reaction({ on: inviteDialog.enteredExternally, run: syncFromUrl });
+
+// приложение открыло его само:
+reaction({ on: inviteDialog.enteredProgrammatically, run: focusFirstField });
+```

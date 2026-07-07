@@ -56,10 +56,7 @@ reaction({
 Когда запускается lazy-юнит, Virentia ставит ветку с подставным юнитом на паузу, ждет загрузки модуля, переносит уже подключенные реакции на настоящий юнит и запускает его с тем же payload и scope.
 
 ```ts
-await allSettled(chat.opened, {
-  scope: appScope,
-  payload: { chatId: "support" },
-});
+await scoped(appScope, () => chat.opened({ chatId: "support" }));
 ```
 
 ## Состояние загрузки
@@ -67,10 +64,7 @@ await allSettled(chat.opened, {
 У каждой ленивой модели есть стор `pending`: `true`, пока модуль импортируется, и `false` после загрузки. Он работает по scope (как `pending` у эффекта) — каждый scope отслеживает свою загрузку.
 
 ```ts
-const loading = allSettled(chat.opened, {
-  scope: appScope,
-  payload: { chatId: "support" },
-});
+const loading = scoped(appScope, () => chat.opened({ chatId: "support" }));
 
 // chat.pending равен `true` в appScope, пока импортируется ./chat.model
 await loading;
