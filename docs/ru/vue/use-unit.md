@@ -52,6 +52,61 @@ const { count, incremented, reset } = useUnit({
 const [count, incremented] = useUnit([counter.count, counter.incremented] as const);
 ```
 
+## Кастомные shape через `@@shape`
+
+Простую запись юнитов `useUnit` читает без всякой помощи. Свойство `@@shape` нужно для случая, когда объект несёт ещё и **не-юниты** — вспомогательные методы, конфиг, приватные поля, — а привязать хочется только часть. Объект объявляет свои привязываемые юниты через `@@shape`, и `useUnit` идёт по этому объявлению, а не перебирает все ключи, поэтому остальное остаётся нетронутым.
+
+Создавайте такой объект **один раз** — в фабрике модели или в модульной области, но не в setup, потому что его юниты должны быть стабильны:
+
+```ts
+import { SHAPE, useUnit } from "@virentia/vue";
+
+function createCounter() {
+  const count = store(0);
+  const incremented = event<number>();
+  reaction({ on: incremented, run: (n) => (count.value += n) });
+
+  return {
+    count,
+    incremented,
+    isZero: () => count.value === 0, // метод, а не юнит
+    [SHAPE]: { count, incremented }, // привязываем только юниты
+  };
+}
+
+const counter = createCounter();
+
+// В setup: `isZero` не привязывается, только объявленные юниты. `count` — это ref.
+const { count, incremented } = useUnit(counter);
+```
+
+Объявление — это обычно сам объект shape. Также принимается форма **функции**, возвращающей shape, — на случай, когда shape выводится из самого объекта:
+
+```ts
+const source = {
+  count,
+  [SHAPE]() {
+    return { count: this.count };
+  },
+};
+```
+
+Shape **вкладываются на любую глубину**: членом shape может быть либо простая запись юнитов, либо ещё один источник с `@@shape`, и `useUnit` разрешает всё дерево за один вызов — сторы на любом уровне возвращаются как ref.
+
+```ts
+const dashboard = {
+  [SHAPE]: {
+    header: { title: header.title }, // простая вложенная запись
+    counter: createCounter(), // вложенный источник @@shape
+  },
+};
+
+const { header, counter } = useUnit(dashboard);
+// header.title.value, counter.count.value, counter.incremented(1)
+```
+
+Тот же протокол работает и для поля модели, прочитанного через `useModel` или `component`: поле, объявляющее `@@shape`, попадает во view как свои привязанные юниты, а маркер наружу не утекает. См. [Вложенные модели с `@@shape`](/ru/vue/models#вложенные-модели-с-shape).
+
 ## Эффекты и pending
 
 `effect.pending` — это стор, поэтому он становится ref. Он публикуется сразу — вне транзакции — так что кнопка блокируется в момент старта эффекта.

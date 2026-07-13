@@ -70,8 +70,9 @@ export const RoutesView = routesView({
 
 ```ts
 interface CreateRoutesViewProps {
-  routes: RouteView[];
+  routes: (RouteView | RouteViewGroup)[];
   otherwise?: ComponentType;
+  layout?: LayoutComponent;
 }
 ```
 
@@ -140,9 +141,74 @@ function withLayout(
 ): RouteView[];
 ```
 
-Используйте `layout` для разовой обертки и `withLayout`, когда несколько
-соседних представлений делят общее обрамление. Родительский роут с `Outlet`
-подходит лучше, когда сама обертка соответствует роуту с собственным состоянием.
+### Layout у routesView
+
+`routesView` тоже принимает `layout`. В отличие от `layout` у отдельного
+представления, он оборачивает весь вывод `routesView`, поэтому монтируется один
+раз и остаётся смонтированным при смене роутов — перемонтируется только
+внутреннее представление. `otherwise` тоже отрисовывается внутри него:
+
+```tsx
+export const RoutesView = routesView({
+  routes: [OverviewView, ReportsView],
+  layout: AppShell,
+  otherwise: NotFoundPage,
+});
+```
+
+### routeViewGroup
+
+`withLayout` даёт каждому представлению собственную копию лейаута, поэтому
+переключение между ними **перемонтирует** лейаут и теряет его состояние.
+`routeViewGroup` разделяет один лейаут между несколькими представлениями: он
+объединяет их роуты в [`group`](/ru/router/core/virtual-routes#сгруппированные-роуты) и несёт
+общий лейаут. Сам он ничего не отрисовывает — его отрисовывает `routesView`,
+оставляя лейаут смонтированным, пока активен любой из членов, и меняя только
+внутреннее представление. Лейаут перемонтируется, только когда навигация
+покидает группу целиком:
+
+```tsx
+import { routeView, routeViewGroup, routesView } from "@virentia/router-react";
+
+const dashboard = routeViewGroup({
+  layout: DashboardLayout,
+  views: [
+    routeView({ route: overviewRoute, view: OverviewPage }),
+    routeView({ route: reportsRoute, view: ReportsPage }),
+  ],
+});
+
+export const RoutesView = routesView({
+  routes: [dashboard, routeView({ route: loginRoute, view: LoginPage })],
+});
+```
+
+```ts
+interface RouteViewGroup {
+  route: VirtualRoute<any, any>;
+  views: RouteView[];
+  layout?: LayoutComponent;
+}
+
+interface CreateRouteViewGroupProps {
+  views: RouteView[];
+  layout?: LayoutComponent;
+}
+
+function routeViewGroup(props: CreateRouteViewGroupProps): RouteViewGroup;
+```
+
+`RouteViewGroup` кладётся в список `routes` у `routesView` рядом с обычными
+представлениями — `routesView` единственная точка отрисовки. Как `route`,
+`router` и `group`, создавайте группу на уровне модуля — до форка scope — чтобы
+её юниты попали в граф форкнутого scope.
+
+Используйте `layout` у `routeView` для разовой обертки, `withLayout`, когда
+соседние представления делят обрамление, которое можно перемонтировать, `layout`
+у `routesView` для оболочки вокруг всего представления, и `routeViewGroup`,
+когда общий лейаут должен оставаться смонтированным при навигации между его
+представлениями. Родительский роут с `Outlet` подходит лучше, когда сама обертка
+соответствует роуту с собственным состоянием.
 
 ## Ленивые представления
 

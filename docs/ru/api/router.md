@@ -52,6 +52,7 @@ import {
 import {
   lazyRouteView,
   routeView,
+  routeViewGroup,
   routesView,
   Link,
   Outlet,
@@ -62,10 +63,13 @@ import {
   useRouter,
   withLayout,
   type CreateLazyRouteViewProps,
+  type CreateRouteViewGroupProps,
   type CreateRouteViewProps,
   type CreateRoutesViewProps,
+  type LayoutComponent,
   type LinkProps,
   type RouteView,
+  type RouteViewGroup,
 } from "@virentia/router-react";
 ```
 
@@ -437,6 +441,8 @@ function lazyRouteView<Params extends object | void = void>(
 
 function routesView(props: CreateRoutesViewProps): ComponentType;
 
+function routeViewGroup(props: CreateRouteViewGroupProps): RouteViewGroup;
+
 interface CreateRouteViewProps<Params extends object | void = void> {
   route: Route<Params> | Router | VirtualRoute<any, any>;
   view: ComponentType;
@@ -451,8 +457,22 @@ interface CreateLazyRouteViewProps<Params extends object | void = void>
 }
 
 interface CreateRoutesViewProps {
-  routes: RouteView[];
+  routes: (RouteView | RouteViewGroup)[];
   otherwise?: ComponentType;
+  layout?: LayoutComponent;
+}
+
+// Набор представлений, разделяющих один лейаут. routesView держит общий лейаут
+// смонтированным, пока активен любой из членов, меняя только внутреннее представление.
+interface RouteViewGroup {
+  route: VirtualRoute<any, any>;
+  views: RouteView[];
+  layout?: LayoutComponent;
+}
+
+interface CreateRouteViewGroupProps {
+  views: RouteView[];
+  layout?: LayoutComponent;
 }
 ```
 

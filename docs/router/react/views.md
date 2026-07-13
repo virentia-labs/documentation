@@ -68,8 +68,9 @@ export const RoutesView = routesView({
 
 ```ts
 interface CreateRoutesViewProps {
-  routes: RouteView[];
+  routes: (RouteView | RouteViewGroup)[];
   otherwise?: ComponentType;
+  layout?: LayoutComponent;
 }
 ```
 
@@ -135,9 +136,72 @@ function withLayout(
 ): RouteView[];
 ```
 
-Use `layout` for a one-off wrapper and `withLayout` when several sibling views
-share chrome. An `Outlet`-based parent route is the better fit when the wrapper
-itself corresponds to a route with its own state.
+### routesView layout
+
+`routesView` also takes a `layout`. Unlike a per-view `layout`, it wraps the
+whole `routesView` output, so it is mounted once and stays mounted across route
+changes — only the inner view remounts. `otherwise` renders inside it too:
+
+```tsx
+export const RoutesView = routesView({
+  routes: [OverviewView, ReportsView],
+  layout: AppShell,
+  otherwise: NotFoundPage,
+});
+```
+
+### routeViewGroup
+
+`withLayout` gives every view its own copy of the layout, so switching between
+those views **remounts** the layout and loses its state. `routeViewGroup` shares
+one layout across several views: it combines their routes into a
+[`group`](/router/core/virtual-routes#grouped-routes) and carries the shared
+layout. It
+does not render anything itself — `routesView` renders it, keeping the layout
+mounted while any member is active and swapping only the inner view. The layout
+remounts only when navigation leaves the group entirely:
+
+```tsx
+import { routeView, routeViewGroup, routesView } from "@virentia/router-react";
+
+const dashboard = routeViewGroup({
+  layout: DashboardLayout,
+  views: [
+    routeView({ route: overviewRoute, view: OverviewPage }),
+    routeView({ route: reportsRoute, view: ReportsPage }),
+  ],
+});
+
+export const RoutesView = routesView({
+  routes: [dashboard, routeView({ route: loginRoute, view: LoginPage })],
+});
+```
+
+```ts
+interface RouteViewGroup {
+  route: VirtualRoute<any, any>;
+  views: RouteView[];
+  layout?: LayoutComponent;
+}
+
+interface CreateRouteViewGroupProps {
+  views: RouteView[];
+  layout?: LayoutComponent;
+}
+
+function routeViewGroup(props: CreateRouteViewGroupProps): RouteViewGroup;
+```
+
+A `RouteViewGroup` goes in a `routesView` `routes` list next to plain views —
+`routesView` is the single place that renders. Like `route`, `router` and
+`group`, build the group at module scope — before any scope is forked — so its
+group units belong to the forked scope's graph.
+
+Use `layout` on a `routeView` for a one-off wrapper, `withLayout` when sibling
+views share chrome that may remount, a `routesView` `layout` for a shell around
+the whole view, and `routeViewGroup` when a shared layout must stay mounted while
+navigating between its views. An `Outlet`-based parent route is the better fit
+when the wrapper itself corresponds to a route with its own state.
 
 ## Lazy views
 

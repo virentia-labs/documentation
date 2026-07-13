@@ -44,6 +44,61 @@ Or an **array**, when positional binding reads better:
 const [count, incremented] = useUnit([counter.count, counter.incremented] as const);
 ```
 
+## Custom shapes with `@@shape`
+
+`useUnit` reads a plain record of units without any help. The `@@shape` property is for the case where the object also carries **non-units** — helper methods, config, private fields — and you want `useUnit` to bind only some of it. The object declares its bindable units through `@@shape`, and `useUnit` binds through that declaration instead of iterating every key, so the rest is left untouched.
+
+Build such an object **once** — in a model factory or at module scope — never in a render, since its units must be stable:
+
+```tsx
+import { SHAPE, useUnit } from "@virentia/react";
+
+function createCounter() {
+  const count = store(0);
+  const incremented = event<number>();
+  reaction({ on: incremented, run: (n) => (count.value += n) });
+
+  return {
+    count,
+    incremented,
+    isZero: () => count.value === 0, // a method, not a unit
+    [SHAPE]: { count, incremented }, // bind only the units
+  };
+}
+
+const counter = createCounter();
+
+// In the component: `isZero` is not bound, only the declared units are.
+const { count, incremented } = useUnit(counter);
+```
+
+The declaration is usually the shape object directly. It may also be a **function** returning the shape, for when the shape is derived from the object itself:
+
+```tsx
+const source = {
+  count,
+  [SHAPE]() {
+    return { count: this.count };
+  },
+};
+```
+
+Shapes **nest to any depth**: a member of a shape may itself be a bare record of units or another `@@shape` source, and `useUnit` resolves the whole tree in one call.
+
+```tsx
+const dashboard = {
+  [SHAPE]: {
+    header: { title: header.title }, // bare nested record
+    counter: createCounter(), // nested @@shape source
+  },
+};
+
+const { header, counter } = useUnit(dashboard);
+// header.title, counter.count, counter.incremented(1)
+```
+
+The same protocol applies to a model field read through `useModel` or `component`: a field that declares `@@shape` reaches the view as its bound units, and the marker never leaks. See [Nested models with `@@shape`](/react/models#nested-models-with-shape).
+
 ## Effects and pending state
 
 `effect.pending` is a store, so read it alongside the effect to drive loading UI. It publishes immediately — outside the transaction — so the button disables the instant the effect starts.

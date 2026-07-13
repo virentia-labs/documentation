@@ -19,6 +19,8 @@ const searchFx = effect(async (text: string, { signal }) => {
 
 Это исключение жизненного цикла описано подробнее в общей [модели транзакций](/ru/core/transactions).
 
+Если вызов сделан с сигналом, который **уже отменён**, хендлер не выполняется: эффект эмитит `aborted`, затем fail-канал (`failed` → `failData` → `settled`), и никогда не эмитит `started`.
+
 ```ts
 searchFx.started;
 searchFx.done;
@@ -167,7 +169,7 @@ const profileLoadUserFx = requestFx.variant("profileLoadUserFx");
 
 Отмена эффекта сразу завершает активный вызов с переданной причиной. Handler не обязан слушать `signal` или сам reject-ить promise, чтобы жизненный цикл Virentia завершился.
 
-`searchFx.abort(reason)` отменяет активные вызовы этого эффекта. Сначала сработает `aborted` с `{ params, reason }`, а сам вызов завершится ошибкой и пройдет через `failData` и `settled`. `pending` и `inFlight` обновятся от этой отмены на уровне Virentia, даже если исходный promise handler-а все еще ждет. Поэтому в модели выше общий обработчик `failData` не перетирает статус `cancelled`.
+`searchFx.abort(reason)` отменяет активные вызовы этого эффекта **в текущем scope** — вызовы того же эффекта в другом scope не затрагиваются. Сначала сработает `aborted` с `{ params, reason }`, а сам вызов завершится ошибкой и пройдет через `failData` и `settled`. `pending` и `inFlight` обновятся от этой отмены на уровне Virentia, даже если исходный promise handler-а все еще ждет. Поэтому в модели выше общий обработчик `failData` не перетирает статус `cancelled`.
 
 Эффекты, запущенные активным эффектом, автоматически наследуют отмену родителя. Если `openSearchFx` вызывает `searchFx`, отмена `openSearchFx` также отменит дочерний вызов `searchFx` с той же причиной.
 

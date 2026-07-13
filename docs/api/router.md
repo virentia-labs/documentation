@@ -52,6 +52,7 @@ import {
 import {
   lazyRouteView,
   routeView,
+  routeViewGroup,
   routesView,
   Link,
   Outlet,
@@ -62,10 +63,13 @@ import {
   useRouter,
   withLayout,
   type CreateLazyRouteViewProps,
+  type CreateRouteViewGroupProps,
   type CreateRouteViewProps,
   type CreateRoutesViewProps,
+  type LayoutComponent,
   type LinkProps,
   type RouteView,
+  type RouteViewGroup,
 } from "@virentia/router-react";
 ```
 
@@ -436,6 +440,8 @@ function lazyRouteView<Params extends object | void = void>(
 
 function routesView(props: CreateRoutesViewProps): ComponentType;
 
+function routeViewGroup(props: CreateRouteViewGroupProps): RouteViewGroup;
+
 interface CreateRouteViewProps<Params extends object | void = void> {
   route: Route<Params> | Router | VirtualRoute<any, any>;
   view: ComponentType;
@@ -450,8 +456,22 @@ interface CreateLazyRouteViewProps<Params extends object | void = void>
 }
 
 interface CreateRoutesViewProps {
-  routes: RouteView[];
+  routes: (RouteView | RouteViewGroup)[];
   otherwise?: ComponentType;
+  layout?: LayoutComponent;
+}
+
+// A set of route views sharing one layout. routesView keeps the shared layout
+// mounted while any member is active and swaps only the inner view.
+interface RouteViewGroup {
+  route: VirtualRoute<any, any>;
+  views: RouteView[];
+  layout?: LayoutComponent;
+}
+
+interface CreateRouteViewGroupProps {
+  views: RouteView[];
+  layout?: LayoutComponent;
 }
 ```
 

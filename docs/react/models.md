@@ -73,6 +73,91 @@ export const Parent = component({
 
 When a controlled model is passed to the child component, React still keeps `props`, `mounted`, `unmounted`, and `mounts` fresh. Unmounting the child view does not dispose the model; the parent owns it.
 
+## Mapping props with `mapProps`
+
+By default a component's **external props** — what you pass in JSX — are also the **model's props**. `mapProps` lets them differ: it receives the external props and returns the model props. It runs during render, so it may read React context or call hooks — a router's params, a theme — and fold them into what the model receives.
+
+```tsx
+export const Page = component({
+  mapProps: (props: { slug: string }) => {
+    const { uuid } = useParams<{ uuid: string }>(); // react-router hook
+    return { ...props, uuid };
+  },
+  model: createPageModel, // receives ModelContext<{ slug: string; uuid: string }>
+  view({ model }) {
+    return <Article model={model} />;
+  },
+});
+```
+
+The view still receives the **external** props (plus `model`); only the model sees the mapped props. Omit `mapProps` and the two coincide.
+
+`.create(props)` takes the **model** props directly — it runs while a parent model is built, outside any render, so there is no `mapProps` step there.
+
+## Nested models with `@@shape`
+
+A model is often composed from smaller sub-models. When a sub-model is a plain record of units, `useModel` and `component` unwrap it as-is. When it also carries helpers you do not want in the view, declare its bindable units with a `@@shape` property: the field then reaches the view as just those units, and the marker never leaks. Shapes nest, so this holds at any depth.
+
+```tsx
+import { SHAPE } from "@virentia/react";
+
+// A reusable field sub-model: two units plus a helper it keeps to itself.
+function createField(initial: string) {
+  const text = store(initial);
+  const changed = event<string>();
+  reaction({ on: changed, run: (next) => (text.value = next) });
+
+  return {
+    text,
+    changed,
+    isEmpty: () => text.value.trim() === "", // helper, not bound
+    [SHAPE]: { text, changed }, // bind only these
+  };
+}
+
+// A model built from sub-models.
+function createProfileModel() {
+  const name = createField("");
+  const bio = createField("");
+  const saved = event<void>();
+
+  return { name, bio, saved };
+}
+```
+
+With `useModel`, each field arrives as `{ text, changed }` — `isEmpty` stays out:
+
+```tsx
+function Profile() {
+  const model = useModel(createProfileModel, {}); // no props
+
+  return (
+    <form onSubmit={() => model.saved()}>
+      <input value={model.name.text} onChange={(e) => model.name.changed(e.target.value)} />
+      <input value={model.bio.text} onChange={(e) => model.bio.changed(e.target.value)} />
+    </form>
+  );
+}
+```
+
+`component` binds the same model the same way — the view receives `model.name` and `model.bio` already unwrapped to their units:
+
+```tsx
+export const Profile = component({
+  model: createProfileModel,
+  view({ model }) {
+    return (
+      <form onSubmit={() => model.saved()}>
+        <input value={model.name.text} onChange={(e) => model.name.changed(e.target.value)} />
+        <input value={model.bio.text} onChange={(e) => model.bio.changed(e.target.value)} />
+      </form>
+    );
+  },
+});
+```
+
+Reach for `@@shape` only when a sub-model mixes units with non-units. A sub-model that is a plain record of units needs no declaration — it already unwraps.
+
 ## Lifecycle Units
 
 Factories receive `mounted`, `unmounted`, and `mounts`. Use them for model logic that should react to the UI lifetime: loading data on mount, pausing work when the last instance unmounts, or tracking how many mounted views share a cached model.

@@ -19,6 +19,8 @@ Effect lifecycle state is published immediately when async work starts or settle
 
 This lifecycle exception is part of the broader [transaction model](/core/transactions).
 
+If a call is made with a `signal` that is **already aborted**, the handler never runs: the effect emits `aborted` and then the fail channel (`failed` → `failData` → `settled`), and never emits `started`.
+
 ```ts
 searchFx.started;
 searchFx.done;
@@ -167,7 +169,7 @@ const profileLoadUserFx = requestFx.variant("profileLoadUserFx");
 
 Aborting an effect settles the active call immediately with the abort reason. The handler does not need to listen to `signal` or reject its own promise for Virentia lifecycle to finish.
 
-`searchFx.abort(reason)` cancels active calls of this effect. First, `aborted` runs with `{ params, reason }`; then the call finishes as a failure and goes through `failData` and `settled`. `pending` and `inFlight` update from that Virentia-level cancellation even if the original handler promise is still waiting. That is why the model above does not let the generic `failData` handler overwrite the `cancelled` status.
+`searchFx.abort(reason)` cancels the active calls of this effect **in the current scope** — calls of the same effect running in another scope are left untouched. First, `aborted` runs with `{ params, reason }`; then the call finishes as a failure and goes through `failData` and `settled`. `pending` and `inFlight` update from that Virentia-level cancellation even if the original handler promise is still waiting. That is why the model above does not let the generic `failData` handler overwrite the `cancelled` status.
 
 Effects started by an active effect inherit the parent cancellation automatically. If `openSearchFx` calls `searchFx`, aborting `openSearchFx` also aborts the child `searchFx` call with the same reason.
 

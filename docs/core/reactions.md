@@ -62,7 +62,7 @@ If a value is completely derived from other stores and does not need to be writt
 
 ## Explicit on
 
-Use `on` when the reason for running matters: a specific event, effect, or effect lifecycle unit. In this mode the reaction does not run when it is created. It runs only from the listed unit and receives its payload.
+Use `on` when the reason for running matters: a specific event, effect, or effect lifecycle unit. In this mode the reaction does not run when it is created. It runs only from the listed unit and receives its payload — an event delivers its payload, an effect source delivers the call params, and an effect lifecycle unit (`done`, `failed`, `aborted`, …) delivers that unit's value.
 
 ```ts
 reaction({

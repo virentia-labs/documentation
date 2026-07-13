@@ -75,6 +75,8 @@ form.name = "Grace";
 
 A `reactive` follows the same rules as a `store`: its value lives in a scope, direct reads and writes need an active scope, and writes are transactional.
 
+Deleting a field with `delete form.age` removes the key and notifies subscribers, like any other write. Fields are written through assignment, so `Object.defineProperty` on a `reactive` is rejected. A subscriber that throws is contained: it never stops the other subscribers or the store's reactive propagation.
+
 Use `readonlyReactive` for an object the model exposes but updates only through its own reactions or effects. Consumers can read fields but cannot assign them.
 
 ```ts
@@ -92,6 +94,8 @@ const queryLabel = query.map((text) => (text ? `Searching: ${text}` : "Search"))
 ```
 
 Derived stores are lazy. If no reaction or UI is subscribed to a derived store, a source store change only marks its cache dirty. The value is recalculated later, when it is explicitly read. If a derived store is active, for example observed by a reaction, dependency changes recalculate it immediately and notify subscribers only when the result actually changed.
+
+An observer without a `scope:` is **global**, like any global observer: it recomputes and notifies in whatever scope its source changed in — even a scope where the derived store was never read. Bind the reaction with `scope:` (or read the derived store in that scope first) for per-scope observation.
 
 If the value depends on an event in time, it is not derived state. Use a normal store and update it through a reaction.
 
