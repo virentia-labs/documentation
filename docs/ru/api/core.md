@@ -235,19 +235,19 @@ await scoped(appScope, () => loadUserFx.abort(new Error("cancelled")));
 
 Отмена завершает in-flight вызовы в текущем scope на уровне рантайма Virentia, поэтому handler не обязан читать `signal` или вручную делать reject. Вызовы того же эффекта в других scope не затрагиваются; dispose владельца эффекта отменяет все его in-flight вызовы. Эффекты, запущенные активным эффектом, автоматически наследуют отмену родителя и отменяются с той же причиной.
 
-## attach
-
-Создает новый эффект, который перед запуском читает source-сторы и собирает params.
+Вариант — отдельно наблюдаемая точка входа в тот же эффект:
 
 ```ts
-const authorizedFx = attach({
-  source: token,
-  effect: requestFx,
-  mapParams: (id: number, token: string) => ({ id, token }),
-});
+const profileLoadUserFx = loadUserFx.variant("profileLoadUserFx");
+const authorizedRequestFx = requestFx.variant("authorizedRequestFx", (id: number) => ({
+  id,
+  token: token.value,
+}));
 ```
 
-`source` может быть одним стором, массивом сторов или объектом сторов. Если `effect` — существующий эффект, `attach` переиспользует его обработчик, а жизненный цикл остается у нового эффекта.
+У варианта свои unit'ы жизненного цикла и свой `abort`, а необязательный mapper меняет тип его params. Вызов варианта вызывает базовый эффект, поэтому жизненный цикл базы срабатывает тоже, а `requestFx.pending`/`inFlight` учитывают вызовы, сделанные через любой из ее вариантов. Отмена варианта отменяет сделанный им вызов базы, и оба эффекта эмитят `aborted`. Scoped handler override на базе действует для всех вариантов; override на самом варианте заменяет делегирование, поэтому база не вызывается.
+
+Используйте `EffectParams<typeof fx>`, `EffectDoneValue<typeof fx>` и `EffectFailValue<typeof fx>`, когда фабрике нужно сослаться на форму эффекта без отдельно именованных типов params, результата или ошибки.
 
 ## reaction
 

@@ -235,7 +235,7 @@ await scoped(appScope, () => loadUserFx.abort(new Error("cancelled")));
 
 Abort settles the in-flight calls in the current scope at the Virentia runtime level, so the handler does not need to observe `signal` or reject manually. Calls of the same effect in other scopes are untouched; disposing the effect's owner aborts all of its in-flight calls. Effects started by an active effect inherit parent cancellation automatically and are aborted with the same reason.
 
-Create an independent variant over the same handler:
+Create a variant — a separately observable front door to the same effect:
 
 ```ts
 const profileLoadUserFx = loadUserFx.variant("profileLoadUserFx");
@@ -245,23 +245,9 @@ const authorizedRequestFx = requestFx.variant("authorizedRequestFx", (id: number
 }));
 ```
 
-The variant has its own lifecycle units. It reuses the base effect handler and scoped handler overrides, but calling the variant does not emit the base effect lifecycle.
+The variant has its own lifecycle units and its own `abort`, and the optional mapper re-types its params. Calling the variant calls the base effect, so the base lifecycle fires too and `requestFx.pending`/`inFlight` account for calls made through any of its variants. Aborting a variant cancels the base call it made, and both effects emit `aborted`. A scoped handler override on the base applies to every variant; an override on the variant itself replaces the delegation, so the base is never called.
 
 Use `EffectParams<typeof fx>`, `EffectDoneValue<typeof fx>`, and `EffectFailValue<typeof fx>` when a factory needs to reference an effect shape without importing a separately named params, result, or error type.
-
-## attach
-
-Creates a new effect that reads source stores and assembles params before running.
-
-```ts
-const authorizedFx = attach({
-  source: token,
-  effect: requestFx,
-  mapParams: (id: number, token: string) => ({ id, token }),
-});
-```
-
-`source` can be one store, an array of stores, or an object of stores. If `effect` is an existing effect, `attach` reuses its handler, while lifecycle belongs to the new effect.
 
 ## reaction
 

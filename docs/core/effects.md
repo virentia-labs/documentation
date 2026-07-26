@@ -153,9 +153,15 @@ const authorizedRequestFx = requestFx.variant("authorizedRequestFx", (id: number
 }));
 ```
 
-When `authorizedRequestFx(42)` runs in a scope, the mapper reads `token` from that scope and passes assembled params to the handler of `requestFx`.
+When `authorizedRequestFx(42)` runs in a scope, the mapper reads `token` from that scope and passes the assembled params to `requestFx`.
 
-The lifecycle belongs to the variant. Calling `authorizedRequestFx` does not emit `requestFx.doneData` and does not make `requestFx.pending` true. Scoped handler overrides of the base effect still apply, so tests can replace `requestFx` once and all variants will use that handler.
+A variant is a front door to the base effect, not a copy of it. Calling `authorizedRequestFx` **calls `requestFx`**, so the base lifecycle fires too: `requestFx.started`, `requestFx.pending`/`inFlight`, and `requestFx.doneData`/`failData` all account for that call. This is what makes the base effect a useful aggregate — `requestFx.pending` is true while any of its variants is in flight, and one reaction on `requestFx.failData` covers every route into the transport.
+
+Order follows the nesting. On start the variant fires first, since it is what was called, and then the base. On settle the base finishes first and the variant right after, because the variant is waiting on the call it made.
+
+Aborting a variant cancels the base call it created. Both effects emit `aborted`, the base under its own mapped params.
+
+Scoped handler overrides apply at both levels. Overriding the base in a test replaces the work for every variant at once. Overriding the variant replaces the delegation itself, so the base is never called and its lifecycle stays silent — the one case where the two come apart.
 
 If the call params already match the base effect, omit the mapper:
 
@@ -163,7 +169,7 @@ If the call params already match the base effect, omit the mapper:
 const profileLoadUserFx = requestFx.variant("profileLoadUserFx");
 ```
 
-`attach` is still available for compatibility with code that prefers `source` and `mapParams`, but new Virentia code should usually use `variant`: stores are regular scoped values, so reading `token.value` is clearer than declaring a separate source list.
+There is no separate source declaration to write: stores are ordinary scoped values, so the mapper reads `token.value` directly and gets it from the calling scope.
 
 ## Cancellation
 
