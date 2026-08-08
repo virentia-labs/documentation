@@ -1,6 +1,6 @@
 # Mutation
 
-`mutation(config)` is the write side. It is the same effect-with-operators as a [query](/net/query) — `handler`, `params`, `use`, `executor`, and `trigger` work identically — with two write-specific additions: **optimistic updates** and **invalidation**.
+`mutation(config)` is the write side. It is the same effect-with-operators as a [query](/net/core/query) — `handler`, `params`, `use`, `executor`, and `trigger` work identically — with two write-specific additions: **optimistic updates** and **invalidation**.
 
 ```ts
 import { mutation } from "@virentia/net-core";
@@ -48,5 +48,5 @@ Because `optimistic` wraps *outside* `retry`, the update applies once and the ro
 
 ## Notes
 
-- Overlapping submits are uncoordinated by default; add `concurrency` in `use` for serialization or dedup — see [operators](/net/operators).
+- Overlapping submits are uncoordinated by default; add `concurrency` in `use` for serialization or dedup — see [operators](/net/core/operators).
 - A mutation exposes the same `data` store (the last result) and `reset`. There is no `cache()` — writes are not cached.

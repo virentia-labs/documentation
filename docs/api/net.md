@@ -26,7 +26,7 @@ Returns an `Effect<Raw, Data, Err>` plus:
 - `refresh: EventCallable<void>` — re-run the last params in the scope.
 - `reset: EventCallable<void>` — clear `data`, abort in-flight.
 
-See [Query](/net/query).
+See [Query](/net/core/query).
 
 ## mutation
 
@@ -41,7 +41,7 @@ const addItem = mutation({
 });
 ```
 
-Same shape as `query`. `invalidates` re-runs the target queries (via `refresh`) on success; `optimistic.update` applies on start, `rollback` reverts once on final failure. See [Mutation](/net/mutation).
+Same shape as `query`. `invalidates` re-runs the target queries (via `refresh`) on success; `optimistic.update` applies on start, `rollback` reverts once on final failure. See [Mutation](/net/core/mutation).
 
 ## trigger
 
@@ -55,7 +55,7 @@ const stop = trigger(target, {
 });
 ```
 
-Runs `target` when `on` fires. Returns an unsubscribe; auto-registers cleanup inside an owner. See [Triggers](/net/triggers).
+Runs `target` when `on` fires. Returns an unsubscribe; auto-registers cleanup inside an owner. See [Triggers](/net/core/triggers).
 
 ## concurrency
 
@@ -65,7 +65,7 @@ import { concurrency } from "@virentia/net-core";
 concurrency({ strategy: "takeLatest", key: (params) => params.id });
 ```
 
-`strategy`: `"takeLatest"` (default) | `"takeFirst"` | `"takeEvery"` | `"queue"`. `key` splits into independent lanes. See [Operators](/net/operators).
+`strategy`: `"takeLatest"` (default) | `"takeFirst"` | `"takeEvery"` | `"queue"`. `key` splits into independent lanes. See [Operators](/net/core/operators).
 
 ## retry
 
@@ -75,7 +75,7 @@ import { retry } from "@virentia/net-core";
 retry({ times: 3, delay: 300, when: (error, attempt) => boolean });
 ```
 
-`delay` may be `(attempt, error) => ms` for backoff. Skips and aborts are not retried. See [Operators](/net/operators).
+`delay` may be `(attempt, error) => ms` for backoff. Skips and aborts are not retried. See [Operators](/net/core/operators).
 
 ## timeout · debounce · fallback · tap
 
@@ -88,7 +88,7 @@ fallback([]);                                     // value | (error, params) => 
 tap({ onStart, onSuccess, onError, onSettled });  // observe without changing the result
 ```
 
-See [Operators](/net/operators).
+See [Operators](/net/core/operators).
 
 ## overrideDefaults
 
@@ -102,7 +102,7 @@ const revert = overrideDefaults(
 );
 ```
 
-Sets the defaults a factory's queries/mutations inherit — a default `executor` and/or default `use` operators — globally or per scope. Resolved at execution time inside the run's scope. Returns a revert function. See [Defaults](/net/defaults).
+Sets the defaults a factory's queries/mutations inherit — a default `executor` and/or default `use` operators — globally or per scope. Resolved at execution time inside the run's scope. Returns a revert function. See [Defaults](/net/core/defaults).
 
 ## Executors & adapters
 
@@ -112,7 +112,7 @@ import { tanstackExecutor } from "@virentia/net-core/tanstack";
 import { apolloExecutor } from "@virentia/net-core/apollo";
 ```
 
-`Executor<Params, Data>` is just a function — `(params, ctx) => Promise<Data>` — the innermost link of the chain. `ctx` carries `signal`, `scope`, and the user's `handler` (if any). By default it calls `ctx.handler`; you rarely write one by hand. `tanstackExecutor(getClient, opts?)` routes the handler through a TanStack `QueryClient`; `apolloExecutor(getClient, { document, variables?, fetchPolicy? })` fetches via Apollo and needs no handler. Both are optional subpath exports. See [Adapters](/net/adapters).
+`Executor<Params, Data>` is just a function — `(params, ctx) => Promise<Data>` — the innermost link of the chain. `ctx` carries `signal`, `scope`, and the user's `handler` (if any). By default it calls `ctx.handler`; you rarely write one by hand. `tanstackExecutor(getClient, opts?)` routes the handler through a TanStack `QueryClient`; `apolloExecutor(getClient, { document, variables?, fetchPolicy? })` fetches via Apollo and needs no handler. Both are optional subpath exports. See [Adapters](/net/core/adapters).
 
 ## Skips
 

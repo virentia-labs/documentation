@@ -1,6 +1,6 @@
 # Defaults
 
-`overrideDefaults` sets what every query or mutation inherits — a default executor (e.g. an [adapter](/net/adapters)) or default operators — either process-wide or scoped to one scope.
+`overrideDefaults` sets what every query or mutation inherits — a default executor (e.g. an [adapter](/net/core/adapters)) or default operators — either process-wide or scoped to one scope.
 
 ```ts
 import { overrideDefaults, query } from "@virentia/net-core";

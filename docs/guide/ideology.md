@@ -1,6 +1,6 @@
 # Ideology
 
-Virentia is a state manager for applications with complex business logic. Its goal is not to make state writes shorter. Its goal is to preserve causality: what happened, which rules ran, which external work started, and which state came out of it.
+Virentia is a reactive stack for applications with complex business logic: a core that models state and rules, and the rest of the stack built on top of the same model. Its goal is not to make state writes shorter. Its goal is to preserve causality: what happened, which rules ran, which external work started, and which state came out of it.
 
 When logic is small, almost any approach looks fine. The trouble starts later: one handler changes several fields, another starts a request, another clears an error, another keeps loading state in the UI. The behavior still works, but it no longer reads as a model. Virentia is built around the opposite idea: every state movement should have a place and a name.
 

@@ -26,7 +26,7 @@ const userQuery = query({
 - `refresh: EventCallable<void>` — перезапуск последних параметров в скоупе.
 - `reset: EventCallable<void>` — очистить `data`, отменить in-flight.
 
-См. [Query](/ru/net/query).
+См. [Query](/ru/net/core/query).
 
 ## mutation
 
@@ -41,7 +41,7 @@ const addItem = mutation({
 });
 ```
 
-Та же форма, что у `query`. `invalidates` перезапускает целевые query (через `refresh`) при успехе; `optimistic.update` применяется на старте, `rollback` откатывает один раз при финальной ошибке. См. [Mutation](/ru/net/mutation).
+Та же форма, что у `query`. `invalidates` перезапускает целевые query (через `refresh`) при успехе; `optimistic.update` применяется на старте, `rollback` откатывает один раз при финальной ошибке. См. [Mutation](/ru/net/core/mutation).
 
 ## trigger
 
@@ -55,7 +55,7 @@ const stop = trigger(target, {
 });
 ```
 
-Запускает `target` при срабатывании `on`. Возвращает функцию отписки; автоматически регистрирует очистку внутри владельца. См. [Триггеры](/ru/net/triggers).
+Запускает `target` при срабатывании `on`. Возвращает функцию отписки; автоматически регистрирует очистку внутри владельца. См. [Триггеры](/ru/net/core/triggers).
 
 ## concurrency
 
@@ -65,7 +65,7 @@ import { concurrency } from "@virentia/net-core";
 concurrency({ strategy: "takeLatest", key: (params) => params.id });
 ```
 
-`strategy`: `"takeLatest"` (по умолчанию) | `"takeFirst"` | `"takeEvery"` | `"queue"`. `key` разбивает на независимые дорожки. См. [Операторы](/ru/net/operators).
+`strategy`: `"takeLatest"` (по умолчанию) | `"takeFirst"` | `"takeEvery"` | `"queue"`. `key` разбивает на независимые дорожки. См. [Операторы](/ru/net/core/operators).
 
 ## retry
 
@@ -75,7 +75,7 @@ import { retry } from "@virentia/net-core";
 retry({ times: 3, delay: 300, when: (error, attempt) => boolean });
 ```
 
-`delay` может быть `(attempt, error) => ms` для бэкоффа. Скипы и отмены не ретраятся. См. [Операторы](/ru/net/operators).
+`delay` может быть `(attempt, error) => ms` для бэкоффа. Скипы и отмены не ретраятся. См. [Операторы](/ru/net/core/operators).
 
 ## timeout · debounce · fallback · tap
 
@@ -88,7 +88,7 @@ fallback([]);                                     // value | (error, params) => 
 tap({ onStart, onSuccess, onError, onSettled });  // наблюдать, не меняя результат
 ```
 
-См. [Операторы](/ru/net/operators).
+См. [Операторы](/ru/net/core/operators).
 
 ## overrideDefaults
 
@@ -102,7 +102,7 @@ const revert = overrideDefaults(
 );
 ```
 
-Задаёт дефолты, которые наследуют query/mutation фабрики — исполнитель по умолчанию и/или операторы `use` по умолчанию — глобально или по скоупу. Разрешается во время выполнения внутри скоупа запуска. Возвращает функцию отката. См. [Дефолты](/ru/net/defaults).
+Задаёт дефолты, которые наследуют query/mutation фабрики — исполнитель по умолчанию и/или операторы `use` по умолчанию — глобально или по скоупу. Разрешается во время выполнения внутри скоупа запуска. Возвращает функцию отката. См. [Дефолты](/ru/net/core/defaults).
 
 ## Исполнители и адаптеры
 
@@ -112,7 +112,7 @@ import { tanstackExecutor } from "@virentia/net-core/tanstack";
 import { apolloExecutor } from "@virentia/net-core/apollo";
 ```
 
-`Executor<Params, Data>` — это просто функция `(params, ctx) => Promise<Data>`, самое внутреннее звено цепочки. В `ctx` есть `signal`, `scope` и хэндлер пользователя (`handler`, если есть). По умолчанию вызывает `ctx.handler`; вручную его пишут редко. `tanstackExecutor(getClient, opts?)` пропускает хэндлер через TanStack `QueryClient`; `apolloExecutor(getClient, { document, variables?, fetchPolicy? })` загружает через Apollo и не требует хэндлера. Оба — опциональные subpath-экспорты. См. [Адаптеры](/ru/net/adapters).
+`Executor<Params, Data>` — это просто функция `(params, ctx) => Promise<Data>`, самое внутреннее звено цепочки. В `ctx` есть `signal`, `scope` и хэндлер пользователя (`handler`, если есть). По умолчанию вызывает `ctx.handler`; вручную его пишут редко. `tanstackExecutor(getClient, opts?)` пропускает хэндлер через TanStack `QueryClient`; `apolloExecutor(getClient, { document, variables?, fetchPolicy? })` загружает через Apollo и не требует хэндлера. Оба — опциональные subpath-экспорты. См. [Адаптеры](/ru/net/core/adapters).
 
 ## Скипы
 

@@ -77,6 +77,25 @@ Drive a spinner from `chat.pending` (for example via `useUnit` in React) instead
 
 Lazy models can wait for loading when an event, effect, or effect lifecycle unit is launched. Store reads stay synchronous: `chat.messages.value` cannot wait for an import.
 
-Read lazy stores after the model has been loaded by an event or effect. For loading state before the module is ready, use `pending`; for anything more specific, keep that small shell state near the place that starts the scenario.
+Read lazy stores after the model has been loaded by an event or effect. Gate a defensive read on `loaded`, not on `pending` — see below.
 
 :::
+
+## `loaded` vs `pending`
+
+The two flags answer different questions, and only one of them can gate a read:
+
+| | before load | while loading | after load |
+| --- | --- | --- | --- |
+| `pending` | `false` | `true` | `false` |
+| `loaded` | `false` | `false` | `true` |
+
+`pending` means "an import is in flight", so it reads `false` both before and after — it cannot tell "not loaded yet" from "ready". `loaded` is the flag that can:
+
+```ts
+const unreadCount = computed(() => (chat.loaded.value ? chat.unread.value : 0));
+```
+
+Reading a lazy store while `loaded` is `false` throws `Lazy unit is not loaded yet`. The type does not stop you: `LazyModel<Model>` is typed as `Model`, so `chat.unread.value` looks like a plain value at compile time.
+
+Like `pending`, `loaded` is per-scope: a scope learns the model is loaded once it has taken part in a load, which is what happens the first time it calls any lazy unit.

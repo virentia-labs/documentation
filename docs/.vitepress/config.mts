@@ -1,8 +1,10 @@
 import { defineConfig } from "vitepress";
 import { enSidebar, ruSidebar } from "./navigation";
 
-const siteDescription = "State manager for applications with complex business logic.";
-const ruSiteDescription = "Стейт-менеджер для приложений со сложной бизнес-логикой.";
+const siteDescription =
+  "The reactive stack for complex business logic — the application lives in the model, not in the UI.";
+const ruSiteDescription =
+  "Реактивный стек для сложной бизнес-логики: приложение живёт в модели, а не в UI.";
 
 export default defineConfig({
   base: "/virentia/",

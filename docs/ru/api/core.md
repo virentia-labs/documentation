@@ -157,6 +157,15 @@ await scoped(appScope, () => chat.opened("chat:1"));
 
 Реакции могут подписываться на ленивые события и lifecycle-юниты эффектов до загрузки модуля. Чтение сторов остается синхронным, поэтому читайте сторы ленивой модели после того, как модель уже загрузилась.
 
+У каждой ленивой модели есть два флага, работающих по scope:
+
+- `pending: Store<boolean>` — идёт импорт. Равен `false` и до, и после, поэтому гейтом для чтения не годится.
+- `loaded: Store<boolean>` — загрузчик выдал модель. Именно на нём стройте защитное чтение.
+
+```ts
+const unreadCount = computed(() => (chat.loaded.value ? chat.unread.value : 0));
+```
+
 ## event
 
 Создает вызываемое событие.
@@ -233,7 +242,7 @@ const user = await scoped(appScope, () => loadUserFx("user:1"));
 await scoped(appScope, () => loadUserFx.abort(new Error("cancelled")));
 ```
 
-Отмена завершает in-flight вызовы в текущем scope на уровне рантайма Virentia, поэтому handler не обязан читать `signal` или вручную делать reject. Вызовы того же эффекта в других scope не затрагиваются; dispose владельца эффекта отменяет все его in-flight вызовы. Эффекты, запущенные активным эффектом, автоматически наследуют отмену родителя и отменяются с той же причиной.
+Отмена завершает in-flight вызовы в текущем scope на уровне рантайма Virentia, поэтому handler не обязан читать `signal` или вручную делать reject. Вызовы того же эффекта в других scope не затрагиваются. Роспуск отменяет вызовы с обеих сторон: dispose владельца эффекта отменяет все его in-flight вызовы (`Effect owner disposed`), а dispose владельца, **сделавшего** вызов, отменяет этот вызов (`Effect caller disposed`) — именно это отменяет запросы при разборе модели экрана, хотя сам эффект обычно живёт на уровне модуля. Эффекты, запущенные активным эффектом, автоматически наследуют отмену родителя и отменяются с той же причиной.
 
 Вариант — отдельно наблюдаемая точка входа в тот же эффект:
 
@@ -429,3 +438,114 @@ const reader = node((ctx) => {
   console.log(ctx.getContext(requestId));
 });
 ```
+
+## setErrorReporter
+
+Меняет адресата, которому уходят сдержанные отказы. По умолчанию читаемый отчёт пишется в консоль; `null` возвращает поведение по умолчанию.
+
+```ts
+import { setErrorReporter } from "@virentia/core";
+
+setErrorReporter((failure) => {
+  Sentry.captureException(failure.error, {
+    tags: { unit: failure.unit, kind: failure.kind },
+    extra: { path: failure.path, declaredAt: failure.declaredAt, scope: failure.scope },
+  });
+});
+```
+
+Репортер получает `VirentiaFailureReport`:
+
+| поле | значение |
+| --- | --- |
+| `kind` | `reaction`, `async reaction` или `store subscriber` |
+| `unit` | упавший юнит, например `reaction "connectSocket"` |
+| `declaredAt` | место объявления юнита, если его удалось снять |
+| `scope` | идентификатор scope, в котором шло обновление |
+| `path` | юниты, через которые прошло обновление, от источника |
+| `error` | брошенное значение, без изменений |
+| `message` | готовый читаемый отчёт |
+
+Репортер, который сам бросил, не роняет обновление — используется запасной консольный вывод, поэтому отказ остаётся виден.
+
+Правила сдерживания, которые описывает отчёт, — в разделе [Когда реакция бросает исключение](/ru/core/reactions#когда-реакция-бросает-исключение).
+
+## @virentia/core/utils
+
+Стандартная библиотека операторов поставляется с ядром как сабпас. Это справочник; гайд с семантикой и рецептами — [Утилиты](/ru/utils/).
+
+```ts
+import {
+  debounce, throttle, delay, interval,
+  once, previous, reset, status,
+} from "@virentia/core/utils";
+```
+
+Каждый оператор per-scope и знает о владельце: таймеры и флаги не протекают между скоупами, а dispose владельца, под которым оператор создан, отменяет его незавершённую работу.
+
+### debounce, throttle
+
+```ts
+debounce(source: Store<T>, ms: number | DebounceOptions): Store<T>
+debounce(source: Event<T>, ms: number | DebounceOptions): Event<T>
+// DebounceOptions: { ms: number; leading?: boolean } — у throttle та же форма
+```
+
+Операторы времени сохраняют породу источника: событие на входе — событие на выходе; стор на входе — стор с последним устоявшимся значением (его initial — декларационный initial источника). `debounce` стреляет последним payload после `ms` тишины; `leading: true` пропускает первое срабатывание сразу и молчит до полной паузы. `throttle` эмитит не чаще раза в `ms` — последнее значение окна в его конце; `leading: true` дополнительно стреляет при открытии окна.
+
+`await` источника не включает отложенную эмиссию: это новый корневой апдейт, и сбой ниже по его течению репортится через канал ошибок, а не становится unhandled rejection.
+
+### delay
+
+```ts
+delay(source: Store<T> | Event<T>, ms: number): Store<T> | Event<T>
+```
+
+Сдвигает каждое срабатывание на `ms` независимо — без схлопывания, порядок сохраняется.
+
+### interval
+
+```ts
+interval(options: { ms: number; start: Event<any>; stop?: Event<any>; leading?: boolean }):
+  { tick: Event<void>; active: Store<boolean> }
+```
+
+`tick` стреляет каждые `ms` между `start` и `stop` в том скоупе, где их вызвали; `active` — per-scope флаг работы. `start` во время работы — no-op; `leading: true` тикает сразу при старте. Dispose владельца останавливает все скоупы и гасит `active`.
+
+### once
+
+```ts
+once(source: Event<T> | Store<T>, options?: { reset?: Event<unknown> | Store<unknown> }): Event<T>
+```
+
+Пропускает первое срабатывание в скоупе и глотает остальные; `reset` перевзводит. Флаг «уже стрелял» — стор, поэтому SSR-снапшот его переносит: баннер, показанный на сервере, не покажется второй раз после гидрации.
+
+### previous
+
+```ts
+previous(source: Store<T>): Store<T | undefined>
+previous(source: Store<T>, seed: Seed): Store<T | Seed>
+```
+
+Отстаёт от источника на одно изменение, per scope. При первом изменении «предыдущим» становится декларационный initial источника; до этого производный стор читает seed (по умолчанию `undefined`).
+
+### reset
+
+```ts
+reset(options: {
+  clock: Event<unknown> | Store<unknown> | readonly (Event<unknown> | Store<unknown>)[];
+  target: StoreWritable<any> | readonly StoreWritable<any>[];
+}): Reaction
+```
+
+Возвращает каждую цель к её декларационному initial по срабатыванию clock — все цели одной транзакцией, в скоупе срабатывания; остальные скоупы сохраняют значения. Цель-computed бросает в момент reset (у неё нет сохранённого initial). Сам initial читается через `initialValueOf`/`hasInitialValue` из `@virentia/core/internal`.
+
+### status
+
+```ts
+status(fx: Effect<P, D, F>, options?: { reset?: Event<unknown> | Store<unknown> }):
+  Store<"initial" | "pending" | "done" | "fail">
+```
+
+Консолидированная машина состояний эффекта: `"initial"` до первого вызова в скоупе, дальше побеждает последнее событие жизненного цикла. `reset` возвращает в `"initial"`. При пересекающихся вызовах ранний успех читается как `"done"`, пока поздний вызов ещё бежит — где это важно, комбинируйте со `pending`.
+

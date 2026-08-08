@@ -175,3 +175,63 @@ subscription.stop();
 ```
 
 В динамических моделях чаще не нужно вызывать `stop()` вручную. Создавайте такие реакции внутри `owner`: при `dispose` Virentia отвяжет их вместе с остальной временной работой.
+
+## Когда реакция бросает исключение
+
+Непойманная ошибка в реакции ведёт себя так же, как в обычном асинхронном JavaScript: выражения после броска не выполняются, а отказ доходит до того, кто ждал триггер. Конкретно Virentia:
+
+1. **останавливает эту ветку** — ничего ниже упавшей реакции не выполняется;
+2. **сообщает об отказе** — никогда молча;
+3. **всё равно выполняет независимые ветки** того же обновления;
+4. **отклоняет триггер** для того, кто его ожидает (`AggregateError`, если упало несколько веток).
+
+Асинхронная реакция подчиняется ровно тем же правилам, что и синхронная.
+
+```ts
+reaction({ name: "connectSocket", on: authorized, run: () => { throw new Error("handshake"); } });
+reaction({ on: authorized, run: () => analytics.track("authorized") }); // всё равно выполнится
+
+// Обновление без ожидания: отказ логируется, работа продолжается.
+scoped(appScope, () => { token.value = "abc"; });
+
+// Ожидаемый триггер отклоняется с этой же ошибкой.
+await scoped(appScope, () => submitted()); // бросит Error("handshake")
+```
+
+Запись из синхронного кода никто не ожидает, поэтому отказ рапортуется, но не бросается. Он никогда не превращается в unhandled rejection — упавшее правило не может уронить Node-процесс.
+
+То же сдерживание действует для колбэков `store.subscribe(...)`: один бросивший подписчик не лишает остальных уведомления и не останавливает распространение.
+
+## Как читать отчёт об отказе
+
+Отчёт по умолчанию рассчитан на голую консоль, без подключённых devtools:
+
+```
+[virentia] reaction failed: reaction "connectSocket"
+  declared at: /src/features/auth/model.ts:42:3
+  scope: scope:1
+  propagation path: store "$token" → computed "$authorized" → reaction "connectSocket"
+  this branch stopped here; independent branches of the same update still ran
+  the update as a whole fails, so an awaited trigger will reject with this error
+  Error: handshake
+      at run (/src/features/auth/model.ts:44:11)
+```
+
+`declared at` снимается при создании реакции, поэтому даже анонимная реакция указывает на реальный исходник. Именование юнитов (`store(0, undefined, { name: "$token" })`, `reaction({ name: "connectSocket", … })`) превращает путь из идентификаторов в имена — стоит делать для правил, которые вы рассчитываете отлаживать.
+
+### Отправка отказов в другое место
+
+`setErrorReporter` меняет адресата — креш-репортер, структурный логгер, тестовый шпион. Он получает структуру, а не только текст, поэтому ничего не нужно разбирать обратно из строки:
+
+```ts
+import { setErrorReporter } from "@virentia/core";
+
+setErrorReporter((failure) => {
+  Sentry.captureException(failure.error, {
+    tags: { unit: failure.unit, kind: failure.kind },
+    extra: { path: failure.path, declaredAt: failure.declaredAt, scope: failure.scope },
+  });
+});
+```
+
+В `failure.message` лежит готовый отчёт, если нужно просто залогировать. `null` возвращает консольный вывод по умолчанию. Репортер, который сам бросил, не роняет обновление — отчёт уходит в запасной консольный вывод, поэтому отказ остаётся виден.

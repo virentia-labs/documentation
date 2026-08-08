@@ -81,6 +81,76 @@ const coreRu: DefaultTheme.SidebarItem[] = [
   },
 ];
 
+const modelsEn: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Models",
+    items: [
+      { text: "Overview", link: "/models/" },
+      { text: "Fields and data", link: "/models/fields" },
+      { text: "Traits", link: "/models/traits" },
+      { text: "Collections and instances", link: "/models/instances" },
+      { text: "Model kinds", link: "/models/kinds" },
+      { text: "Relations", link: "/models/relations" },
+      { text: "Queries and indexes", link: "/models/queries" },
+      { text: "Unions", link: "/models/unions" },
+      { text: "Data in and out", link: "/models/wire" },
+      { text: "UI bindings", link: "/models/bindings" },
+    ],
+  },
+];
+
+const modelsRu: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Модели",
+    items: [
+      { text: "Обзор", link: "/ru/models/" },
+      { text: "Поля и данные", link: "/ru/models/fields" },
+      { text: "Трейты", link: "/ru/models/traits" },
+      { text: "Коллекции и экземпляры", link: "/ru/models/instances" },
+      { text: "Виды моделей", link: "/ru/models/kinds" },
+      { text: "Связи", link: "/ru/models/relations" },
+      { text: "Запросы и индексы", link: "/ru/models/queries" },
+      { text: "Объединения", link: "/ru/models/unions" },
+      { text: "Загрузка и сериализация", link: "/ru/models/wire" },
+      { text: "UI-биндинги", link: "/ru/models/bindings" },
+    ],
+  },
+];
+
+const utilsEn: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Utils",
+    items: [
+      { text: "Overview", link: "/utils/" },
+      { text: "debounce", link: "/utils/debounce" },
+      { text: "throttle", link: "/utils/throttle" },
+      { text: "delay", link: "/utils/delay" },
+      { text: "interval", link: "/utils/interval" },
+      { text: "once", link: "/utils/once" },
+      { text: "previous", link: "/utils/previous" },
+      { text: "reset", link: "/utils/reset" },
+      { text: "status", link: "/utils/status" },
+    ],
+  },
+];
+
+const utilsRu: DefaultTheme.SidebarItem[] = [
+  {
+    text: "Утилиты",
+    items: [
+      { text: "Обзор", link: "/ru/utils/" },
+      { text: "debounce", link: "/ru/utils/debounce" },
+      { text: "throttle", link: "/ru/utils/throttle" },
+      { text: "delay", link: "/ru/utils/delay" },
+      { text: "interval", link: "/ru/utils/interval" },
+      { text: "once", link: "/ru/utils/once" },
+      { text: "previous", link: "/ru/utils/previous" },
+      { text: "reset", link: "/ru/utils/reset" },
+      { text: "status", link: "/ru/utils/status" },
+    ],
+  },
+];
+
 const inspectorEn: DefaultTheme.SidebarItem[] = [
   {
     text: "Inspector",
@@ -362,14 +432,34 @@ const mutableRu: DefaultTheme.SidebarItem[] = [
 const netEn: DefaultTheme.SidebarItem[] = [
   {
     text: "Net",
+    items: [{ text: "Overview", link: "/net/" }],
+  },
+  {
+    text: "Core",
     items: [
-      { text: "Overview", link: "/net/" },
-      { text: "Query", link: "/net/query" },
-      { text: "Mutation", link: "/net/mutation" },
-      { text: "Triggers", link: "/net/triggers" },
-      { text: "Operators", link: "/net/operators" },
-      { text: "Adapters", link: "/net/adapters" },
-      { text: "Defaults", link: "/net/defaults" },
+      { text: "Overview", link: "/net/core/" },
+      { text: "Query", link: "/net/core/query" },
+      { text: "Mutation", link: "/net/core/mutation" },
+      { text: "Triggers", link: "/net/core/triggers" },
+      { text: "Operators", link: "/net/core/operators" },
+      { text: "Adapters", link: "/net/core/adapters" },
+      { text: "Defaults", link: "/net/core/defaults" },
+    ],
+  },
+  {
+    text: "React",
+    items: [
+      { text: "Overview", link: "/net/react/" },
+      { text: "useQuery", link: "/net/react/use-query" },
+      { text: "useMutation", link: "/net/react/use-mutation" },
+    ],
+  },
+  {
+    text: "Vue",
+    items: [
+      { text: "Overview", link: "/net/vue/" },
+      { text: "useQuery", link: "/net/vue/use-query" },
+      { text: "useMutation", link: "/net/vue/use-mutation" },
     ],
   },
 ];
@@ -377,14 +467,34 @@ const netEn: DefaultTheme.SidebarItem[] = [
 const netRu: DefaultTheme.SidebarItem[] = [
   {
     text: "Net",
+    items: [{ text: "Обзор", link: "/ru/net/" }],
+  },
+  {
+    text: "Ядро",
     items: [
-      { text: "Обзор", link: "/ru/net/" },
-      { text: "Query", link: "/ru/net/query" },
-      { text: "Mutation", link: "/ru/net/mutation" },
-      { text: "Триггеры", link: "/ru/net/triggers" },
-      { text: "Операторы", link: "/ru/net/operators" },
-      { text: "Адаптеры", link: "/ru/net/adapters" },
-      { text: "Дефолты", link: "/ru/net/defaults" },
+      { text: "Обзор", link: "/ru/net/core/" },
+      { text: "Query", link: "/ru/net/core/query" },
+      { text: "Mutation", link: "/ru/net/core/mutation" },
+      { text: "Триггеры", link: "/ru/net/core/triggers" },
+      { text: "Операторы", link: "/ru/net/core/operators" },
+      { text: "Адаптеры", link: "/ru/net/core/adapters" },
+      { text: "Дефолты", link: "/ru/net/core/defaults" },
+    ],
+  },
+  {
+    text: "React",
+    items: [
+      { text: "Обзор", link: "/ru/net/react/" },
+      { text: "useQuery", link: "/ru/net/react/use-query" },
+      { text: "useMutation", link: "/ru/net/react/use-mutation" },
+    ],
+  },
+  {
+    text: "Vue",
+    items: [
+      { text: "Обзор", link: "/ru/net/vue/" },
+      { text: "useQuery", link: "/ru/net/vue/use-query" },
+      { text: "useMutation", link: "/ru/net/vue/use-mutation" },
     ],
   },
 ];
@@ -467,12 +577,26 @@ const skillsRu: DefaultTheme.SidebarItem[] = [
   },
 ];
 
-const virentiaEn: DefaultTheme.SidebarItem[] = [...guideEn, ...coreEn, ...inspectorEn];
-const virentiaRu: DefaultTheme.SidebarItem[] = [...guideRu, ...coreRu, ...inspectorRu];
+const virentiaEn: DefaultTheme.SidebarItem[] = [
+  ...guideEn,
+  ...coreEn,
+  ...modelsEn,
+  ...utilsEn,
+  ...inspectorEn,
+];
+const virentiaRu: DefaultTheme.SidebarItem[] = [
+  ...guideRu,
+  ...coreRu,
+  ...modelsRu,
+  ...utilsRu,
+  ...inspectorRu,
+];
 
 export const enSidebar: DefaultTheme.Sidebar = {
   "/guide/": virentiaEn,
   "/core/": virentiaEn,
+  "/models/": virentiaEn,
+  "/utils/": virentiaEn,
   "/inspector/": virentiaEn,
   "/forms/": formsEn,
   "/router/": routerEn,
@@ -490,6 +614,8 @@ export const enSidebar: DefaultTheme.Sidebar = {
 export const ruSidebar: DefaultTheme.Sidebar = {
   "/ru/guide/": virentiaRu,
   "/ru/core/": virentiaRu,
+  "/ru/models/": virentiaRu,
+  "/ru/utils/": virentiaRu,
   "/ru/inspector/": virentiaRu,
   "/ru/forms/": formsRu,
   "/ru/router/": routerRu,
@@ -510,19 +636,23 @@ export const docsSections: DocsSection[] = [
     label: { en: "Virentia", ru: "Virentia" },
     link: { en: "/guide/getting-started", ru: "/ru/guide/getting-started" },
     match: {
-      en: ["/", "/guide/", "/core/", "/inspector/"],
-      ru: ["/ru/", "/ru/guide/", "/ru/core/", "/ru/inspector/"],
+      en: ["/", "/guide/", "/core/", "/models/", "/utils/", "/inspector/"],
+      ru: ["/ru/", "/ru/guide/", "/ru/core/", "/ru/models/", "/ru/utils/", "/ru/inspector/"],
     },
     nav: {
       en: [
         { text: "Guide", link: "/guide/getting-started" },
         { text: "Core", link: "/core/" },
+        { text: "Models", link: "/models/" },
+        { text: "Utils", link: "/utils/" },
         { text: "Inspector", link: "/inspector/" },
         { text: "API", link: "/api/core" },
       ],
       ru: [
         { text: "Руководство", link: "/ru/guide/getting-started" },
         { text: "Ядро", link: "/ru/core/" },
+        { text: "Модели", link: "/ru/models/" },
+        { text: "Утилиты", link: "/ru/utils/" },
         { text: "Инспектор", link: "/ru/inspector/" },
         { text: "API", link: "/ru/api/core" },
       ],
@@ -682,22 +812,38 @@ export const docsSections: DocsSection[] = [
     nav: {
       en: [
         { text: "Overview", link: "/net/" },
-        { text: "Query", link: "/net/query" },
-        { text: "Mutation", link: "/net/mutation" },
-        { text: "Triggers", link: "/net/triggers" },
-        { text: "Operators", link: "/net/operators" },
-        { text: "Adapters", link: "/net/adapters" },
-        { text: "Defaults", link: "/net/defaults" },
+        {
+          text: "Core",
+          items: [
+            { text: "Overview", link: "/net/core/" },
+            { text: "Query", link: "/net/core/query" },
+            { text: "Mutation", link: "/net/core/mutation" },
+            { text: "Triggers", link: "/net/core/triggers" },
+            { text: "Operators", link: "/net/core/operators" },
+            { text: "Adapters", link: "/net/core/adapters" },
+            { text: "Defaults", link: "/net/core/defaults" },
+          ],
+        },
+        { text: "React", link: "/net/react/" },
+        { text: "Vue", link: "/net/vue/" },
         { text: "API", link: "/api/net" },
       ],
       ru: [
         { text: "Обзор", link: "/ru/net/" },
-        { text: "Query", link: "/ru/net/query" },
-        { text: "Mutation", link: "/ru/net/mutation" },
-        { text: "Триггеры", link: "/ru/net/triggers" },
-        { text: "Операторы", link: "/ru/net/operators" },
-        { text: "Адаптеры", link: "/ru/net/adapters" },
-        { text: "Дефолты", link: "/ru/net/defaults" },
+        {
+          text: "Ядро",
+          items: [
+            { text: "Обзор", link: "/ru/net/core/" },
+            { text: "Query", link: "/ru/net/core/query" },
+            { text: "Mutation", link: "/ru/net/core/mutation" },
+            { text: "Триггеры", link: "/ru/net/core/triggers" },
+            { text: "Операторы", link: "/ru/net/core/operators" },
+            { text: "Адаптеры", link: "/ru/net/core/adapters" },
+            { text: "Дефолты", link: "/ru/net/core/defaults" },
+          ],
+        },
+        { text: "React", link: "/ru/net/react/" },
+        { text: "Vue", link: "/ru/net/vue/" },
         { text: "API", link: "/ru/api/net" },
       ],
     },

@@ -19,11 +19,11 @@ const userQuery = query({
 |-------|---------|
 | `handler(params, ctx)` | the async fetcher; `ctx` is `{ signal, scope }`. Pass `ctx.signal` to `fetch` for cancellation. |
 | `params?(raw)` | maps the call/trigger input into handler params. Omit to pass the input through unchanged. |
-| `use?` | ordered [operators](/net/operators) (`concurrency`, `retry`, …). |
-| `executor?` | swaps the execution engine — see [adapters](/net/adapters). Defaults to running `handler`. |
+| `use?` | ordered [operators](/net/core/operators) (`concurrency`, `retry`, …). |
+| `executor?` | swaps the execution engine — see [adapters](/net/core/adapters). Defaults to running `handler`. |
 | `key?(params)` | lane key shared by operators (e.g. per-id concurrency). |
 | `initialData?` | seed for `data` (default `null`). |
-| `trigger?` | inline [trigger](/net/triggers) binding(s). |
+| `trigger?` | inline [trigger](/net/core/triggers) binding(s). |
 | `name?` | devtools name. |
 
 `params` separates the call shape from the handler shape — the query is called with the raw input, the handler receives the mapped value:

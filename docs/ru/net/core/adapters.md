@@ -74,4 +74,4 @@ tanstackExecutor(() => client.value);
 overrideDefaults(query, { executor: tanstackExecutor(() => queryClient) });
 ```
 
-См. [Дефолты](/ru/net/defaults).
+См. [Дефолты](/ru/net/core/defaults).

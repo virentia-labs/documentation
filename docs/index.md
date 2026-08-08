@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Virentia
-  text: State manager for complex business logic
-  tagline: Describe application rules outside the UI and run the same model wherever it is needed.
+  text: The reactive stack for describing any business logic
+  tagline: Build apps of any complexity. Scale them without the complications.
   image:
     src: /logo.svg
     alt: Virentia logo
@@ -13,18 +13,16 @@ hero:
       text: Get Started
       link: /guide/getting-started
     - theme: alt
-      text: Core
-      link: /core/
+      text: Why Virentia
+      link: /guide/ideology
 
 features:
-  - title: Business rules in the model
-    details: Events describe what happened. Stores hold state. Effects run external work. Reactions connect behavior.
-  - title: Scoped values
-    details: Reuse the same model in an app, request, test, tab, or preview without sharing state.
-  - title: Runtime models
-    details: Create state when a runtime scenario starts and dispose its subscriptions when it ends.
-  - title: UI adapters
-    details: Keep domain models in core and render them through framework bindings.
+  - title: Learn once, create anything
+    details: From a counter to a whole product, without changing the approach.
+  - title: Real isolation
+    details: "App, test, SSR request: separate states of one model."
+  - title: Async included
+    details: Cancellation, pending, and errors are part of the effect, not wiring around it.
 ---
 
 <CodeRow>

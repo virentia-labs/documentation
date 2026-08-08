@@ -49,4 +49,6 @@ One model, two states. That is the basic Virentia mechanism.
 
 Start with the main units: [stores](/core/stores), [events](/core/events), [effects](/core/effects), and [reactions](/core/reactions). Then read [Transactions](/core/transactions) to understand when writes become visible, and [Scopes](/core/scopes) to understand where values live and how `scoped` works. If models are created and removed at runtime, read [Owners and Cleanup](/core/owners).
 
+[Utils](/utils/) is the standard operator library — `debounce`, `once`, `previous`, `reset`, effect status — for what neither a `computed` nor a reaction body can express.
+
 [Low-level Kernel](/core/kernel) is only needed for adapters, devtools, and custom primitives.

@@ -157,6 +157,15 @@ await scoped(appScope, () => chat.opened("chat:1"));
 
 Reactions can subscribe to lazy events and effect lifecycle units before the module is loaded. Store reads stay synchronous, so read lazy stores after the model has already been loaded.
 
+Two per-scope flags come with every lazy model:
+
+- `pending: Store<boolean>` — an import is in flight. Reads `false` both before and after, so it cannot gate a read.
+- `loaded: Store<boolean>` — the loader has produced the model. This is the flag to gate a defensive read on.
+
+```ts
+const unreadCount = computed(() => (chat.loaded.value ? chat.unread.value : 0));
+```
+
 ## event
 
 Creates a callable event.
@@ -233,7 +242,7 @@ Abort running calls:
 await scoped(appScope, () => loadUserFx.abort(new Error("cancelled")));
 ```
 
-Abort settles the in-flight calls in the current scope at the Virentia runtime level, so the handler does not need to observe `signal` or reject manually. Calls of the same effect in other scopes are untouched; disposing the effect's owner aborts all of its in-flight calls. Effects started by an active effect inherit parent cancellation automatically and are aborted with the same reason.
+Abort settles the in-flight calls in the current scope at the Virentia runtime level, so the handler does not need to observe `signal` or reject manually. Calls of the same effect in other scopes are untouched. Disposal cancels calls from both ends: disposing the effect's owner aborts all of its in-flight calls (`Effect owner disposed`), and disposing the owner that **made** a call aborts that call (`Effect caller disposed`) — which is what cancels requests when a screen model is torn down, even though the effect itself usually lives at module scope. Effects started by an active effect inherit parent cancellation automatically and are aborted with the same reason.
 
 Create a variant — a separately observable front door to the same effect:
 
@@ -431,3 +440,113 @@ const reader = node((ctx) => {
   console.log(ctx.getContext(requestId));
 });
 ```
+
+## setErrorReporter
+
+Replaces where contained failures are sent. The default writes a readable report to the console; pass `null` to restore it.
+
+```ts
+import { setErrorReporter } from "@virentia/core";
+
+setErrorReporter((failure) => {
+  Sentry.captureException(failure.error, {
+    tags: { unit: failure.unit, kind: failure.kind },
+    extra: { path: failure.path, declaredAt: failure.declaredAt, scope: failure.scope },
+  });
+});
+```
+
+The reporter receives a `VirentiaFailureReport`:
+
+| field | meaning |
+| --- | --- |
+| `kind` | `reaction`, `async reaction`, or `store subscriber` |
+| `unit` | the failing unit, e.g. `reaction "connectSocket"` |
+| `declaredAt` | where the unit was declared, when the site could be captured |
+| `scope` | identifier of the scope the update ran in |
+| `path` | units the update travelled through, source first |
+| `error` | the thrown value, untouched |
+| `message` | the default human-readable report |
+
+A reporter that throws does not take the update down — the console default is used as a fallback so the failure stays visible.
+
+See [When A Reaction Throws](/core/reactions#when-a-reaction-throws) for the containment rules the report describes.
+
+## @virentia/core/utils
+
+The standard operator library ships with core as a subpath. This is the reference; the guide with semantics and recipes is [Utils](/utils/).
+
+```ts
+import {
+  debounce, throttle, delay, interval,
+  once, previous, reset, status,
+} from "@virentia/core/utils";
+```
+
+Every operator is per-scope and owner-aware: timers and flags never leak between scopes, and disposing the owner an operator was created under cancels its pending work.
+
+### debounce, throttle
+
+```ts
+debounce(source: Store<T>, ms: number | DebounceOptions): Store<T>
+debounce(source: Event<T>, ms: number | DebounceOptions): Event<T>
+// DebounceOptions: { ms: number; leading?: boolean } — throttle has the same shape
+```
+
+Time operators preserve the kind of the source: an event in — an event out; a store in — a store out holding the last settled value (its initial is the source's declaration initial). `debounce` fires the last payload after `ms` of quiet; `leading: true` passes the first hit immediately, then stays silent until a full pause. `throttle` emits at most once per `ms` — the window's last value fires at the window end; `leading: true` also fires when a window opens.
+
+Awaiting the source does not include the delayed emission: it is a new root update, and a failure downstream of it is reported through the error funnel, never thrown as an unhandled rejection.
+
+### delay
+
+```ts
+delay(source: Store<T> | Event<T>, ms: number): Store<T> | Event<T>
+```
+
+Shifts every hit by `ms` independently — no collapsing, order preserved.
+
+### interval
+
+```ts
+interval(options: { ms: number; start: Event<any>; stop?: Event<any>; leading?: boolean }):
+  { tick: Event<void>; active: Store<boolean> }
+```
+
+`tick` fires every `ms` between `start` and `stop` in the scope that called them; `active` is the per-scope running flag. `start` while running is a no-op; `leading: true` ticks immediately on start. Owner dispose stops every scope and clears `active`.
+
+### once
+
+```ts
+once(source: Event<T> | Store<T>, options?: { reset?: Event<unknown> | Store<unknown> }): Event<T>
+```
+
+Passes the first hit per scope and swallows the rest; `reset` re-arms it. The fired flag is a store, so an SSR snapshot carries it — a banner shown on the server does not show again after hydration.
+
+### previous
+
+```ts
+previous(source: Store<T>): Store<T | undefined>
+previous(source: Store<T>, seed: Seed): Store<T | Seed>
+```
+
+Trails the source by one change, per scope. On the first change the source's declaration initial becomes the previous value; before that the derived store reads the seed (`undefined` by default).
+
+### reset
+
+```ts
+reset(options: {
+  clock: Event<unknown> | Store<unknown> | readonly (Event<unknown> | Store<unknown>)[];
+  target: StoreWritable<any> | readonly StoreWritable<any>[];
+}): Reaction
+```
+
+Restores every target to its declaration initial when the clock fires — all targets in one transaction, in the firing scope; other scopes keep their values. A computed target throws at reset time (it has no stored initial). The initial itself is readable via `initialValueOf`/`hasInitialValue` from `@virentia/core/internal`.
+
+### status
+
+```ts
+status(fx: Effect<P, D, F>, options?: { reset?: Event<unknown> | Store<unknown> }):
+  Store<"initial" | "pending" | "done" | "fail">
+```
+
+A consolidated per-effect state machine: `"initial"` until the first call in the scope, then the last lifecycle event wins. `reset` returns it to `"initial"`. With overlapping calls an early success reads `"done"` while a later call is still in flight — combine with `pending` when that matters.

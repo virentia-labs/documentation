@@ -74,4 +74,4 @@ To route **every** query through an adapter without repeating `executor`, set it
 overrideDefaults(query, { executor: tanstackExecutor(() => queryClient) });
 ```
 
-See [Defaults](/net/defaults).
+See [Defaults](/net/core/defaults).
