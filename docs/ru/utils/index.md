@@ -32,5 +32,3 @@ import { debounce, once, reset, status } from "@virentia/core/utils";
 Состояние эффектов:
 
 - [status](/ru/utils/status) — `"initial" | "pending" | "done" | "fail"` по эффекту: кнопки отправки.
-
-Сухие сигнатуры — в [справочнике API](/ru/api/core#virentia-core-utils).

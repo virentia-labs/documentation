@@ -65,10 +65,6 @@ function isActive(link: string): boolean {
   return path === target;
 }
 
-function hasActiveItem(item: SectionNavItem): boolean {
-  return isLink(item) ? isActive(item.link) : item.items.some((link) => isActive(link.link));
-}
-
 function toggleMenu(id: string): void {
   openMenu.value = openMenu.value === id ? null : id;
 }
@@ -170,53 +166,6 @@ onBeforeUnmount(() => {
             {{ section.text }}
           </a>
         </div>
-      </div>
-
-      <div class="section-nav__items">
-        <template v-for="(item, index) in currentNav" :key="JSON.stringify(item)">
-          <a
-            v-if="isLink(item)"
-            class="section-nav__link"
-            :class="{ 'is-active': isActive(item.link) }"
-            :href="href(item.link)"
-            :aria-current="isActive(item.link) ? 'page' : undefined"
-            @click="navigate"
-          >
-            {{ item.text }}
-          </a>
-          <div
-            v-else
-            class="section-nav__group"
-            :class="{
-              'is-active': hasActiveItem(item),
-              'is-open': openMenu === `group-${index}`,
-            }"
-          >
-            <button
-              class="section-nav__group-button"
-              type="button"
-              :aria-expanded="openMenu === `group-${index}`"
-              aria-haspopup="menu"
-              @click.stop="toggleMenu(`group-${index}`)"
-            >
-              {{ item.text }}
-            </button>
-            <div v-if="openMenu === `group-${index}`" class="section-nav__menu" role="menu">
-              <a
-                v-for="link in item.items"
-                :key="link.link"
-                class="section-nav__menu-link"
-                :class="{ 'is-active': isActive(link.link) }"
-                :href="href(link.link)"
-                :aria-current="isActive(link.link) ? 'page' : undefined"
-                role="menuitem"
-                @click="navigate"
-              >
-                {{ link.text }}
-              </a>
-            </div>
-          </div>
-        </template>
       </div>
     </template>
 

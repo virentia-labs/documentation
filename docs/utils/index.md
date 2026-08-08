@@ -32,5 +32,3 @@ Writes:
 Effect state for the UI:
 
 - [status](/utils/status) — `"initial" | "pending" | "done" | "fail"` per effect: submit buttons.
-
-The dry signatures live in the [API reference](/api/core#virentia-core-utils).

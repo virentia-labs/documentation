@@ -185,4 +185,3 @@ function zodFieldValidator<Schema extends ZodType>(
 - [Типы полей](./field-types) - переиспользуемая настройка валидаторов.
 - [Shape-поля](./shape-fields) и [array-поля](./array-fields) - как ошибки
   схемы ложатся на динамические поля.
-- [API-справка](/ru/api/forms) - типы валидаторов и `ValidationContext`.

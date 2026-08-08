@@ -99,5 +99,3 @@ What this gives you:
 @virentia/forms-react  // React hooks
 @virentia/forms-zod    // Zod validators
 ```
-
-Full signatures live in the [API reference](/api/forms).

@@ -531,38 +531,6 @@ const recipesRu: DefaultTheme.SidebarItem[] = [
   },
 ];
 
-const apiEn: DefaultTheme.SidebarItem[] = [
-  {
-    text: "API",
-    items: [
-      { text: "@virentia/core", link: "/api/core" },
-      { text: "@virentia/net-core", link: "/api/net" },
-      { text: "@virentia/react", link: "/api/react" },
-      { text: "@virentia/vue", link: "/api/vue" },
-      { text: "@virentia/effector", link: "/api/effector" },
-      { text: "@virentia/forms", link: "/api/forms" },
-      { text: "@virentia/router", link: "/api/router" },
-      { text: "@virentia/storage-core", link: "/api/storage" },
-    ],
-  },
-];
-
-const apiRu: DefaultTheme.SidebarItem[] = [
-  {
-    text: "API",
-    items: [
-      { text: "@virentia/core", link: "/ru/api/core" },
-      { text: "@virentia/net-core", link: "/ru/api/net" },
-      { text: "@virentia/react", link: "/ru/api/react" },
-      { text: "@virentia/vue", link: "/ru/api/vue" },
-      { text: "@virentia/effector", link: "/ru/api/effector" },
-      { text: "@virentia/forms", link: "/ru/api/forms" },
-      { text: "@virentia/router", link: "/ru/api/router" },
-      { text: "@virentia/storage-core", link: "/ru/api/storage" },
-    ],
-  },
-];
-
 const skillsEn: DefaultTheme.SidebarItem[] = [
   {
     text: "AI",
@@ -582,6 +550,10 @@ const virentiaEn: DefaultTheme.SidebarItem[] = [
   ...coreEn,
   ...modelsEn,
   ...utilsEn,
+  ...reactEn,
+  ...vueEn,
+  ...mutableEn,
+  ...effectorEn,
   ...inspectorEn,
 ];
 const virentiaRu: DefaultTheme.SidebarItem[] = [
@@ -589,6 +561,10 @@ const virentiaRu: DefaultTheme.SidebarItem[] = [
   ...coreRu,
   ...modelsRu,
   ...utilsRu,
+  ...reactRu,
+  ...vueRu,
+  ...mutableRu,
+  ...effectorRu,
   ...inspectorRu,
 ];
 
@@ -600,14 +576,13 @@ export const enSidebar: DefaultTheme.Sidebar = {
   "/inspector/": virentiaEn,
   "/forms/": formsEn,
   "/router/": routerEn,
-  "/react/": reactEn,
-  "/vue/": vueEn,
+  "/react/": virentiaEn,
+  "/vue/": virentiaEn,
   "/storage/": storageEn,
-  "/effector/": effectorEn,
-  "/mutable/": mutableEn,
+  "/effector/": virentiaEn,
+  "/mutable/": virentiaEn,
   "/net/": netEn,
   "/recipes/": recipesEn,
-  "/api/": apiEn,
   "/skills/": skillsEn,
 };
 
@@ -619,25 +594,24 @@ export const ruSidebar: DefaultTheme.Sidebar = {
   "/ru/inspector/": virentiaRu,
   "/ru/forms/": formsRu,
   "/ru/router/": routerRu,
-  "/ru/react/": reactRu,
-  "/ru/vue/": vueRu,
+  "/ru/react/": virentiaRu,
+  "/ru/vue/": virentiaRu,
   "/ru/storage/": storageRu,
-  "/ru/effector/": effectorRu,
-  "/ru/mutable/": mutableRu,
+  "/ru/effector/": virentiaRu,
+  "/ru/mutable/": virentiaRu,
   "/ru/net/": netRu,
   "/ru/recipes/": recipesRu,
-  "/ru/api/": apiRu,
   "/ru/skills/": skillsRu,
 };
 
 export const docsSections: DocsSection[] = [
   {
     id: "virentia",
-    label: { en: "Virentia", ru: "Virentia" },
+    label: { en: "Core", ru: "Ядро" },
     link: { en: "/guide/getting-started", ru: "/ru/guide/getting-started" },
     match: {
-      en: ["/", "/guide/", "/core/", "/models/", "/utils/", "/inspector/"],
-      ru: ["/ru/", "/ru/guide/", "/ru/core/", "/ru/models/", "/ru/utils/", "/ru/inspector/"],
+      en: ["/", "/guide/", "/core/", "/models/", "/utils/", "/react/", "/vue/", "/mutable/", "/effector/", "/inspector/"],
+      ru: ["/ru/", "/ru/guide/", "/ru/core/", "/ru/models/", "/ru/utils/", "/ru/react/", "/ru/vue/", "/ru/mutable/", "/ru/effector/", "/ru/inspector/"],
     },
     nav: {
       en: [
@@ -645,16 +619,22 @@ export const docsSections: DocsSection[] = [
         { text: "Core", link: "/core/" },
         { text: "Models", link: "/models/" },
         { text: "Utils", link: "/utils/" },
+        { text: "React", link: "/react/" },
+        { text: "Vue", link: "/vue/" },
+        { text: "Mutable", link: "/mutable/" },
+        { text: "Effector", link: "/effector/" },
         { text: "Inspector", link: "/inspector/" },
-        { text: "API", link: "/api/core" },
       ],
       ru: [
         { text: "Руководство", link: "/ru/guide/getting-started" },
         { text: "Ядро", link: "/ru/core/" },
         { text: "Модели", link: "/ru/models/" },
         { text: "Утилиты", link: "/ru/utils/" },
+        { text: "React", link: "/ru/react/" },
+        { text: "Vue", link: "/ru/vue/" },
+        { text: "Mutable", link: "/ru/mutable/" },
+        { text: "Effector", link: "/ru/effector/" },
         { text: "Инспектор", link: "/ru/inspector/" },
-        { text: "API", link: "/ru/api/core" },
       ],
     },
   },
@@ -672,7 +652,6 @@ export const docsSections: DocsSection[] = [
         { text: "Adapters", link: "/forms/adapters" },
         { text: "React", link: "/forms/react/" },
         { text: "Effector", link: "/forms/effector/" },
-        { text: "API", link: "/api/forms" },
       ],
       ru: [
         { text: "Обзор", link: "/ru/forms/" },
@@ -682,7 +661,6 @@ export const docsSections: DocsSection[] = [
         { text: "Адаптеры", link: "/ru/forms/adapters" },
         { text: "React", link: "/ru/forms/react/" },
         { text: "Effector", link: "/ru/forms/effector/" },
-        { text: "API", link: "/ru/api/forms" },
       ],
     },
   },
@@ -708,7 +686,6 @@ export const docsSections: DocsSection[] = [
         },
         { text: "React", link: "/router/react/" },
         { text: "React Native", link: "/router/react-native/" },
-        { text: "API", link: "/api/router" },
       ],
       ru: [
         { text: "Обзор", link: "/ru/router/" },
@@ -726,51 +703,6 @@ export const docsSections: DocsSection[] = [
         },
         { text: "React", link: "/ru/router/react/" },
         { text: "React Native", link: "/ru/router/react-native/" },
-        { text: "API", link: "/ru/api/router" },
-      ],
-    },
-  },
-  {
-    id: "react",
-    label: { en: "React", ru: "React" },
-    link: { en: "/react/", ru: "/ru/react/" },
-    match: { en: ["/react/"], ru: ["/ru/react/"] },
-    nav: {
-      en: [
-        { text: "Overview", link: "/react/" },
-        { text: "useUnit", link: "/react/use-unit" },
-        { text: "Models", link: "/react/models" },
-        { text: "Cache", link: "/react/cache" },
-        { text: "API", link: "/api/react" },
-      ],
-      ru: [
-        { text: "Обзор", link: "/ru/react/" },
-        { text: "useUnit", link: "/ru/react/use-unit" },
-        { text: "Модели", link: "/ru/react/models" },
-        { text: "Кеш", link: "/ru/react/cache" },
-        { text: "API", link: "/ru/api/react" },
-      ],
-    },
-  },
-  {
-    id: "vue",
-    label: { en: "Vue", ru: "Vue" },
-    link: { en: "/vue/", ru: "/ru/vue/" },
-    match: { en: ["/vue/"], ru: ["/ru/vue/"] },
-    nav: {
-      en: [
-        { text: "Overview", link: "/vue/" },
-        { text: "useUnit", link: "/vue/use-unit" },
-        { text: "Models", link: "/vue/models" },
-        { text: "Cache", link: "/vue/cache" },
-        { text: "API", link: "/api/vue" },
-      ],
-      ru: [
-        { text: "Обзор", link: "/ru/vue/" },
-        { text: "useUnit", link: "/ru/vue/use-unit" },
-        { text: "Модели", link: "/ru/vue/models" },
-        { text: "Кеш", link: "/ru/vue/cache" },
-        { text: "API", link: "/ru/api/vue" },
       ],
     },
   },
@@ -784,24 +716,12 @@ export const docsSections: DocsSection[] = [
         { text: "Overview", link: "/storage/" },
         { text: "Boxes", link: "/storage/boxes" },
         { text: "Persistence", link: "/storage/persist" },
-        { text: "API", link: "/api/storage" },
       ],
       ru: [
         { text: "Обзор", link: "/ru/storage/" },
         { text: "Боксы", link: "/ru/storage/boxes" },
         { text: "Сохранение", link: "/ru/storage/persist" },
-        { text: "API", link: "/ru/api/storage" },
       ],
-    },
-  },
-  {
-    id: "mutable",
-    label: { en: "Mutable", ru: "Mutable" },
-    link: { en: "/mutable/", ru: "/ru/mutable/" },
-    match: { en: ["/mutable/"], ru: ["/ru/mutable/"] },
-    nav: {
-      en: [{ text: "Overview", link: "/mutable/" }],
-      ru: [{ text: "Обзор", link: "/ru/mutable/" }],
     },
   },
   {
@@ -826,7 +746,6 @@ export const docsSections: DocsSection[] = [
         },
         { text: "React", link: "/net/react/" },
         { text: "Vue", link: "/net/vue/" },
-        { text: "API", link: "/api/net" },
       ],
       ru: [
         { text: "Обзор", link: "/ru/net/" },
@@ -844,27 +763,6 @@ export const docsSections: DocsSection[] = [
         },
         { text: "React", link: "/ru/net/react/" },
         { text: "Vue", link: "/ru/net/vue/" },
-        { text: "API", link: "/ru/api/net" },
-      ],
-    },
-  },
-  {
-    id: "effector",
-    label: { en: "Effector compatibility", ru: "Совместимость с Effector" },
-    link: { en: "/effector/", ru: "/ru/effector/" },
-    match: { en: ["/effector/"], ru: ["/ru/effector/"] },
-    nav: {
-      en: [
-        { text: "Overview", link: "/effector/" },
-        { text: "Operators", link: "/effector/operators" },
-        { text: "Scopes", link: "/effector/scopes" },
-        { text: "API", link: "/api/effector" },
-      ],
-      ru: [
-        { text: "Обзор", link: "/ru/effector/" },
-        { text: "Операторы", link: "/ru/effector/operators" },
-        { text: "Скоупы", link: "/ru/effector/scopes" },
-        { text: "API", link: "/ru/api/effector" },
       ],
     },
   },
@@ -894,16 +792,6 @@ export const docsSections: DocsSection[] = [
         { text: "Тестирование", link: "/ru/recipes/testing" },
         { text: "Миграция", link: "/ru/recipes/migration" },
       ],
-    },
-  },
-  {
-    id: "api",
-    label: { en: "API", ru: "API" },
-    link: { en: "/api/core", ru: "/ru/api/core" },
-    match: { en: ["/api/"], ru: ["/ru/api/"] },
-    nav: {
-      en: apiEn[0].items as SectionNavLink[],
-      ru: apiRu[0].items as SectionNavLink[],
     },
   },
   {

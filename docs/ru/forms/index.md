@@ -100,5 +100,3 @@ await scoped(appScope, async () => {
 @virentia/forms-react  // хуки React
 @virentia/forms-zod    // Zod-валидаторы
 ```
-
-Полные сигнатуры находятся в [API-справке](/ru/api/forms).

@@ -74,9 +74,6 @@ import {
 } from "@virentia/router-paths";
 ```
 
-The full type-level contract for every export is in the
-[`@virentia/router` API reference](/api/router).
-
 ## Type guards
 
 `is` narrows unknown values to router types. It is useful in generic rendering

@@ -20,7 +20,9 @@
   .section-nav--bar {
     display: flex;
     align-items: center;
-    flex: 1 1 auto;
+    /* The switcher is the only child now: don't grow, let VPNavBarSearch
+       (flex-grow: 1 in the default theme) claim the freed middle space. */
+    flex: 0 0 auto;
     gap: 10px;
     margin-left: 18px;
     min-width: 0;

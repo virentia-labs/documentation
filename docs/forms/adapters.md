@@ -184,4 +184,3 @@ function zodFieldValidator<Schema extends ZodType>(
 - [Field types](./field-types) - reusable validator setup.
 - [Shape fields](./shape-fields) and [array fields](./array-fields) - how
   schema errors map to dynamic fields.
-- [API reference](/api/forms) - validator types and `ValidationContext`.
