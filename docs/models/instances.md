@@ -1,72 +1,105 @@
 ---
-title: Collections And Instances
+title: Model Instances
 ---
 
-# Collections And Instances
+# Model Instances
 
-A collection is where a model's instances live: the only way to create them,
-the place queries run, and the owner of their lifecycle. Use it as the single
-source of truth for "which entities exist right now" - components, effects,
-and tests all read the same collection through a scope.
+Create and find instances through the model itself. Its registry lives in a
+scoped store: one definition can serve independent applications, SSR requests,
+and parallel tests.
 
-## Creating A Collection
+## Creating And Finding Instances
 
-`collection(Model)` is get-or-create per scope:
+`create` uses the active application scope. `get` only looks up an existing
+instance and returns `null` when the ID is missing.
 
 ```ts
 import { scope, scoped } from "@virentia/core";
-import { collection } from "@virentia/core/models";
+import { f, staticModel } from "@virentia/core/models";
 
+const Todo = staticModel({ data: { title: f.string(), done: f.boolean(false) } });
 const appScope = scope();
 
-scoped(appScope, () => {
-  const todos = collection(Todo);
-
-  collection(Todo) === todos; // true - same scope, same collection
-});
+const todo = scoped(appScope, () => Todo.create({ id: "1", title: "Write docs" }));
+scoped(appScope, () => Todo.get("1") === todo); // true
+scoped(scope(), () => Todo.get("1"));          // null: another scope
 ```
 
-Different scopes hold fully independent populations - SSR requests and tests
-never see each other's entities. The rest of the examples assume an active
-scope.
+The returned instance is bound to its scope. Its fields and units can be used
+outside `scoped`. The remaining examples run inside an active scope.
 
-## Adding And Merging
+## Creating And Merging
 
-`add` takes JSON. A new id creates, a known id merges - present keys win,
-absent keys stay:
+`create` takes JSON. A new ID creates an instance; a known ID merges into the
+same instance. Present keys win and absent keys stay unchanged.
 
 ```ts
-const todos = collection(Todo);
+Todo.create({ id: "1", title: "Write docs" });
+Todo.create({ id: "1", done: true });
+Todo.get("1")!.title.value; // "Write docs"
 
-todos.add({ id: "1", title: "write docs" });        // create
-todos.add({ id: "1", done: true });                 // merge - title untouched
-todos.get("1")!.title.value;                        // "write docs"
+Todo.create({ id: "1", title: "Rewrite" }, { replace: true });
+// Missing optional fields reset to defaults; local fields stay unchanged.
 
-todos.add({ id: "1", title: "rewrite" }, { replace: true });
-// replace - absent optional keys reset to defaults
+const batch = Todo.create([{ title: "A" }, { title: "B" }]);
 ```
 
-An array is one batch - validated up front, rolled back if an element fails:
+A partial input with an unknown ID fails if required fields are missing.
+Batches validate their inputs first; if creation fails, their newly created
+instances are disposed.
+
+## All Instances And LINQ
+
+`Todo.instances` is the unfiltered reactive query for the current scope.
+It captures that scope, so the query can be passed to a renderer or read later.
+Start a filtered query directly from the model:
 
 ```ts
-todos.add([{ title: "a" }, { title: "b" }]); // both or neither
+Todo.instances.count;
+Todo.instances.items;
+Todo.where(Todo.done.eq(false)).take(10).first;
+Todo.instances.select(Todo.title);
 ```
 
-What happens:
+Query terminals live under `instances` so a field such as `Todo.count` can
+remain a field descriptor. See [Queries and indexes](./queries) for sorting,
+projections, bulk updates, and reactive lookups.
 
-- merging is how server refreshes work: re-`add` the fetched list, existing
-  instances update in place, references to them stay valid;
-- a partial input with an unknown id is an error naming the missing keys -
-  there are no half-created entities;
-- `Model.create(props)` is a shortcut for `collection(Model).add(props)` in
-  the active scope.
+## A Singleton From An Existing Model
+
+Every `Todo.static(input?)` call creates a new independent model with its own
+native stores, events, and effects. Results are never cached or included in
+`Todo.instances`; regular `Todo.create` instances remain independent too.
+
+```ts
+const draft = Todo.static({ title: "Draft" }); // no active scope needed
+const other = Todo.static({ title: "Draft" }); // different native units
+draft === other;                             // false
+
+const first = scope(), second = scope();
+scoped(first, () => { draft.title.value = "Edited"; });
+scoped(first, () => other.title.value);      // "Draft": another model
+scoped(second, () => draft.title.value);      // "Draft"
+```
+
+Each result's units hold separate values per application scope. Read and call
+them inside `scoped`, or pass the result as a component's `model`: the renderer
+binds it to its scope. Native units work in `reaction` and in `scope({ values,
+handlers })`, including effect overrides.
+
+Both `model` and `staticModel` support this method. Omit the input when all
+fields have defaults; otherwise supply required DTO fields. Each call takes its
+own initial input and runs `setup` again. Use `onCreate` for resources that must
+be initialized in each scope. For SSR, give the source model a stable `sid` or
+`name` and preserve its `.static()` declaration order on the server and client:
+each result has a separate SID namespace that includes its declaration ordinal.
 
 ## Reading And Writing
 
 Fields are stores; members returned from `setup` are callable on the instance:
 
 ```ts
-const t = todos.add({ title: "x" });
+const t = Todo.create({ title: "x" });
 
 t.title.value;          // "x"
 t.done.value = true;    // a regular store write - queries update immediately
@@ -106,8 +139,8 @@ const Todo = staticModel({
   },
 });
 
-const a = todos.add({});
-const b = todos.add({});
+const a = Todo.create({});
+const b = Todo.create({});
 
 await a.toggled();
 
@@ -145,7 +178,7 @@ instances, no runs; other scopes are not touched.
 
 ## Disposal
 
-`dispose()` (or `collection.remove(id)`) cascades children, applies
+`dispose()` (or `Model.instances.remove(id)`) cascades children, applies
 [delete policies](./relations#delete-policies), and drops the instance from
 indexes and queries. After that:
 
@@ -156,12 +189,12 @@ indexes and queries. After that:
 ```ts
 const label = computed(() => (t.alive ? t.title.value : "deleted"));
 
-todos.remove(t.id);
+Todo.instances.remove(t.id);
 label.value; // "deleted"
 ```
 
 Static instances are cheap to churn: a disposed instance's scope returns to a
-pool and is reused for the next `add`. Stale references stay safe - `t.key`
+pool and is reused for the next `create`. Stale references stay safe - `t.key`
 never repeats, and old handles throw instead of reading the new occupant.
 
 ## External Resources: `onCleanup`
@@ -345,7 +378,7 @@ const Room = staticModel({
     reaction({
       on: joined,
       run: () => {
-        const me = collection(Room).get(self.id)!; // callbacks run outside model context
+        const me = Room.get(self.id)!; // callbacks run outside model context
 
         const socket = new WebSocket(`wss://chat.example/${self.channel.value}`);
 
@@ -395,7 +428,7 @@ const Monitor = staticModel({
     reaction({
       on: started,
       run: () => {
-        const me = collection(Monitor).get(self.id)!; // the facade survives outside unit bodies
+        const me = Monitor.get(self.id)!; // the facade survives outside unit bodies
 
         const timer = setInterval(() => void me.check(), 5_000);
 
@@ -411,13 +444,15 @@ const Monitor = staticModel({
 ## Contract
 
 ```ts
-function collection<M>(model: M, scope?: Scope): Collection<M>;
-
-interface Collection<M> extends Query<InstanceOf<M>> {
-  add(input: Dto | ({ id: string } & Partial<Dto>), options?: { replace?: boolean }): InstanceOf<M>;
-  add(input: readonly Input[], options?: { replace?: boolean }): InstanceOf<M>[];
-  get(id: string): InstanceOf<M> | null; // reactive, resolves rebind aliases
-  remove(id: string): void;
+interface ModelAccess<M> {
+  static(...args: {} extends Dto<M> ? [input?: Dto<M>] : [input: Dto<M>]): SingletonOf<M>;
+  create(input: AddInput<M>, options?: { replace?: boolean }): InstanceOf<M>;
+  create(input: readonly AddInput<M>[], options?: { replace?: boolean }): InstanceOf<M>[];
+  get(id: string): InstanceOf<M> | null;
+  readonly instances: TypedQuery<InstanceOf<M>>;
+  where(predicate: Predicate | ((item: InstanceOf<M>) => boolean)): TypedQuery<InstanceOf<M>>;
+  sort(by: SortToken): TypedQuery<InstanceOf<M>>;
+  take(count: number): TypedQuery<InstanceOf<M>>;
 }
 
 interface InstanceApi {
@@ -425,23 +460,27 @@ interface InstanceApi {
   readonly key: string;
   readonly alive: boolean;
   json(): Record<string, unknown>;
-  dispose(): void;
+  dispose(): void | Promise<void>;
   rebind(newId: string): void;
   onCleanup(cleanup: () => void): () => void; // returns unregister
 }
 ```
 
+`SingletonOf<M>` exposes the model's fields as full `StoreWritable<T>` units,
+its setup members and relations, and the instance API. It does not capture a
+scope; a fresh scope starts with the initial values.
+
 ## Common Cases
 
-Use collections for:
+Use model registries for:
 
-- caching server lists - `add` the response, merges keep references valid;
-- entity registries shared by many screens - one collection per scope;
-- optimistic creation - `add` without an id, [rebind later](./wire#changing-an-id-rebind);
+- caching server lists - `create` the response, merges keep references valid;
+- entity registries shared by many screens - one registry per model and scope;
+- optimistic creation - `create` without an id, [rebind later](./wire#changing-an-id-rebind);
 - test setups - a fresh scope gives a fresh, isolated population.
 
 ## Related
 
-- [Queries and indexes](./queries) - every collection is also a query.
+- [Queries and indexes](./queries) - `Model.instances` is the unfiltered query.
 - [Relations](./relations) - children are created through their parent.
 - [Data in and out](./wire) - `json()`, temporary ids, `rebind`.

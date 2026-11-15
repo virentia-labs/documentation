@@ -1,5 +1,7 @@
 # Triggers
 
+Declare shared triggers once in `staticModel.setup`; a disposed instance releases its own trigger resources. A trigger created by a runtime method has that method’s instance lifetime. See [static model ownership](./models).
+
 A trigger runs a query or mutation when a Virentia unit fires. Since a query *is* an effect, this is just a `reaction` that calls it — but `trigger()` handles payload mapping, filtering, and owner cleanup for you.
 
 ```ts

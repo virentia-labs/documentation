@@ -14,6 +14,9 @@ component subscribes to exactly what it shows.
 The list subscribes to the query; each row subscribes to its own instance:
 
 ```tsx
+import { scoped } from "@virentia/core";
+import { useModel, useProvidedScope } from "@virentia/react";
+
 function TodoRow({ todo }: { todo: InstanceOf<typeof Todo> }) {
   const t = useModel(todo);
 
@@ -23,9 +26,10 @@ function TodoRow({ todo }: { todo: InstanceOf<typeof Todo> }) {
 }
 
 function ActiveTodos() {
-  const active = useModel(
-    todos.where(Todo.done.eq(false)).sort(Todo.priority.desc).take(50),
-  );
+  const appScope = useProvidedScope();
+  const active = useModel(scoped(appScope, () =>
+    Todo.where(Todo.done.eq(false)).sort(Todo.priority.desc).take(50),
+  ));
 
   return (
     <ul>
@@ -53,7 +57,8 @@ In Vue the same calls return refs: `active.value.items`, `t.value.title.value`.
 
 ```tsx
 function TodoScreen({ id }: { id: string }) {
-  const todo = useModel(todos.get(id));
+  const appScope = useProvidedScope();
+  const todo = useModel(scoped(appScope, () => Todo.get(id)));
 
   if (!todo) return <NotFound />;
 
@@ -68,8 +73,7 @@ Nothing throws mid-render.
 
 ## Screen Models
 
-A model definition is a `props → instance` factory through its collection, so
-the existing screen-model signatures accept it directly:
+A model definition is a scoped `props → instance` factory, so screen-model signatures accept it directly:
 
 ```tsx
 const OrderView = component({ model: OrderScreen, view: OrderLayout });
@@ -105,7 +109,7 @@ Who the remount finds:
 - an `id` in props - the instance with that id (tabs, master-detail, the id
   comes from a route or document).
 
-There is no `cache`/`key` option for models - the collection already is the
+There is no `cache`/`key` option for models - the model's registry already is the
 cache, `keep` just leaves the instance in it.
 
 ## Inspector
@@ -119,7 +123,7 @@ workload, not a thousand devtools scopes.
 ```ts
 // React and Vue, same shapes; Vue returns refs
 useModel(query): query;                       // live query view
-useModel(collection.get(id)): Instance | null; // entity view
+useModel(scoped(appScope, () => Todo.get(id))): Instance | null; // entity view
 useModel(Definition, props?, { keep? }): Instance | null;
 
 component({ model: Definition, view, keep?, mapProps? });
@@ -131,7 +135,7 @@ Component.create(props): Instance;             // controlled instance
 Use the bindings for:
 
 - list screens - a query built inline, rows keyed by `t.key`;
-- detail screens - `useModel(todos.get(id))` with a `null` fallback;
+- detail screens - `useModel(scoped(appScope, () => Todo.get(id)))` with a `null` fallback;
 - screen state that survives tab switches - `keep: true`;
 - parent-owned dialogs and editors - `component.create()`.
 

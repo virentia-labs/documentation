@@ -4,6 +4,8 @@ title: Array Fields
 
 # Array Fields
 
+For an array that owns model instances, use [arrayFieldModel](./models). It creates children from raw values and borrows existing model fields through refs. Its `.field` exposes the operations described here; the model’s `.value` is readonly.
+
 Use an array field when a form contains an ordered list of repeated items:
 invoice lines, tags, contacts, addresses, conditions, checklist rows. Each item
 is a field model, so it can have its own value, validation, errors, and nested

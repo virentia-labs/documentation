@@ -1,5 +1,7 @@
 # Query
 
+Query из `staticModel.setup` сохраняет привязку вызова, data и lifecycle-юнитов к экземпляру. См. [проверяемый модельный пример](./models) с изоляцией, refresh/reset и disposal.
+
 `query(config)` создаёт fetch-эффект. Результат — эффект `@virentia/core` (его жизненный цикл у вас уже есть), к которому добавлены стор `data`, стор `stale` и `refresh`/`reset`.
 
 ```ts

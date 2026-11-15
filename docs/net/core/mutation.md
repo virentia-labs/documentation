@@ -1,5 +1,7 @@
 # Mutation
 
+Declare mutations in `staticModel.setup` for independent instance state and cancellation. Return the native mutation directly; its nested API remains bound. See [static Net models](./models).
+
 `mutation(config)` is the write side. It is the same effect-with-operators as a [query](/net/core/query) — `handler`, `params`, `use`, `executor`, and `trigger` work identically — with two write-specific additions: **optimistic updates** and **invalidation**.
 
 ```ts

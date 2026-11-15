@@ -4,6 +4,8 @@ title: Field Types
 
 # Field Types
 
+An existing `fieldType` can be used by [fieldModel with the create option](./models). Base it on `createField` or the extension’s `base` to retain shared trait state and typed custom methods in owned instances.
+
 A field type is a reusable field factory. Use it when a domain primitive should
 carry the same behavior everywhere: validation, normalization, view metadata, or
 extra methods.

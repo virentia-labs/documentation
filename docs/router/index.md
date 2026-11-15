@@ -4,6 +4,8 @@ title: Router
 
 # Router
 
+For independent screen instances, use [model-owned routing](./core/models). Routes, router stores and history listeners retain the screen’s scope and lifetime.
+
 Virentia Router is a route model family for applications built with
 `@virentia/core` and `@virentia/react`.
 

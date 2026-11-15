@@ -80,4 +80,5 @@ function isRootPath(path: string): boolean {
 }
 </script>
 
-<template></template>
+<!-- A stable root keeps this headless helper consistent during SSR hydration. -->
+<template><span hidden aria-hidden="true"></span></template>

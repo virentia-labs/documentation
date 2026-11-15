@@ -4,6 +4,8 @@ title: Overview
 
 # Forms · Effector
 
+The bridge accepts forms containing [owned model fields](../models), including nested arrays/shapes. Lenses follow the current membership; a borrowed field keeps its original owner and application scope.
+
 `@virentia/forms` is UI- and runtime-independent: a form is a model whose state
 lives in Virentia stores. Some products already run on **Effector** and want to
 read a form's state and drive its lifecycle from an Effector graph — `sample`,
@@ -111,7 +113,7 @@ Because methods are effects, `.pending` and `.done` / `.fail` work as usual, and
 `fill` / `reset` / `submit` sequence their downstream side effects inside the
 Virentia scope.
 
-## Nested units — the lens
+## Nested units — the lens {#nested-units-the-lens}
 
 `model.fields` mirrors the schema. Leaf fields expose their units as watch
 (`clock()`) or dispatch (`target()`) actions; array and shape fields are

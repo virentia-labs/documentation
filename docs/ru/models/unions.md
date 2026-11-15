@@ -13,7 +13,7 @@ title: Объединения
 нужно придумывать и держать уникальными.
 
 Примеры на этой странице выполняются в активном скоупе - см.
-[Коллекции и экземпляры](./instances).
+[Экземпляры моделей](./instances).
 
 ## Объявление объединения
 
@@ -38,22 +38,21 @@ const FeedItem = union(Post, Ad).by((json) =>
   "budget" in json ? Ad : Post,
 );
 
-const feed = collection(FeedItem);
 ```
 
 `by` говорит объединению, какому варианту принадлежит JSON-объект.
-Union-коллекция - представление: экземпляры живут в `collection(Post)` и
-`collection(Ad)`, и обе стороны видят одни и те же данные.
+Объединение — представление: экземпляры живут в `Post.instances` и
+`Ad.instances`, и обе стороны видят одни и те же данные.
 
 ## Добавление через объединение
 
 ```ts
-feed.add({ title: "привет", likes: 3 }); // by → Post
-feed.add({ budget: 100 });               // by → Ad
+FeedItem.create({ title: "привет", likes: 3 }); // by → Post
+FeedItem.create({ budget: 100 });               // by → Ad
 
-feed.count;             // 2
-collection(Post).count; // 1
-collection(Ad).count;   // 1
+FeedItem.instances.count;             // 2
+Post.instances.count; // 1
+Ad.instances.count;   // 1
 ```
 
 Что происходит:
@@ -63,7 +62,7 @@ collection(Ad).count;   // 1
   обновлениям различительные ключи не нужны;
 - полный объект другого варианта с занятым id - ошибка: варианты не
   мигрируют;
-- без `.by(...)` у объединения нет `add` - ни в типах, ни в рантайме.
+- без `.by(...)` у объединения нет `create` - ни в типах, ни в рантайме.
 
 ## Общие поля
 
@@ -71,8 +70,8 @@ collection(Ad).count;   // 1
 трейта:
 
 ```ts
-feed.where(FeedItem.createdAt.gte(today)).count;
-feed.sort(FeedItem.createdAt.desc).items;
+FeedItem.where(FeedItem.createdAt.gte(today)).count;
+FeedItem.sort(FeedItem.createdAt.desc).items;
 ```
 
 Оба работают, потому что `Post` и `Ad` компонуют `Timestamped`. Каждый
@@ -88,7 +87,7 @@ feed.sort(FeedItem.createdAt.desc).items;
 Вариант-специфичные условия идут через `match` - по ветке на вариант:
 
 ```ts
-feed.match(
+FeedItem.match(
   [Post, (p) => p.likes.gte(100)],  // p - дескрипторы Post
   [Ad, (a) => a.active.eq(true)],
 );
@@ -100,8 +99,7 @@ feed.match(
 цепочке с `where`, `sort` и `take`:
 
 ```ts
-feed
-  .where(FeedItem.createdAt.gte(today))
+FeedItem  .where(FeedItem.createdAt.gte(today))
   .match([Post, (p) => p.likes.gte(10)], [Ad, () => false])
   .sort(FeedItem.createdAt.desc)
   .take(20);
@@ -112,7 +110,7 @@ feed
 Результаты типизированы объединением экземпляров вариантов; `in` сужает:
 
 ```ts
-for (const item of feed.items) {
+for (const item of FeedItem.instances.items) {
   if ("likes" in item) {
     item.likes.value;  // Post
   } else {
@@ -149,14 +147,14 @@ bookmark.json().target;       // id
 function union(...variants: Model[]): Union;
 
 // дискриминатор входа: json типизирован как Dto<V1> | Dto<V2> | ...
-// пока .by(...) не объявлен, у объединения нет add - ни в типах, ни в рантайме
+// пока .by(...) не объявлен, у объединения нет create - ни в типах, ни в рантайме
 union.by((json) => Variant): Union;
 
-// union-коллекция - Query по всем вариантам, плюс:
-feed.add(json)      // маршрут через by / мерж по известному id
-feed.get(id)        // ищет по вариантам
-feed.remove(id)
-feed.match(...[Variant, (descriptors) => Predicate | boolean][])
+// instances — запрос без фильтра по всем вариантам:
+FeedItem.create(json)      // маршрут через by / мерж по известному id
+FeedItem.get(id)        // ищет по вариантам
+FeedItem.instances.remove(id)
+FeedItem.match(...[Variant, (descriptors) => Predicate | boolean][])
 ```
 
 Общие дескрипторы (`FeedItem.field`) существуют для полей, которые каждый

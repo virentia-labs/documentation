@@ -4,6 +4,8 @@ title: Forms
 
 # Forms
 
+For independent form instances, start with [owned fields and static models](./models): declare field definitions once, create children for each form, and use refs to share an existing instance. The native factories described below remain available.
+
 `@virentia/forms` is a model layer for forms. It is not a component library and
 does not prescribe markup. A form is described once as fields, validators,
 errors, dynamic sections, and navigation rules; UI, tests, SSR, and background

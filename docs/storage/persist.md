@@ -1,5 +1,7 @@
 # Persistence
 
+In a `staticModel`, connect persistence from a bound method or `onCreate`: cleanup belongs to that instance. See [the checked model example](./models) for independent keys, child/ref sources and hydration order. Explicit owner groups below remain supported.
+
 `persist` binds one writable store to one [box](/storage/boxes) for one scope and keeps them in sync both ways.
 
 ```ts

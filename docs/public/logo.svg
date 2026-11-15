@@ -1,29 +1,13 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="vGradient" x1="128" y1="80" x2="384" y2="432" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#D7DCFF"/>
-      <stop offset="0.45" stop-color="#A8B1FF"/>
-      <stop offset="1" stop-color="#7F8CFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Virentia — black hole symbol</title>
+<defs>
+    <linearGradient id="virentia-violet" x1="59.80" y1="53.57" x2="384.40" y2="422.94" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5831BC"/><stop offset=".5" stop-color="#9060F0"/><stop offset="1" stop-color="#B59AFA"/>
+    </linearGradient>
+    <linearGradient id="virentia-gold" x1="138.15" y1="146.47" x2="330.68" y2="387.13" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EEA273"/><stop offset=".48" stop-color="#FFD099"/><stop offset="1" stop-color="#FFE7B7"/>
     </linearGradient>
   </defs>
-
-  <!-- Main V -->
-  <path
-    d="M94 86H162C180 86 190 96 198 112L256 242L314 112C322 96 332 86 350 86H418L292 398C285 415 273 426 256 426C239 426 227 415 220 398L94 86Z"
-    fill="url(#vGradient)"
-  />
-
-  <!-- Internal graph -->
-  <path
-    d="M178 214L226 306L256 350L292 286L334 214"
-    stroke="#0F172A"
-    stroke-width="16"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-
-  <!-- Nodes -->
-  <circle cx="178" cy="214" r="22" fill="#A8B1FF" stroke="#0F172A" stroke-width="12"/>
-  <circle cx="334" cy="214" r="22" fill="#A8B1FF" stroke="#0F172A" stroke-width="12"/>
-  <circle cx="256" cy="350" r="22" fill="#A8B1FF" stroke="#0F172A" stroke-width="12"/>
+  <path fill="url(#virentia-violet)" d="M 126.40 113.73 C 168.50 79.94 225.29 60.07 280.38 62.29 C 335.47 64.50 387.88 89.08 420.18 129.82 C 452.47 170.56 463.86 226.84 450.03 280.65 C 436.19 334.46 397.35 384.74 346.79 415.39 C 296.23 446.02 235.05 456.53 183.37 445.41 C 131.71 434.28 90.45 402.03 70.58 361.45 C 50.73 320.87 52.18 272.89 70.47 232.75 C 62.56 274.38 73.45 315.04 97.52 344.14 C 121.60 373.25 158.34 390.74 197.28 393.89 C 236.22 397.02 277.13 386.01 310.59 364.09 C 344.06 342.18 370.03 309.45 381.88 272.91 C 393.74 236.38 391.25 196.10 372.50 162.24 C 353.76 128.37 318.51 101.32 273.58 90.99 C 228.65 80.66 174.33 87.62 126.40 113.73 Z"/>
+  <path fill="url(#virentia-gold)" d="M 311.86 372.10 C 279.76 395.08 238.58 407.97 198.88 406.04 C 159.19 404.12 121.52 387.24 96.89 359.23 C 72.25 331.22 61.09 292.41 66.91 253.84 C 72.73 215.26 95.46 177.51 127.98 151.35 C 160.51 125.21 202.27 111.00 240.75 111.63 C 279.23 112.26 313.89 127.52 335.91 151.23 C 357.94 174.93 367.24 206.56 363.84 236.51 C 359.77 207.70 343.58 182.77 320.61 167.05 C 297.64 151.32 268.18 144.75 239.16 147.77 C 210.15 150.78 181.67 163.25 159.44 182.34 C 137.21 201.43 121.24 227.11 115.33 254.51 C 109.42 281.91 113.71 310.99 128.98 335.18 C 144.24 359.37 170.64 378.42 203.62 386.04 C 236.61 393.66 276.03 389.51 311.86 372.10 Z"/>
 </svg>

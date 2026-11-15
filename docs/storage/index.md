@@ -1,5 +1,7 @@
 # Storage
 
+For storage owned by a live model instance, see [static model bindings](./models). Connect from a bound method or `onCreate`, choose instance-specific keys, and let disposal release the binding.
+
 `@virentia/storage-core` persists Virentia stores into pluggable backends — `localStorage`, `sessionStorage`, the URL query string, memory, or your own — and keeps them in sync **both ways**.
 
 State stays a model: a store remembers a value, and a `persist` binding mirrors that value into a **box** for one scope. The model never learns where it renders or where it is stored.

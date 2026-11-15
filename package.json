@@ -4,16 +4,26 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/build-ui-walkthroughs.mjs",
+    "predev": "node scripts/build-ui-walkthroughs.mjs",
+    "predocs:build": "node scripts/build-ui-walkthroughs.mjs",
+    "predocs:dev": "node scripts/build-ui-walkthroughs.mjs",
+    "check:ui": "node scripts/check-ui-docs.mjs",
+    "ui:dev": "node scripts/dev-ui-course.mjs",
+    "ui:build": "node scripts/dev-ui-course.mjs --build",
     "build": "vitepress build docs",
     "dev": "vitepress dev docs",
     "preview": "vitepress preview docs",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "check:packages": "node scripts/check-package-docs.mjs"
   },
   "devDependencies": {
+    "@shikijs/magic-move": "4.5.0",
     "@vue-flow/core": "^1.48.2",
     "typescript": "^6.0.3",
+    "shiki": "4.5.0",
     "vitepress": "^1.6.4",
     "vue": "^3.5.34"
   },

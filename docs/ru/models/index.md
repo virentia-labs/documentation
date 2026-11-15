@@ -24,7 +24,7 @@ pnpm add @virentia/core @sinclair/typebox
 ```
 
 ```ts
-import { collection, f, staticModel } from "@virentia/core/models";
+import { f, staticModel } from "@virentia/core/models";
 ```
 
 Приложения, которые `@virentia/core/models` не импортируют, обходятся без
@@ -36,7 +36,7 @@ import { collection, f, staticModel } from "@virentia/core/models";
 | ------------------------------------------- | ------------------------------------------------------------------- |
 | [Поля и данные](./fields)                   | У сущности типизированные поля, приходящие из JSON и уходящие в него. |
 | [Трейты](./traits)                          | Несколько моделей делят поля и поведение.                           |
-| [Коллекции и экземпляры](./instances)       | Сущностям нужен дом: создание, мерж, жизненный цикл.                |
+| [Экземпляры моделей](./instances)       | Сущностям нужен дом: создание, мерж, жизненный цикл.                |
 | [Виды моделей](./kinds)                     | Выбор между `staticModel`, `model` и обычным `owner`.               |
 | [Связи](./relations)                        | Сущности ссылаются на другие или владеют дочерними.                 |
 | [Запросы и индексы](./queries)              | Спискам нужны фильтрация, сортировка и быстрый поиск.               |
@@ -46,12 +46,11 @@ import { collection, f, staticModel } from "@virentia/core/models";
 
 ## Первая модель
 
-Опишите сущность, создайте коллекцию в скоупе, загрузите JSON, запросите и
-сериализуйте обратно.
+Опишите сущность, создайте экземпляры в скоупе, запросите их и сериализуйте обратно.
 
 ```ts
 import { scope, scoped } from "@virentia/core";
-import { collection, f, staticModel } from "@virentia/core/models";
+import { f, staticModel } from "@virentia/core/models";
 
 const Todo = staticModel({
   data: {
@@ -63,20 +62,18 @@ const Todo = staticModel({
 const appScope = scope();
 
 scoped(appScope, () => {
-  const todos = collection(Todo);
-
-  todos.add([
+  Todo.create([
     { id: "1", title: "написать доку" },
     { id: "2", title: "выпустить релиз", done: true },
   ]);
 
-  todos.count;                              // 2
-  todos.where(Todo.done.eq(false)).ids;     // ["1"]
+  Todo.instances.count;                              // 2
+  Todo.where(Todo.done.eq(false)).ids;     // ["1"]
 
-  const first = todos.get("1")!;
+  const first = Todo.get("1")!;
 
   first.done.value = true;
-  todos.where(Todo.done.eq(false)).count;   // 0
+  Todo.where(Todo.done.eq(false)).count;   // 0
 
   first.json(); // { id: "1", title: "написать доку", done: true }
 });
@@ -86,9 +83,8 @@ scoped(appScope, () => {
 
 - `staticModel` объявляет сущность один раз; `Todo.done` - дескриптор поля
   для запросов;
-- `collection(Todo)` - get-or-create на скоуп: тот же вызов возвращает ту же
-  коллекцию, разные скоупы держат независимые данные;
-- `add` валидирует JSON и создаёт экземпляры; известный id мержится, а не
+- `Todo.instances` — полная реактивная выборка; разные скоупы держат независимые экземпляры;
+- `create` валидирует JSON и создаёт экземпляры; известный id мержится, а не
   дублируется;
 - `first.done.value` - обычная запись в стор: индекс и все запросы
   обновляются сразу;
@@ -113,5 +109,5 @@ scoped(appScope, () => {
 ## Связанные разделы
 
 - [Поля и данные](./fields) - как декларации `f.*` описывают и хранение, и JSON.
-- [Коллекции и экземпляры](./instances) - API коллекции и жизненный цикл экземпляра.
+- [Экземпляры моделей](./instances) - создание, поиск и жизненный цикл экземпляра.
 - [UI-биндинги](./bindings) - рендер запросов и экземпляров в React и Vue.

@@ -13,7 +13,7 @@ A trait is identified by its object reference. There are no string names to
 register or collide.
 
 Examples on this page run inside an active scope - see
-[Collections and instances](./instances).
+[Model instances](./instances).
 
 ## Sharing Fields
 
@@ -30,7 +30,7 @@ const Post = staticModel({
   data: { title: f.string() },
 });
 
-const post = collection(Post).add({
+const post = Post.create({
   title: "hello",
   createdAt: "2026-08-08T10:00:00.000Z",
 });
@@ -77,7 +77,7 @@ const Todo = staticModel({
   },
 });
 
-const t = collection(Todo).add({ title: "x" });
+const t = Todo.create({ title: "x" });
 
 await t.toggle();   // the trait's event, available on the instance
 t.selected.value;   // true
@@ -120,8 +120,8 @@ function selectAll<M extends Impl<typeof Selectable>>(items: readonly M[]) {
   }
 }
 
-selectAll(collection(Todo).items); // ok
-selectAll(collection(User).items); // compile error - User does not implement it
+selectAll(Todo.instances.items); // ok
+selectAll(User.instances.items); // compile error - User does not implement it
 ```
 
 ## Parameterized Traits
@@ -170,4 +170,4 @@ Use traits for:
 
 - [Fields and data](./fields) - what `data` and `requires` accept.
 - [Unions](./unions) - why shared fields must come from one trait.
-- [Collections and instances](./instances) - how `setup` and `self` behave.
+- [Model instances](./instances) - how `setup` and `self` behave.

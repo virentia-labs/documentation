@@ -4,7 +4,7 @@ title: Запросы и индексы
 
 # Запросы и индексы
 
-Запросы фильтруют, сортируют и режут коллекцию. Используйте их вместо
+Запросы фильтруют, сортируют и ограничивают выборку экземпляров модели. Используйте их вместо
 `.items` с методами массивов: они едут по объявленным индексам, обновляются
 реактивно и держат идентичность результата стабильной - ровно то, что нужно
 списковым UI.
@@ -13,7 +13,7 @@ title: Запросы и индексы
 запроса экземпляр в руках не нужен.
 
 Примеры на этой странице выполняются в активном скоупе - см.
-[Коллекции и экземпляры](./instances).
+[Экземпляры моделей](./instances).
 
 ## Фильтрация
 
@@ -26,24 +26,22 @@ const Todo = staticModel({
   },
 });
 
-const todos = collection(Todo);
-
-todos.add([
+Todo.create([
   { title: "a", priority: 1 },
   { title: "b", priority: 5, done: true },
   { title: "c", priority: 9 },
 ]);
 
-todos.where(Todo.done.eq(false)).count;          // 2
-todos.where(Todo.priority.between(2, 9)).ids;    // id «b» и «c»
-todos.where(Todo.title.startsWith("a")).first;   // экземпляр «a»
+Todo.where(Todo.done.eq(false)).count;          // 2
+Todo.where(Todo.priority.between(2, 9)).ids;    // id «b» и «c»
+Todo.where(Todo.title.startsWith("a")).first;   // экземпляр «a»
 ```
 
 Цепочка вызовов сужает выборку дальше; обычная функция - запасной выход,
 она просто проходит по всем экземплярам:
 
 ```ts
-todos
+Todo
   .where(Todo.done.eq(false))
   .where((t) => t.title.value.length > 1);
 ```
@@ -51,17 +49,17 @@ todos
 ## Сортировка и срезы
 
 ```ts
-todos.sort(Todo.priority.desc).take(2).items; // топ-2 по приоритету
+Todo.sort(Todo.priority.desc).take(2).items; // топ-2 по приоритету
 ```
 
 ## Проекции и массовые операции
 
 ```ts
-const done = todos.where(Todo.done.eq(true));
+const done = Todo.where(Todo.done.eq(true));
 
 done.select(Todo.title);    // ["b"] - значения поля, не экземпляры
 done.set(Todo.done, false); // запись каждому совпавшему
-todos.where(Todo.priority.lt(2)).remove(); // dispose каждого совпавшего
+Todo.where(Todo.priority.lt(2)).remove(); // dispose каждого совпавшего
 ```
 
 ## Один экземпляр по id
@@ -69,12 +67,12 @@ todos.where(Todo.priority.lt(2)).remove(); // dispose каждого совпа�
 `get(id)` - реактивный вид одного экземпляра:
 
 ```ts
-const view = computed(() => todos.get("42"));
+const view = computed(() => Todo.get("42"));
 
 view.value;              // null - ещё не загружен
-todos.add({ id: "42", title: "x" });
+Todo.create({ id: "42", title: "x" });
 view.value;              // экземпляр
-todos.remove("42");
+await Todo.get("42")?.dispose();
 view.value;              // снова null - без throw посреди чтения
 ```
 
@@ -98,10 +96,10 @@ view.value;              // снова null - без throw посреди чте
 перезапускаются, когда результат может измениться:
 
 ```ts
-const activeCount = computed(() => todos.where(Todo.done.eq(false)).count);
+const activeCount = computed(() => Todo.where(Todo.done.eq(false)).count);
 
 activeCount.value;      // 2
-todos.first!.done.value = true;
+Todo.instances.first!.done.value = true;
 activeCount.value;      // 1 - пересчитано
 ```
 
@@ -111,13 +109,13 @@ activeCount.value;      // 1 - пересчитано
 пересобранная с нуля, возвращает те же массивы, пока результат не изменился:
 
 ```ts
-const a = todos.where(Todo.priority.gte(2)).items;
-const b = todos.where(Todo.priority.gte(2)).items;
+const a = Todo.where(Todo.priority.gte(2)).items;
+const b = Todo.where(Todo.priority.gte(2)).items;
 
 a === b; // true
 
-todos.first!.title.value = "переименовано"; // этот результат не задет
-todos.where(Todo.priority.gte(2)).items === a; // по-прежнему true
+Todo.instances.first!.title.value = "переименовано"; // этот результат не задет
+Todo.where(Todo.priority.gte(2)).items === a; // по-прежнему true
 ```
 
 Поэтому пересборку запроса на каждом рендере можно не считать: UI-биндинги
@@ -138,7 +136,7 @@ interface Query<T> extends Iterable<T> {
 
   select(field: Descriptor): unknown[];
   set(field: Descriptor, value: unknown): void;
-  remove(): void;       // массовый dispose
+  remove(): void | Promise<void>;       // массовый dispose
   toArray(): T[];
 }
 

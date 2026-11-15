@@ -10,7 +10,7 @@ points at another that lives its own life (a post and its author), and
 its columns). Storage is always by id; navigation looks like objects.
 
 Examples on this page run inside an active scope - see
-[Collections and instances](./instances).
+[Model instances](./instances).
 
 ## References
 
@@ -25,8 +25,8 @@ const User = staticModel({
   data: { login: f.string() },
 });
 
-const bob = collection(User).add({ login: "bob" });
-const post = collection(Post).add({ title: "hello" });
+const bob = User.create({ login: "bob" });
+const post = Post.create({ title: "hello" });
 
 post.author.value = bob;   // link (an id string works too)
 post.author.value?.login.value; // "bob"
@@ -52,17 +52,17 @@ const Column = staticModel({
   data: { name: f.string() },
 });
 
-const board = collection(Board).add({ title: "Sprint" });
+const board = Board.create({ title: "Sprint" });
 
 board.columns.add({ name: "Doing" });
 board.columns.items;   // [Column]
 board.columns.move(board.columns.items[0], 0);
 
-collection(Column).add({ name: "loose" });
+Column.create({ name: "loose" });
 // Error: Column is owned as children - create it through the parent
 
 board.dispose();
-collection(Column).count; // 0 - cascaded
+Column.instances.count; // 0 - cascaded
 ```
 
 In JSON children are embedded: the parent's `json()` contains the child
@@ -83,7 +83,7 @@ const User = staticModel({
   },
 });
 
-bob.posts.items;        // all posts whose author is bob
+bob.Post.instances.items;        // all posts whose author is bob
 bob.posts.link(post);   // same as post.author.value = bob
 bob.posts.unlink(post);
 ```
@@ -142,7 +142,7 @@ author: refs.one(() => User).policy("orphan"),   // id stays, reads resolve to n
 ```
 
 ```ts
-users.remove(bob.id);
+User.instances.remove(bob.id);
 post.author.value; // null - the default policy cleared the link
 ```
 
@@ -153,10 +153,10 @@ Children need no policy - they always die with the parent.
 A reference id may arrive before its target:
 
 ```ts
-const post = posts.add({ title: "x", author: "u1" }); // u1 not loaded yet
+const post = Post.create({ title: "x", author: "u1" }); // u1 not loaded yet
 
 post.author.value;            // null - for now
-users.add({ id: "u1", login: "bob" });
+User.create({ id: "u1", login: "bob" });
 post.author.value?.login.value; // "bob" - same read, now resolved
 ```
 

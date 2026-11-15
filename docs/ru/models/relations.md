@@ -10,7 +10,7 @@ title: Связи
 (доска и её колонки). Хранение всегда по id; навигация выглядит объектной.
 
 Примеры на этой странице выполняются в активном скоупе - см.
-[Коллекции и экземпляры](./instances).
+[Экземпляры моделей](./instances).
 
 ## Ссылки
 
@@ -25,8 +25,8 @@ const User = staticModel({
   data: { login: f.string() },
 });
 
-const bob = collection(User).add({ login: "bob" });
-const post = collection(Post).add({ title: "привет" });
+const bob = User.create({ login: "bob" });
+const post = Post.create({ title: "привет" });
 
 post.author.value = bob;   // связать (строка-id тоже работает)
 post.author.value?.login.value; // "bob"
@@ -52,17 +52,17 @@ const Column = staticModel({
   data: { name: f.string() },
 });
 
-const board = collection(Board).add({ title: "Спринт" });
+const board = Board.create({ title: "Спринт" });
 
 board.columns.add({ name: "В работе" });
 board.columns.items;   // [Column]
 board.columns.move(board.columns.items[0], 0);
 
-collection(Column).add({ name: "бесхозная" });
+Column.create({ name: "бесхозная" });
 // Error: Column is owned as children - create it through the parent
 
 board.dispose();
-collection(Column).count; // 0 - каскад
+Column.instances.count; // 0 - каскад
 ```
 
 В JSON дети встроены: `json()` родителя содержит объекты детей, а загрузка
@@ -82,7 +82,7 @@ const User = staticModel({
   },
 });
 
-bob.posts.items;        // все посты, у которых author - bob
+bob.Post.instances.items;        // все посты, у которых author - bob
 bob.posts.link(post);   // то же, что post.author.value = bob
 bob.posts.unlink(post);
 ```
@@ -140,7 +140,7 @@ author: refs.one(() => User).policy("orphan"),   // id остаётся, чте�
 ```
 
 ```ts
-users.remove(bob.id);
+User.instances.remove(bob.id);
 post.author.value; // null - дефолтная политика очистила связь
 ```
 
@@ -151,10 +151,10 @@ post.author.value; // null - дефолтная политика очистил�
 Id ссылки может прийти раньше своей цели:
 
 ```ts
-const post = posts.add({ title: "x", author: "u1" }); // u1 ещё не загружен
+const post = Post.create({ title: "x", author: "u1" }); // u1 ещё не загружен
 
 post.author.value;            // null - пока
-users.add({ id: "u1", login: "bob" });
+User.create({ id: "u1", login: "bob" });
 post.author.value?.login.value; // "bob" - то же чтение, теперь разрешилось
 ```
 

@@ -4,6 +4,8 @@ title: Роутер и history
 
 # Роутер и history
 
+Для роутера во владении модели объявите его один раз в `staticModel.setup`, а history подключайте каждому экземпляру. Таблицы роутов сохраняют привязку, disposal освобождает listener. См. [проверяемый пример](./models).
+
 Роутер регистрирует роуты и связывает их с URL. Он читает текущий location,
 находит подходящие роуты, запускает их `beforeOpen`, обновляет `appRouter.path`,
 `appRouter.query` и `appRouter.activeRoutes`.

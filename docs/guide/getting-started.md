@@ -59,7 +59,7 @@ Use `scoped(scope, fn)` when you need to explicitly run an event or effect in a 
 
 ## UI Libraries
 
-A model written with `@virentia/core` does not depend on the UI layer. Read [`@virentia/react`](/react/) to connect it to React. Other UI adapters should follow the same shape: the UI chooses a scope, while the model stays plain Virentia code.
+A model written with `@virentia/core` does not depend on the UI layer. Read [`@virentia/react`](/react/) to connect it to React, or [`@virentia/ui`](/ui/) for compiled JSX with fine-grained DOM updates and no component rerenders. The UI chooses a scope; the model stays plain Virentia code.
 
 ## Next Sections
 

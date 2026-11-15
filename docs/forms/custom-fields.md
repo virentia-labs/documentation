@@ -4,6 +4,8 @@ title: Custom Fields
 
 # Custom Fields
 
+For model-owned domain fields composed of scalar/array/shape definitions, see [static field models](./models). The field contract below remains available for custom native APIs; a model factory built on `createField` can preserve additional methods.
+
 Use a custom field when the UI is made of several internal fields, but the form
 should see one domain value. The form should not know that `Money` is rendered
 as amount and currency, or that an address is rendered as country, city, and

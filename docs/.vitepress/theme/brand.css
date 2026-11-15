@@ -1,0 +1,126 @@
+/* Shared brand tokens. The landing page keeps its own dark composition. */
+:root {
+  --vi-bg: #fcfafd;
+  --vi-surface: #f5f0f8;
+  --vi-surface-raised: #fffaff;
+  --vi-text: #302537;
+  --vi-muted: #594d66;
+  --vi-subtle: #6f607b;
+  --vi-line: #39224924;
+  --vi-accent: #744399;
+  --vi-accent-hover: #583271;
+  --vi-accent-soft: #8956b512;
+  --vi-gold: #885719;
+  --vi-code-bg: #f5f0f8;
+  --vi-nav-bg: #fcfafdf2;
+  --vi-green: #286549;
+  --vi-red: #a23e59;
+  --vp-c-bg: var(--vi-bg);
+  --vp-c-bg-alt: var(--vi-surface);
+  --vp-c-bg-elv: var(--vi-surface-raised);
+  --vp-c-bg-soft: var(--vi-surface);
+  --vp-c-text-1: var(--vi-text);
+  --vp-c-text-2: var(--vi-muted);
+  --vp-c-text-3: var(--vi-subtle);
+  --vp-c-divider: var(--vi-line);
+  --vp-c-border: var(--vi-line);
+  --vp-c-gutter: var(--vi-line);
+  --vp-c-brand-1: var(--vi-accent);
+  --vp-c-brand-2: var(--vi-accent-hover);
+  --vp-c-brand-3: #8656b1;
+  --vp-c-brand-soft: var(--vi-accent-soft);
+  --vp-c-default-1: var(--vi-subtle);
+  --vp-c-default-2: var(--vi-line);
+  --vp-c-default-3: var(--vi-line);
+  --vp-c-default-soft: var(--vi-surface);
+  --vp-c-tip-1: var(--vi-accent);
+  --vp-c-tip-2: var(--vi-accent-hover);
+  --vp-c-tip-3: var(--vi-accent);
+  --vp-c-tip-soft: var(--vi-accent-soft);
+  --vp-c-warning-1: var(--vi-gold);
+  --vp-c-warning-2: var(--vi-gold);
+  --vp-c-warning-3: var(--vi-gold);
+  --vp-c-warning-soft: #dba24612;
+  --vp-c-danger-1: var(--vi-red);
+  --vp-c-danger-2: var(--vi-red);
+  --vp-c-danger-3: var(--vi-red);
+  --vp-c-danger-soft: #ce6c8812;
+  --vp-c-green-1: var(--vi-green);
+  --vp-c-green-soft: #6ba78a14;
+  --vp-c-important-1: var(--vi-accent);
+  --vp-c-important-soft: var(--vi-accent-soft);
+  --vp-c-caution-1: var(--vi-red);
+  --vp-c-caution-soft: var(--vp-c-danger-soft);
+  --vp-nav-height: 80px;
+  --vp-sidebar-width: 284px;
+  --vp-layout-max-width: 1440px;
+  --vp-nav-bg-color: var(--vi-nav-bg);
+  --vp-sidebar-bg-color: var(--vi-bg);
+  --vp-local-nav-bg-color: var(--vi-nav-bg);
+  --vp-code-color: var(--vi-accent);
+  --vp-code-bg: var(--vi-accent-soft);
+  --vp-code-block-bg: var(--vi-code-bg);
+  --vp-code-tab-bg: var(--vi-surface);
+  --vp-code-tab-divider: var(--vi-line);
+  --vp-code-tab-text-color: var(--vi-muted);
+  --vp-code-tab-active-text-color: var(--vi-accent);
+  --vp-code-tab-active-bar-color: var(--vi-accent);
+  --vp-code-block-color: var(--vi-text);
+  --vp-code-copy-code-bg: var(--vi-surface);
+  --vp-code-copy-code-hover-bg: var(--vi-accent-soft);
+  --vp-code-copy-code-border-color: var(--vi-line);
+  --vp-code-copy-code-hover-border-color: var(--vi-accent);
+  --vp-code-line-highlight-color: var(--vi-accent-soft);
+  --vp-code-line-number-color: var(--vi-subtle);
+  --vp-custom-block-font-size: 1rem;
+  --vp-custom-block-code-font-size: .9375rem;
+  --vp-custom-block-info-bg: var(--vi-surface);
+  --vp-custom-block-info-border: var(--vi-line);
+  --vp-custom-block-info-text: var(--vi-muted);
+  --vp-custom-block-tip-text: var(--vi-text);
+  --vp-custom-block-tip-border: var(--vi-line);
+  --vp-custom-block-warning-text: var(--vi-text);
+  --vp-custom-block-warning-border: #bd945a55;
+  --vp-custom-block-danger-text: var(--vi-text);
+  --vp-custom-block-danger-border: #c77e9555;
+  --vp-custom-block-details-bg: var(--vi-surface);
+  --vp-custom-block-details-border: var(--vi-line);
+  --vp-custom-block-details-text: var(--vi-muted);
+}
+
+.dark {
+  --vi-bg: #08080d;
+  --vi-surface: #111017;
+  --vi-surface-raised: #18131f;
+  --vi-text: #eee8f5;
+  --vi-muted: #c6bdd2;
+  --vi-subtle: #a99cb7;
+  --vi-line: #d5bbef24;
+  --vi-accent: #c9a9ee;
+  --vi-accent-hover: #e1c8fc;
+  --vi-accent-soft: #b98ee514;
+  --vi-gold: #e2bf86;
+  --vi-code-bg: #100d16;
+  --vi-nav-bg: #08080df0;
+  --vi-green: #acd2b7;
+  --vi-red: #e5a6b8;
+  --vp-c-brand-3: #9564c9;
+  --vp-c-warning-soft: #dba2460e;
+  --vp-c-danger-soft: #ce6c8810;
+}
+
+::selection { color: var(--vi-text); background: color-mix(in srgb, var(--vi-accent) 28%, transparent); }
+
+/* Search and menus are teleported outside the page layout. */
+.VPMenu { padding: 10px; border: 1px solid var(--vi-line); border-radius: 8px; background: var(--vi-surface-raised); box-shadow: 0 12px 48px #0003; }
+.VPMenuLink .link { min-height: 40px; font-size: .9375rem; }
+.VPLocalSearchBox { --vp-local-search-bg: var(--vi-surface-raised); --vp-local-search-result-bg: var(--vi-bg); --vp-local-search-result-border: var(--vi-line); --vp-local-search-result-selected-bg: var(--vi-accent-soft); --vp-local-search-result-selected-border: var(--vi-accent); --vp-local-search-highlight-bg: var(--vi-accent-soft); --vp-local-search-highlight-text: var(--vi-accent); }
+.VPLocalSearchBox .shell { border: 1px solid var(--vi-line); border-radius: 10px; box-shadow: 0 28px 90px #0006; }
+.VPLocalSearchBox .search-bar { border-radius: 6px; }
+.VPLocalSearchBox input { min-height: 48px; font-size: 1.125rem; }
+.VPLocalSearchBox .result { padding: 15px 18px; border-radius: 6px; }
+.VPLocalSearchBox .result .title { font-size: 1rem; }
+.VPLocalSearchBox .titles, .VPLocalSearchBox .search-keyboard-shortcuts { font-size: .875rem; }
+.VPBackdrop { background: #05030c99; backdrop-filter: blur(3px); }
+
+@media (max-width: 767px) { :root { --vp-nav-height: 64px; } }
