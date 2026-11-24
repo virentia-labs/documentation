@@ -7,7 +7,7 @@ mkdir virentia-ui-app
 cd virentia-ui-app
 npm init -y
 npm pkg set type=module scripts.dev=vite 'scripts.build=vite build'
-npm install @virentia/ui@0.1.0 @virentia/core@0.12.0 @sinclair/typebox@0.34.52
+npm install @virentia/ui@0.1 @virentia/core@0.12.0 @sinclair/typebox@0.34.52
 npm install -D vite@8 typescript@6
 mkdir src
 ```
