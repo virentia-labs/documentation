@@ -46,16 +46,54 @@ jobs:
         run: pnpm docs:build
 
       - name: Deploy docs
-        uses: pressidium/lftp-mirror-action@v1
         timeout-minutes: 15
-        with:
-          host: ${{ secrets.SERVER }}
-          port: 22
-          user: ${{ secrets.SERVER_LOGIN }}
-          pass: ${{ secrets.SERVER_PASSWORD }}
-          localDir: ./docs/.vitepress/dist
-          remoteDir: ${{ secrets.TARGET_DIR }}
-          reverse: true
-          parallel: 4
-          options: --verbose=1
-          settings: cmd:fail-exit=yes
+        env:
+          DEPLOY_HOST: ${{ secrets.SERVER }}
+          DEPLOY_USER: ${{ secrets.SERVER_LOGIN }}
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
+          DEPLOY_DIR: ${{ secrets.TARGET_DIR }}
+          DEPLOY_HOST_KEY: ${{ secrets.DOCS_SSH_HOST_KEY }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?Missing SERVER}"
+          : "${DEPLOY_USER:?Missing SERVER_LOGIN}"
+          : "${SSHPASS:?Missing SERVER_PASSWORD}"
+          : "${DEPLOY_DIR:?Missing TARGET_DIR}"
+          : "${DEPLOY_HOST_KEY:?Missing DOCS_SSH_HOST_KEY}"
+
+          if ! command -v rsync >/dev/null || ! command -v sshpass >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends rsync sshpass
+          fi
+
+          known_hosts="$(mktemp "$RUNNER_TEMP/docs-known-hosts.XXXXXX")"
+          ssh_config="$(mktemp "$RUNNER_TEMP/docs-ssh.XXXXXX")"
+          printf 'docs-deploy %s\n' "$DEPLOY_HOST_KEY" > "$known_hosts"
+          cat > "$ssh_config" <<EOF
+          Host docs-deploy
+            HostName $DEPLOY_HOST
+            User $DEPLOY_USER
+            Port 22
+            BatchMode no
+            ConnectTimeout 12
+            ConnectionAttempts 1
+            NumberOfPasswordPrompts 1
+            PreferredAuthentications keyboard-interactive,password
+            StrictHostKeyChecking yes
+            HostKeyAlias docs-deploy
+            UserKnownHostsFile "$known_hosts"
+          EOF
+
+          export RSYNC_RSH="sshpass -e ssh -F '$ssh_config'"
+          rsync --recursive --checksum --compress --protect-args --delay-updates --stats \
+            ./docs/.vitepress/dist/ "docs-deploy:${DEPLOY_DIR%/}/"
+
+      - name: Verify published docs
+        run: |
+          set -euo pipefail
+          published="$(mktemp "$RUNNER_TEMP/docs-index.XXXXXX")"
+          curl --fail --silent --show-error --compressed --retry 3 --retry-delay 2 \
+            --retry-max-time 35 --connect-timeout 5 --max-time 15 \
+            -H 'Cache-Control: no-cache' \
+            "https://movpushmov.dev/virentia/?deployment=$GITHUB_SHA" -o "$published"
+          cmp docs/.vitepress/dist/index.html "$published"
