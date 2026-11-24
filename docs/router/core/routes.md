@@ -4,6 +4,8 @@ title: Route model
 
 # Route Model
 
+Routes can belong to a screen model: declare them in `staticModel.setup` and return their native API. See [model-owned routing](./models) for independent params and histories.
+
 A route is a Virentia model for one addressable application state. It is not a
 React component and not a history object. It stores whether that state is open,
 which params opened it, and which rules must run before it becomes active.

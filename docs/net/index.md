@@ -1,5 +1,7 @@
 # Net
 
+Queries and mutations can belong to independent [static model instances](./core/models). Declare their graph and triggers once in setup; returned calls and nested units retain their instance binding.
+
 `@virentia/net-core` describes remote data as a model: what fetch runs, when it runs, how overlapping runs behave, and how failures recover — all outside the UI.
 
 The one idea to hold on to: **a query is an effect.** It is a real `@virentia/core` effect, so it already carries `pending`, `doneData`, `failData`, `abort`, a per-call `signal`, and per-scope isolation. Net adds two stores — `data` and `stale` — and a small set of composable operators on top.

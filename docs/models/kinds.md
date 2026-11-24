@@ -5,7 +5,7 @@ title: Model Kinds
 # Model Kinds
 
 `model` and `staticModel` declare fields, traits, and relations the same way,
-live in the same collections, and expose the same instance surface. They
+use scoped registries and expose the same instance surface. They
 differ in one thing: when the units from `setup` are created. This page is
 about that difference, and about when neither is the right tool and a plain
 core [`owner`](/core/owners) is.
@@ -74,7 +74,7 @@ const ReportScreen = model({
   },
 });
 
-const report = collection(ReportScreen).add({ period: "week", filters: { team: 1 } });
+const report = ReportScreen.create({ period: "week", filters: { team: 1 } });
 
 await report.refresh();
 report.total.value;
@@ -84,7 +84,7 @@ What happens:
 
 - stores, events, computeds, and reactions are created for this instance and
   owned by it - `dispose()` tears them all down;
-- `props` is the raw `add` input - keys that are not fields (like `filters`
+- `props` is the raw `create` input - keys that are not fields (like `filters`
   above) are visible to `setup` even though they are not stored;
 - because each instance owns real units, `setup` may branch: create different
   reactions per instance, capture per-instance closures, hold resources.
@@ -98,7 +98,7 @@ entities: screens, editors, wizards, long-lived workspaces.
 |---|---|---|
 | Units | one shared graph | created in `setup` per instance |
 | Instance cost | a scope and a value map | stores + reactions + an owner |
-| `setup` runs | once, at declaration | on every `add` |
+| `setup` runs | once, at declaration | on every `create` |
 | `setup` arguments | `(self)` | `(self, props)` - the creation input |
 | Per-instance closures | no - state lives in fields | yes |
 | Pooling | disposed scopes are reused | no - disposal is a real teardown |
@@ -110,12 +110,17 @@ an instance genuinely needs its own dynamically created units.
 
 ## And Plain `owner`?
 
+For app-wide state that reuses an existing model description, use
+[`Model.static()`](./instances#a-singleton-from-an-existing-model). Unlike the
+`staticModel` kind, each call creates a new model with independent native units;
+its values are still isolated per scope.
+
 The core [`owner`](/core/owners) is the primitive underneath: a disposable
 tree of units and resources. A dynamic model instance *is* an owner inside -
 `model` adds the entity layer on top:
 
 - a declaration: fields that validate input and serialize back;
-- a home: the collection, with get-or-create, id lookup, and merge semantics;
+- a scoped registry with creation, ID lookup, and merge semantics;
 - relations with delete policies, queries with indexes, `rebind` and aliases.
 
 Rule of thumb:
@@ -133,7 +138,7 @@ Rule of thumb:
 ```ts
 model({
   with?, data?, name?,
-  setup?(self, props): members | void,  // per instance; props is the add input
+  setup?(self, props): members | void,  // per instance; props is the create input
 });
 
 staticModel({
@@ -142,8 +147,7 @@ staticModel({
 });
 ```
 
-Both return a definition usable with `collection`, traits, relations, unions,
-and bindings interchangeably.
+Both expose `create`, `get`, `instances`, and LINQ queries, and work with traits, relations, unions, and bindings.
 
 ## Common Cases
 
@@ -156,6 +160,6 @@ and bindings interchangeably.
 
 ## Related
 
-- [Collections and instances](./instances) - the shared instance surface.
+- [Model instances](./instances) - the shared instance surface.
 - [Owners and cleanup](/core/owners) - the primitive underneath.
 - [UI bindings](./bindings) - screen models and `keep`.

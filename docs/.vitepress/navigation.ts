@@ -53,6 +53,7 @@ const coreEn: DefaultTheme.SidebarItem[] = [
       { text: "Lazy models", link: "/core/lazy-models" },
       { text: "Scopes", link: "/core/scopes" },
       { text: "Scope loss", link: "/core/scope-loss" },
+      { text: "Source-stable SIDs", link: "/core/compiler" },
       { text: "Dependencies", link: "/core/dependencies" },
       { text: "Owners and cleanup", link: "/core/owners" },
       { text: "Low-level kernel", link: "/core/kernel" },
@@ -74,6 +75,7 @@ const coreRu: DefaultTheme.SidebarItem[] = [
       { text: "Ленивые модели", link: "/ru/core/lazy-models" },
       { text: "Скоупы", link: "/ru/core/scopes" },
       { text: "Потеря scope", link: "/ru/core/scope-loss" },
+      { text: "Стабильные SID", link: "/ru/core/compiler" },
       { text: "Зависимости", link: "/ru/core/dependencies" },
       { text: "Владельцы и очистка", link: "/ru/core/owners" },
       { text: "Низкоуровневое ядро", link: "/ru/core/kernel" },
@@ -88,7 +90,7 @@ const modelsEn: DefaultTheme.SidebarItem[] = [
       { text: "Overview", link: "/models/" },
       { text: "Fields and data", link: "/models/fields" },
       { text: "Traits", link: "/models/traits" },
-      { text: "Collections and instances", link: "/models/instances" },
+      { text: "Model instances", link: "/models/instances" },
       { text: "Model kinds", link: "/models/kinds" },
       { text: "Relations", link: "/models/relations" },
       { text: "Queries and indexes", link: "/models/queries" },
@@ -106,7 +108,7 @@ const modelsRu: DefaultTheme.SidebarItem[] = [
       { text: "Обзор", link: "/ru/models/" },
       { text: "Поля и данные", link: "/ru/models/fields" },
       { text: "Трейты", link: "/ru/models/traits" },
-      { text: "Коллекции и экземпляры", link: "/ru/models/instances" },
+      { text: "Экземпляры моделей", link: "/ru/models/instances" },
       { text: "Виды моделей", link: "/ru/models/kinds" },
       { text: "Связи", link: "/ru/models/relations" },
       { text: "Запросы и индексы", link: "/ru/models/queries" },
@@ -170,6 +172,7 @@ const formsEn: DefaultTheme.SidebarItem[] = [
     text: "Core",
     items: [
       { text: "Overview", link: "/forms/" },
+      { text: "Static models", link: "/forms/models" },
       { text: "Field model", link: "/forms/fields" },
       { text: "Form model", link: "/forms/form" },
       { text: "Validation lifecycle", link: "/forms/validation" },
@@ -209,6 +212,7 @@ const formsRu: DefaultTheme.SidebarItem[] = [
     text: "Ядро",
     items: [
       { text: "Обзор", link: "/ru/forms/" },
+      { text: "Статические модели", link: "/ru/forms/models" },
       { text: "Модель поля", link: "/ru/forms/fields" },
       { text: "Модель формы", link: "/ru/forms/form" },
       { text: "Жизненный цикл валидации", link: "/ru/forms/validation" },
@@ -255,6 +259,7 @@ const routerEn: DefaultTheme.SidebarItem[] = [
     text: "Core",
     items: [
       { text: "Overview", link: "/router/core/" },
+      { text: "Static models", link: "/router/core/models" },
       { text: "Path templates", link: "/router/core/paths" },
       { text: "Route model", link: "/router/core/routes" },
       { text: "Router and history", link: "/router/core/router" },
@@ -295,6 +300,7 @@ const routerRu: DefaultTheme.SidebarItem[] = [
     text: "Ядро",
     items: [
       { text: "Обзор", link: "/ru/router/core/" },
+      { text: "Статические модели", link: "/ru/router/core/models" },
       { text: "Шаблоны путей", link: "/ru/router/core/paths" },
       { text: "Модель роута", link: "/ru/router/core/routes" },
       { text: "Роутер и history", link: "/ru/router/core/router" },
@@ -347,6 +353,364 @@ const reactRu: DefaultTheme.SidebarItem[] = [
   },
 ];
 
+const uiEn: DefaultTheme.SidebarItem[] = [
+  {
+    "text": "UI",
+    "items": [
+      {
+        "text": "Overview",
+        "link": "/ui/"
+      },
+      {
+        "text": "Setup",
+        "link": "/ui/installation"
+      }
+    ]
+  },
+  {
+    "text": "Tutorial",
+    "items": [
+      {
+        "text": "Introduction",
+        "link": "/ui/learn/"
+      },
+      {
+        "text": "1. Your first component",
+        "link": "/ui/learn/first-app"
+      },
+      {
+        "text": "2. State",
+        "link": "/ui/learn/state-and-props"
+      },
+      {
+        "text": "3. Events",
+        "link": "/ui/learn/events"
+      },
+      {
+        "text": "4. Derived values",
+        "link": "/ui/learn/derived"
+      },
+      {
+        "text": "5. Props",
+        "link": "/ui/learn/props"
+      },
+      {
+        "text": "6. Conditional rendering",
+        "link": "/ui/learn/conditions"
+      },
+      {
+        "text": "7. A list of counters",
+        "link": "/ui/learn/model-lists"
+      }
+    ]
+  },
+  {
+    "text": "Guides",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "Choose a guide",
+        "link": "/ui/guides/"
+      },
+      {
+        "text": "Model ownership",
+        "link": "/ui/learn/setup-and-view"
+      },
+      {
+        "text": "Retaining instances",
+        "link": "/ui/components"
+      },
+      {
+        "text": "Reactive inputs",
+        "link": "/ui/reactivity"
+      },
+      {
+        "text": "Refs and lifecycle",
+        "link": "/ui/learn/refs-and-lifetime"
+      },
+      {
+        "text": "How rendering works",
+        "link": "/ui/how-it-works"
+      },
+      {
+        "text": "Scopes",
+        "link": "/ui/learn/ssr-and-scopes"
+      },
+      {
+        "text": "Vitest",
+        "link": "/ui/api/testing"
+      },
+      {
+        "text": "SSR",
+        "link": "/ui/ssr"
+      },
+      {
+        "text": "Start",
+        "link": "/ui/start"
+      },
+      {
+        "text": "React and Vue",
+        "link": "/ui/interop"
+      }
+    ]
+  },
+  {
+    "text": "Recipes",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "Overview",
+        "link": "/ui/recipes/"
+      },
+      {
+        "text": "Editor and draft",
+        "link": "/ui/recipes/conditional-editor"
+      },
+      {
+        "text": "Editable model list",
+        "link": "/ui/recipes/model-list"
+      },
+      {
+        "text": "Search and cancellation",
+        "link": "/ui/recipes/async-search"
+      },
+      {
+        "text": "Request SSR",
+        "link": "/ui/recipes/ssr"
+      },
+      {
+        "text": "Concurrent tests",
+        "link": "/ui/recipes/testing"
+      }
+    ]
+  },
+  {
+    "text": "API",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "Exports",
+        "link": "/ui/api/"
+      },
+      {
+        "text": "Rendering and DOM",
+        "link": "/ui/api/rendering"
+      },
+      {
+        "text": "Components",
+        "link": "/ui/api/components"
+      },
+      {
+        "text": "Refs and events",
+        "link": "/ui/api/refs-events"
+      },
+      {
+        "text": "Containers and context",
+        "link": "/ui/api/collections-context"
+      },
+      {
+        "text": "Core",
+        "link": "/ui/api/core"
+      },
+      {
+        "text": "SSR and Start",
+        "link": "/ui/api/server-start"
+      },
+      {
+        "text": "JSX and SIDs",
+        "link": "/ui/api/compiler"
+      },
+      {
+        "text": "Adapters",
+        "link": "/ui/api/interop"
+      },
+      {
+        "text": "DOM types",
+        "link": "/ui/api/types"
+      }
+    ]
+  }
+];
+
+const uiRu: DefaultTheme.SidebarItem[] = [
+  {
+    "text": "UI",
+    "items": [
+      {
+        "text": "Обзор",
+        "link": "/ru/ui/"
+      },
+      {
+        "text": "Подготовка",
+        "link": "/ru/ui/installation"
+      }
+    ]
+  },
+  {
+    "text": "Учебник",
+    "items": [
+      {
+        "text": "Введение",
+        "link": "/ru/ui/learn/"
+      },
+      {
+        "text": "1. Первый компонент",
+        "link": "/ru/ui/learn/first-app"
+      },
+      {
+        "text": "2. Состояние",
+        "link": "/ru/ui/learn/state-and-props"
+      },
+      {
+        "text": "3. События",
+        "link": "/ru/ui/learn/events"
+      },
+      {
+        "text": "4. Вычисления",
+        "link": "/ru/ui/learn/derived"
+      },
+      {
+        "text": "5. Пропсы",
+        "link": "/ru/ui/learn/props"
+      },
+      {
+        "text": "6. Условный вывод",
+        "link": "/ru/ui/learn/conditions"
+      },
+      {
+        "text": "7. Список счётчиков",
+        "link": "/ru/ui/learn/model-lists"
+      }
+    ]
+  },
+  {
+    "text": "Руководства",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "Выбрать руководство",
+        "link": "/ru/ui/guides/"
+      },
+      {
+        "text": "Владение моделями",
+        "link": "/ru/ui/learn/setup-and-view"
+      },
+      {
+        "text": "Сохранение экземпляров",
+        "link": "/ru/ui/components"
+      },
+      {
+        "text": "Реактивные входы",
+        "link": "/ru/ui/reactivity"
+      },
+      {
+        "text": "Refs и lifecycle",
+        "link": "/ru/ui/learn/refs-and-lifetime"
+      },
+      {
+        "text": "Как работает рендер",
+        "link": "/ru/ui/how-it-works"
+      },
+      {
+        "text": "Scope",
+        "link": "/ru/ui/learn/ssr-and-scopes"
+      },
+      {
+        "text": "Vitest",
+        "link": "/ru/ui/api/testing"
+      },
+      {
+        "text": "SSR",
+        "link": "/ru/ui/ssr"
+      },
+      {
+        "text": "Start",
+        "link": "/ru/ui/start"
+      },
+      {
+        "text": "React и Vue",
+        "link": "/ru/ui/interop"
+      }
+    ]
+  },
+  {
+    "text": "Рецепты",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "Обзор",
+        "link": "/ru/ui/recipes/"
+      },
+      {
+        "text": "Редактор и черновик",
+        "link": "/ru/ui/recipes/conditional-editor"
+      },
+      {
+        "text": "Редактируемый список",
+        "link": "/ru/ui/recipes/model-list"
+      },
+      {
+        "text": "Поиск и отмена",
+        "link": "/ru/ui/recipes/async-search"
+      },
+      {
+        "text": "SSR запроса",
+        "link": "/ru/ui/recipes/ssr"
+      },
+      {
+        "text": "Параллельные тесты",
+        "link": "/ru/ui/recipes/testing"
+      }
+    ]
+  },
+  {
+    "text": "API",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "Экспорты",
+        "link": "/ru/ui/api/"
+      },
+      {
+        "text": "Рендер и DOM",
+        "link": "/ru/ui/api/rendering"
+      },
+      {
+        "text": "Компоненты",
+        "link": "/ru/ui/api/components"
+      },
+      {
+        "text": "Refs и события",
+        "link": "/ru/ui/api/refs-events"
+      },
+      {
+        "text": "Контейнеры и контекст",
+        "link": "/ru/ui/api/collections-context"
+      },
+      {
+        "text": "Core",
+        "link": "/ru/ui/api/core"
+      },
+      {
+        "text": "SSR и Start",
+        "link": "/ru/ui/api/server-start"
+      },
+      {
+        "text": "JSX и SID",
+        "link": "/ru/ui/api/compiler"
+      },
+      {
+        "text": "Адаптеры",
+        "link": "/ru/ui/api/interop"
+      },
+      {
+        "text": "Типы DOM",
+        "link": "/ru/ui/api/types"
+      }
+    ]
+  }
+];
+
 const vueEn: DefaultTheme.SidebarItem[] = [
   {
     text: "Vue",
@@ -376,6 +740,7 @@ const storageEn: DefaultTheme.SidebarItem[] = [
     text: "Storage",
     items: [
       { text: "Overview", link: "/storage/" },
+      { text: "Static models", link: "/storage/models" },
       { text: "Storage boxes", link: "/storage/boxes" },
       { text: "Persistence", link: "/storage/persist" },
     ],
@@ -387,6 +752,7 @@ const storageRu: DefaultTheme.SidebarItem[] = [
     text: "Storage",
     items: [
       { text: "Обзор", link: "/ru/storage/" },
+      { text: "Статические модели", link: "/ru/storage/models" },
       { text: "Боксы хранилищ", link: "/ru/storage/boxes" },
       { text: "Сохранение", link: "/ru/storage/persist" },
     ],
@@ -438,6 +804,7 @@ const netEn: DefaultTheme.SidebarItem[] = [
     text: "Core",
     items: [
       { text: "Overview", link: "/net/core/" },
+      { text: "Static models", link: "/net/core/models" },
       { text: "Query", link: "/net/core/query" },
       { text: "Mutation", link: "/net/core/mutation" },
       { text: "Triggers", link: "/net/core/triggers" },
@@ -473,6 +840,7 @@ const netRu: DefaultTheme.SidebarItem[] = [
     text: "Ядро",
     items: [
       { text: "Обзор", link: "/ru/net/core/" },
+      { text: "Статические модели", link: "/ru/net/core/models" },
       { text: "Query", link: "/ru/net/core/query" },
       { text: "Mutation", link: "/ru/net/core/mutation" },
       { text: "Триггеры", link: "/ru/net/core/triggers" },
@@ -577,6 +945,7 @@ export const enSidebar: DefaultTheme.Sidebar = {
   "/forms/": formsEn,
   "/router/": routerEn,
   "/react/": virentiaEn,
+  "/ui/": uiEn,
   "/vue/": virentiaEn,
   "/storage/": storageEn,
   "/effector/": virentiaEn,
@@ -595,6 +964,7 @@ export const ruSidebar: DefaultTheme.Sidebar = {
   "/ru/forms/": formsRu,
   "/ru/router/": routerRu,
   "/ru/react/": virentiaRu,
+  "/ru/ui/": uiRu,
   "/ru/vue/": virentiaRu,
   "/ru/storage/": storageRu,
   "/ru/effector/": virentiaRu,
@@ -610,8 +980,30 @@ export const docsSections: DocsSection[] = [
     label: { en: "Core", ru: "Ядро" },
     link: { en: "/guide/getting-started", ru: "/ru/guide/getting-started" },
     match: {
-      en: ["/", "/guide/", "/core/", "/models/", "/utils/", "/react/", "/vue/", "/mutable/", "/effector/", "/inspector/"],
-      ru: ["/ru/", "/ru/guide/", "/ru/core/", "/ru/models/", "/ru/utils/", "/ru/react/", "/ru/vue/", "/ru/mutable/", "/ru/effector/", "/ru/inspector/"],
+      en: [
+        "/",
+        "/guide/",
+        "/core/",
+        "/models/",
+        "/utils/",
+        "/react/",
+        "/vue/",
+        "/mutable/",
+        "/effector/",
+        "/inspector/",
+      ],
+      ru: [
+        "/ru/",
+        "/ru/guide/",
+        "/ru/core/",
+        "/ru/models/",
+        "/ru/utils/",
+        "/ru/react/",
+        "/ru/vue/",
+        "/ru/mutable/",
+        "/ru/effector/",
+        "/ru/inspector/",
+      ],
     },
     nav: {
       en: [
@@ -639,6 +1031,28 @@ export const docsSections: DocsSection[] = [
     },
   },
   {
+    id: "ui",
+    label: { en: "UI", ru: "UI" },
+    link: { en: "/ui/", ru: "/ru/ui/" },
+    match: { en: ["/ui/"], ru: ["/ru/ui/"] },
+    nav: {
+      en: [
+        { text: "Overview", link: "/ui/" },
+        { text: "Learn", link: "/ui/learn/" },
+        { text: "How it works", link: "/ui/how-it-works" },
+        { text: "Recipes", link: "/ui/recipes/" },
+        { text: "API", link: "/ui/api/" },
+      ],
+      ru: [
+        { text: "Обзор", link: "/ru/ui/" },
+        { text: "Обучение", link: "/ru/ui/learn/" },
+        { text: "Как это работает", link: "/ru/ui/how-it-works" },
+        { text: "Рецепты", link: "/ru/ui/recipes/" },
+        { text: "API", link: "/ru/ui/api/" },
+      ],
+    },
+  },
+  {
     id: "forms",
     label: { en: "Forms", ru: "Формы" },
     link: { en: "/forms/", ru: "/ru/forms/" },
@@ -646,6 +1060,7 @@ export const docsSections: DocsSection[] = [
     nav: {
       en: [
         { text: "Overview", link: "/forms/" },
+        { text: "Static models", link: "/forms/models" },
         { text: "Fields", link: "/forms/fields" },
         { text: "Form", link: "/forms/form" },
         { text: "Validation", link: "/forms/validation" },
@@ -655,6 +1070,7 @@ export const docsSections: DocsSection[] = [
       ],
       ru: [
         { text: "Обзор", link: "/ru/forms/" },
+        { text: "Статические модели", link: "/ru/forms/models" },
         { text: "Поля", link: "/ru/forms/fields" },
         { text: "Форма", link: "/ru/forms/form" },
         { text: "Валидация", link: "/ru/forms/validation" },
@@ -676,6 +1092,7 @@ export const docsSections: DocsSection[] = [
           text: "Core",
           items: [
             { text: "Overview", link: "/router/core/" },
+            { text: "Static models", link: "/router/core/models" },
             { text: "Path templates", link: "/router/core/paths" },
             { text: "Route model", link: "/router/core/routes" },
             { text: "Router and history", link: "/router/core/router" },
@@ -693,6 +1110,7 @@ export const docsSections: DocsSection[] = [
           text: "Ядро",
           items: [
             { text: "Обзор", link: "/ru/router/core/" },
+            { text: "Статические модели", link: "/ru/router/core/models" },
             { text: "Шаблоны путей", link: "/ru/router/core/paths" },
             { text: "Модель роута", link: "/ru/router/core/routes" },
             { text: "Роутер и history", link: "/ru/router/core/router" },
@@ -714,11 +1132,13 @@ export const docsSections: DocsSection[] = [
     nav: {
       en: [
         { text: "Overview", link: "/storage/" },
+        { text: "Static models", link: "/storage/models" },
         { text: "Boxes", link: "/storage/boxes" },
         { text: "Persistence", link: "/storage/persist" },
       ],
       ru: [
         { text: "Обзор", link: "/ru/storage/" },
+        { text: "Статические модели", link: "/ru/storage/models" },
         { text: "Боксы", link: "/ru/storage/boxes" },
         { text: "Сохранение", link: "/ru/storage/persist" },
       ],
@@ -736,6 +1156,7 @@ export const docsSections: DocsSection[] = [
           text: "Core",
           items: [
             { text: "Overview", link: "/net/core/" },
+            { text: "Static models", link: "/net/core/models" },
             { text: "Query", link: "/net/core/query" },
             { text: "Mutation", link: "/net/core/mutation" },
             { text: "Triggers", link: "/net/core/triggers" },
@@ -753,6 +1174,7 @@ export const docsSections: DocsSection[] = [
           text: "Ядро",
           items: [
             { text: "Обзор", link: "/ru/net/core/" },
+            { text: "Статические модели", link: "/ru/net/core/models" },
             { text: "Query", link: "/ru/net/core/query" },
             { text: "Mutation", link: "/ru/net/core/mutation" },
             { text: "Триггеры", link: "/ru/net/core/triggers" },

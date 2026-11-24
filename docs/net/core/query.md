@@ -1,5 +1,7 @@
 # Query
 
+A query returned from `staticModel.setup` keeps its call, data and lifecycle units bound to each instance. See [the checked model example](./models) for isolation, refresh/reset and disposal.
+
 `query(config)` builds a fetch effect. The result is a `@virentia/core` effect — you have its full lifecycle — with a `data` store, a `stale` store, and `refresh`/`reset` added.
 
 ```ts

@@ -1,32 +1,16 @@
 ---
-layout: home
-
-hero:
-  name: Virentia
-  text: Реактивный стек для описания любой бизнес-логики
-  tagline: Создавайте приложения любой сложности. Масштабируйте их без сложностей.
-  image:
-    src: /logo.svg
-    alt: Логотип Virentia
-  actions:
-    - theme: brand
-      text: Начать
-      link: /ru/guide/getting-started
-    - theme: alt
-      text: Почему Virentia
-      link: /ru/guide/ideology
-
-features:
-  - title: Выучи единожды — создавай что угодно
-    details: От счётчика до целого продукта, не меняя подхода.
-  - title: Реальная изоляция
-    details: "Приложение, тест, SSR-запрос: независимые состояния в рамках одной модели."
-  - title: Встроенная работа с асинхронностью
-    details: Отмена, pending и ошибки — часть сайд-эффекта, а не обвязка вокруг.
+layout: page
+pageClass: virentia-landing
+description: "Твой следующий фреймворк для веб-приложений. Реактивная основа для состояния, бизнес-логики и асинхронной работы."
 ---
 
-<CodeRow>
-<template #left>
+<script setup>
+import HomePage from "../.vitepress/theme/components/HomePage.vue";
+</script>
+
+<HomePage>
+
+<template #model>
 
 ```ts
 import { event, reaction, store } from "@virentia/core";
@@ -48,7 +32,7 @@ export function createCounterModel() {
 
 </template>
 
-<template #right>
+<template #view>
 
 ```tsx
 import { component } from "@virentia/react";
@@ -59,10 +43,15 @@ export const Counter = component({
   view({ model }) {
     const increment = () => model.incremented();
 
-    return <button onClick={increment}>{model.count}</button>;
+    return (
+      <button onClick={increment}>
+        {model.count}
+      </button>
+    );
   },
 });
 ```
 
 </template>
-</CodeRow>
+
+</HomePage>

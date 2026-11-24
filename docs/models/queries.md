@@ -4,7 +4,7 @@ title: Queries And Indexes
 
 # Queries And Indexes
 
-Queries filter, sort, and slice a collection. Use them instead of `.items`
+Queries filter, sort, and slice a model's instances. Use them instead of `.items`
 plus array methods: they ride the declared indexes, update reactively, and
 keep result identity stable - which is exactly what list UIs need.
 
@@ -12,7 +12,7 @@ Field descriptors live on the model (`Todo.done`), so building a query needs
 no instance in hand.
 
 Examples on this page run inside an active scope - see
-[Collections and instances](./instances).
+[Model instances](./instances).
 
 ## Filtering
 
@@ -25,23 +25,21 @@ const Todo = staticModel({
   },
 });
 
-const todos = collection(Todo);
-
-todos.add([
+Todo.create([
   { title: "a", priority: 1 },
   { title: "b", priority: 5, done: true },
   { title: "c", priority: 9 },
 ]);
 
-todos.where(Todo.done.eq(false)).count;          // 2
-todos.where(Todo.priority.between(2, 9)).ids;    // ids of "b" and "c"
-todos.where(Todo.title.startsWith("a")).first;   // instance "a"
+Todo.where(Todo.done.eq(false)).count;          // 2
+Todo.where(Todo.priority.between(2, 9)).ids;    // ids of "b" and "c"
+Todo.where(Todo.title.startsWith("a")).first;   // instance "a"
 ```
 
 Chains narrow further; a plain function is an escape hatch that scans:
 
 ```ts
-todos
+Todo
   .where(Todo.done.eq(false))
   .where((t) => t.title.value.length > 1);
 ```
@@ -49,17 +47,17 @@ todos
 ## Sorting And Slicing
 
 ```ts
-todos.sort(Todo.priority.desc).take(2).items; // top-2 by priority
+Todo.sort(Todo.priority.desc).take(2).items; // top-2 by priority
 ```
 
 ## Projections And Mass Operations
 
 ```ts
-const done = todos.where(Todo.done.eq(true));
+const done = Todo.where(Todo.done.eq(true));
 
 done.select(Todo.title); // ["b"] - field values, not instances
 done.set(Todo.done, false); // write to every match
-todos.where(Todo.priority.lt(2)).remove(); // dispose every match
+Todo.where(Todo.priority.lt(2)).remove(); // dispose every match
 ```
 
 ## One Instance By Id
@@ -67,12 +65,12 @@ todos.where(Todo.priority.lt(2)).remove(); // dispose every match
 `get(id)` is a reactive view of a single instance:
 
 ```ts
-const view = computed(() => todos.get("42"));
+const view = computed(() => Todo.get("42"));
 
 view.value;              // null - not loaded yet
-todos.add({ id: "42", title: "x" });
+Todo.create({ id: "42", title: "x" });
 view.value;              // the instance
-todos.remove("42");
+await Todo.get("42")?.dispose();
 view.value;              // null again - no throw mid-read
 ```
 
@@ -96,10 +94,10 @@ Query terminals are reactive reads. A computed or reaction over them re-runs
 when the result can change:
 
 ```ts
-const activeCount = computed(() => todos.where(Todo.done.eq(false)).count);
+const activeCount = computed(() => Todo.where(Todo.done.eq(false)).count);
 
 activeCount.value;      // 2
-todos.first!.done.value = true;
+Todo.instances.first!.done.value = true;
 activeCount.value;      // 1 - recomputed
 ```
 
@@ -109,13 +107,13 @@ Plans are interned by shape; values are bind parameters. A chain rebuilt from
 scratch returns the same arrays while the result is unchanged:
 
 ```ts
-const a = todos.where(Todo.priority.gte(2)).items;
-const b = todos.where(Todo.priority.gte(2)).items;
+const a = Todo.where(Todo.priority.gte(2)).items;
+const b = Todo.where(Todo.priority.gte(2)).items;
 
 a === b; // true
 
-todos.first!.title.value = "renamed"; // does not affect this result
-todos.where(Todo.priority.gte(2)).items === a; // still true
+Todo.instances.first!.title.value = "renamed"; // does not affect this result
+Todo.where(Todo.priority.gte(2)).items === a; // still true
 ```
 
 Rebuilding a query every render is therefore free, and UI bindings re-render
@@ -136,7 +134,7 @@ interface Query<T> extends Iterable<T> {
 
   select(field: Descriptor): unknown[];
   set(field: Descriptor, value: unknown): void;
-  remove(): void;       // mass dispose
+  remove(): void | Promise<void>;       // mass dispose
   toArray(): T[];
 }
 

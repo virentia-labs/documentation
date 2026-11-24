@@ -14,6 +14,9 @@ title: UI-биндинги
 Список подписывается на запрос; каждая строка - на свой экземпляр:
 
 ```tsx
+import { scoped } from "@virentia/core";
+import { useModel, useProvidedScope } from "@virentia/react";
+
 function TodoRow({ todo }: { todo: InstanceOf<typeof Todo> }) {
   const t = useModel(todo);
 
@@ -23,9 +26,10 @@ function TodoRow({ todo }: { todo: InstanceOf<typeof Todo> }) {
 }
 
 function ActiveTodos() {
-  const active = useModel(
-    todos.where(Todo.done.eq(false)).sort(Todo.priority.desc).take(50),
-  );
+  const appScope = useProvidedScope();
+  const active = useModel(scoped(appScope, () =>
+    Todo.where(Todo.done.eq(false)).sort(Todo.priority.desc).take(50),
+  ));
 
   return (
     <ul>
@@ -54,7 +58,8 @@ function ActiveTodos() {
 
 ```tsx
 function TodoScreen({ id }: { id: string }) {
-  const todo = useModel(todos.get(id));
+  const appScope = useProvidedScope();
+  const todo = useModel(scoped(appScope, () => Todo.get(id)));
 
   if (!todo) return <NotFound />;
 
@@ -69,7 +74,7 @@ function TodoScreen({ id }: { id: string }) {
 
 ## Экранные модели
 
-Определение модели - фабрика `props → экземпляр` через её коллекцию, поэтому
+Определение модели — scoped-фабрика `props → экземпляр`, поэтому
 существующие сигнатуры экранных моделей принимают его напрямую:
 
 ```tsx
@@ -81,7 +86,7 @@ const order = useModel(OrderScreen, { orderId });
 
 Что происходит:
 
-- экземпляр создаётся в предоставленном скоупе - обычный `add`;
+- экземпляр создаётся в предоставленном скоупе - обычный `create`;
 - изменения пропсов мержатся в экземпляр (присутствующие ключи побеждают);
 - анмаунт уничтожает экземпляр;
 - `component.create()` возвращает controlled-экземпляр, который вью никогда
@@ -120,7 +125,7 @@ useModel(SettingsScreen, props, { keep: true });
 ```ts
 // React и Vue, одинаковые формы; Vue возвращает refs
 useModel(query): query;                        // живой вид запроса
-useModel(collection.get(id)): Instance | null; // вид сущности
+useModel(scoped(appScope, () => Todo.get(id))): Instance | null; // вид сущности
 useModel(Definition, props?, { keep? }): Instance | null;
 
 component({ model: Definition, view, keep?, mapProps? });
@@ -132,7 +137,7 @@ Component.create(props): Instance;             // controlled-экземпляр
 Используйте биндинги для:
 
 - списковых экранов - запрос, собранный в рендере, строки с ключом `t.key`;
-- детальных экранов - `useModel(todos.get(id))` с фолбэком на `null`;
+- детальных экранов - `useModel(scoped(appScope, () => Todo.get(id)))` с фолбэком на `null`;
 - состояния экрана, переживающего переключение вкладок, - `keep: true`;
 - диалогов и редакторов, которыми владеет родитель, - `component.create()`.
 

@@ -4,6 +4,8 @@ title: Wizard Forms
 
 # Wizard Forms
 
+Declare the wizard and `form.pick(...)` projections in `staticModel.setup` when they belong to a model instance. Returned forms in steps and `currentForm` remain bound. See [form ownership](./models).
+
 A wizard is useful when one task is completed in several passes: signup,
 onboarding, checkout, integration setup, or a multi-page questionnaire. The
 hard part is not the Back and Next buttons. The hard part is the model: where

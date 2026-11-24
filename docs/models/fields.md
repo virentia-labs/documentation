@@ -10,7 +10,7 @@ and must return to it: the same declaration parses input, validates it, and
 serializes back. There is no separate DTO layer to keep in sync.
 
 Examples on this page run inside an active scope - see
-[Collections and instances](./instances).
+[Model instances](./instances).
 
 ## Declaring Fields
 
@@ -22,8 +22,7 @@ const Todo = staticModel({
   },
 });
 
-const todos = collection(Todo);
-const t = todos.add({ title: "write docs" });
+const t = Todo.create({ title: "write docs" });
 
 t.title.value; // "write docs"
 t.done.value;  // false - the default
@@ -39,8 +38,8 @@ What happens:
 Missing required keys and wrong types fail before anything is written:
 
 ```ts
-todos.add({});             // Error: creating requires missing keys: title
-todos.add({ title: 42 });  // Error: invalid "title" - Expected string
+Todo.create({});             // Error: creating requires missing keys: title
+Todo.create({ title: 42 });  // Error: invalid "title" - Expected string
 ```
 
 ## Dates
@@ -52,7 +51,7 @@ const Task = staticModel({
   data: { due: f.date().optional() },
 });
 
-const task = collection(Task).add({ due: "2026-08-08T10:00:00.000Z" });
+const task = Task.create({ due: "2026-08-08T10:00:00.000Z" });
 
 task.due.value;  // Date instance
 task.json().due; // "2026-08-08T10:00:00.000Z"
@@ -75,7 +74,7 @@ const Todo = staticModel({
   }),
 });
 
-const t = collection(Todo).add({ name: "write docs" });
+const t = Todo.create({ name: "write docs" });
 
 t.title.value;  // "write docs"
 t.json();       // { id: "...", name: "write docs", is_done: false }
@@ -97,7 +96,7 @@ const Todo = staticModel({
   }),
 });
 
-const t = collection(Todo).add({ name: "x" });
+const t = Todo.create({ name: "x" });
 
 t.draft.value = "unsaved edit";
 t.json(); // { id: "...", name: "x" } - no draft
@@ -139,7 +138,7 @@ const Track = staticModel({
   },
 });
 
-const track = collection(Track).add({
+const track = Track.create({
   marks: ["2026-08-08T10:00:00.000Z"],
   meta: { due: "2026-08-08T10:00:00.000Z", note: "hi" },
   entry: ["deploy", 1],

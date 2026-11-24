@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useData, useRoute, withBase } from "vitepress";
 import {
   docsSections,
@@ -31,23 +31,31 @@ const currentSection = computed(
       section.match[locale.value].some((match) => matchesSection(currentPath.value, match)),
     ) ?? docsSections[0],
 );
-const sectionLinks = computed(() =>
-  docsSections.map((section) => ({
+const isPerformance = computed(() => /\/performance(?:\.html)?$/.test(currentPath.value));
+const currentSectionLabel = computed(() => isPerformance.value
+  ? (locale.value === "ru" ? "Производительность" : "Performance")
+  : currentSection.value.label[locale.value]);
+const sectionLinks = computed(() => [
+  ...docsSections.map((section) => ({
     id: section.id,
     text: section.label[locale.value],
     link: section.link[locale.value],
-    active: section.id === currentSection.value.id,
+    active: !isPerformance.value && section.id === currentSection.value.id,
   })),
-);
-const currentNav = computed(() => currentSection.value.nav[locale.value]);
+  { id: "performance", text: locale.value === "ru" ? "Производительность" : "Performance",
+    link: `${locale.value === "ru" ? "/ru" : ""}/performance`, active: isPerformance.value },
+]);
+const currentNav = computed(() => isPerformance.value ? [] : currentSection.value.nav[locale.value]);
 const labels = computed(() =>
   locale.value === "ru"
     ? {
+        navigation: "Навигация по документации",
         current: "Текущий раздел",
         section: "Раздел",
         sections: "Разделы",
       }
     : {
+        navigation: "Documentation navigation",
         current: "Current section",
         section: "Section",
         sections: "Sections",
@@ -65,8 +73,31 @@ function isActive(link: string): boolean {
   return path === target;
 }
 
+async function showMenu(edge: "first" | "last" = "first"): Promise<void> {
+  openMenu.value = "sections";
+  await nextTick();
+  const links = root.value?.querySelectorAll<HTMLAnchorElement>('[role="menuitem"]');
+  links?.[edge === "first" ? 0 : links.length - 1]?.focus();
+}
+
 function toggleMenu(id: string): void {
-  openMenu.value = openMenu.value === id ? null : id;
+  if (openMenu.value === id) closeMenus();
+  else void showMenu();
+}
+
+function onMenuKeydown(event: KeyboardEvent): void {
+  const links = [...(root.value?.querySelectorAll<HTMLAnchorElement>('[role="menuitem"]') ?? [])];
+  if (!links.length) return;
+  const index = links.indexOf(document.activeElement as HTMLAnchorElement);
+  const next = event.key === "Home" ? 0 : event.key === "End" ? links.length - 1
+    : event.key === "ArrowDown" ? (index + 1) % links.length
+    : event.key === "ArrowUp" ? (index + links.length - 1) % links.length : -1;
+  if (next < 0) return;
+  event.preventDefault(); links[next]?.focus();
+}
+
+function onFocusOut(event: FocusEvent): void {
+  if (!root.value?.contains(event.relatedTarget as Node | null)) closeMenus();
 }
 
 function closeMenus(): void {
@@ -88,8 +119,10 @@ function onDocumentClick(event: MouseEvent): void {
 }
 
 function onDocumentKeydown(event: KeyboardEvent): void {
-  if (event.key === "Escape") {
+  if (event.key === "Escape" && openMenu.value) {
+    const restoreFocus = root.value?.contains(document.activeElement);
     closeMenus();
+    if (restoreFocus) root.value?.querySelector<HTMLButtonElement>(".section-nav__switcher-button")?.focus();
   }
 }
 
@@ -138,7 +171,8 @@ onBeforeUnmount(() => {
     ref="root"
     class="section-nav"
     :class="`section-nav--${mode}`"
-    aria-label="Documentation navigation"
+    :aria-label="labels.navigation"
+    @focusout="onFocusOut"
   >
     <template v-if="mode === 'bar'">
       <div class="section-nav__switcher" :class="{ 'is-open': openMenu === 'sections' }">
@@ -147,12 +181,15 @@ onBeforeUnmount(() => {
           type="button"
           :aria-expanded="openMenu === 'sections'"
           aria-haspopup="menu"
+          :aria-controls="`section-menu-${mode}`"
+          @keydown.down.prevent="showMenu('first')"
+          @keydown.up.prevent="showMenu('last')"
           @click.stop="toggleMenu('sections')"
         >
           <span>{{ labels.section }}</span>
-          <strong>{{ currentSection.label[locale] }}</strong>
+          <strong>{{ currentSectionLabel }}</strong>
         </button>
-        <div v-if="openMenu === 'sections'" class="section-nav__menu" role="menu">
+        <div v-if="openMenu === 'sections'" :id="`section-menu-${mode}`" class="section-nav__menu" role="menu" @keydown="onMenuKeydown">
           <a
             v-for="section in sectionLinks"
             :key="section.id"
@@ -161,6 +198,7 @@ onBeforeUnmount(() => {
             :href="href(section.link)"
             :aria-current="section.active ? 'page' : undefined"
             role="menuitem"
+            tabindex="-1"
             @click="navigate"
           >
             {{ section.text }}

@@ -1,0 +1,147 @@
+{
+  "measuredAt": "2026-10-20T23:45:52.825Z",
+  "commit": "e5743a89e4cb8b9cdad41f2d7bc1f78714fc8c81",
+  "source": "git archive; working-tree changes are excluded",
+  "pilot": false,
+  "environment": {
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "platform": "darwin",
+    "arch": "arm64",
+    "os": "25.5.0",
+    "cpu": "Apple M1 Max",
+    "cpuCount": 10,
+    "esbuild": "0.21.5",
+    "typebox": "0.34.52"
+  },
+  "workload": {
+    "n": 10000,
+    "searches": 1000,
+    "processes": 5,
+    "model": "staticModel Point: one x field with an eq index",
+    "query": "collection(Point).where(Point.x.eq(x)).first",
+    "linear": "for (const row of rows) if (row.x.value === x) return row; return null",
+    "data": "unique x values 0..9999; insertion order is a deterministic shuffle",
+    "targets": "deterministic shuffled unique values; every timed search changes x; all searches have one match",
+    "excluded": "declaration, creation, index maintenance during insertion, validation and warmup",
+    "included": "building the descriptor chain, resolving the query and consuming the returned instance",
+    "caveat": "The eq implementation still filters state.order by its hash bucket; no O(1) guarantee for the full search. No writes or UI subscribers in the timed loops."
+  },
+  "provenance": {
+    "archiveSha256": "dd3ebc0b44ac7d4b157262fe468f23a3795d9eb0e58ad1a0bb3ce5df7f697839",
+    "harnessSha256": "bf101b6fd1a7437a7b2e5f7e03058e1dab33ea87ce5272f4c620aacbfc69c179",
+    "bundleSha256": "22783137ddeaaa4a7451a67461ce3301c722c8ea7003e67900bf25109b30d2f4"
+  },
+  "medians": {
+    "linearMs": 2135.860041,
+    "queryMs": 182.41583300000048,
+    "speedup": 11.708742634198833
+  },
+  "samples": [
+    {
+      "n": 10000,
+      "searches": 1000,
+      "round": 0,
+      "order": [
+        "linear",
+        "query"
+      ],
+      "timings": {
+        "linear": 2116.9877500000002,
+        "query": 179.4522079999997
+      },
+      "checksums": {
+        "linear": 5085184,
+        "query": 5085184
+      },
+      "checksumExpected": 5085184,
+      "uniqueTargets": 1000,
+      "averageLinearCandidates": 5163.235,
+      "verifiedExactInstances": true
+    },
+    {
+      "n": 10000,
+      "searches": 1000,
+      "round": 1,
+      "order": [
+        "query",
+        "linear"
+      ],
+      "timings": {
+        "query": 182.41583300000048,
+        "linear": 2135.860041
+      },
+      "checksums": {
+        "query": 5085184,
+        "linear": 5085184
+      },
+      "checksumExpected": 5085184,
+      "uniqueTargets": 1000,
+      "averageLinearCandidates": 5163.235,
+      "verifiedExactInstances": true
+    },
+    {
+      "n": 10000,
+      "searches": 1000,
+      "round": 2,
+      "order": [
+        "linear",
+        "query"
+      ],
+      "timings": {
+        "linear": 2243.4097920000004,
+        "query": 204.43845799999963
+      },
+      "checksums": {
+        "linear": 5085184,
+        "query": 5085184
+      },
+      "checksumExpected": 5085184,
+      "uniqueTargets": 1000,
+      "averageLinearCandidates": 5163.235,
+      "verifiedExactInstances": true
+    },
+    {
+      "n": 10000,
+      "searches": 1000,
+      "round": 3,
+      "order": [
+        "query",
+        "linear"
+      ],
+      "timings": {
+        "query": 181.65804200000048,
+        "linear": 2084.768166
+      },
+      "checksums": {
+        "query": 5085184,
+        "linear": 5085184
+      },
+      "checksumExpected": 5085184,
+      "uniqueTargets": 1000,
+      "averageLinearCandidates": 5163.235,
+      "verifiedExactInstances": true
+    },
+    {
+      "n": 10000,
+      "searches": 1000,
+      "round": 4,
+      "order": [
+        "linear",
+        "query"
+      ],
+      "timings": {
+        "linear": 2453.829417,
+        "query": 240.60420900000008
+      },
+      "checksums": {
+        "linear": 5085184,
+        "query": 5085184
+      },
+      "checksumExpected": 5085184,
+      "uniqueTargets": 1000,
+      "averageLinearCandidates": 5163.235,
+      "verifiedExactInstances": true
+    }
+  ]
+}

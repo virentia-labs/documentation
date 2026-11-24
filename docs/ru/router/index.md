@@ -4,6 +4,8 @@ title: Роутер
 
 # Роутер
 
+Для независимых экземпляров экранов используйте [роутинг во владении модели](./core/models). Роуты, сторы роутера и history listeners сохраняют scope и lifetime экрана.
+
 Virentia Router — это семейство моделей роутов для приложений на
 `@virentia/core` и `@virentia/react`.
 

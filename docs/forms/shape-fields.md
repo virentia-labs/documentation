@@ -4,6 +4,8 @@ title: Shape Fields
 
 # Shape Fields
 
+Use [shapeFieldModel](./models) for an owned object field with model children. Declare reusable field definitions in its schema and optional `additional` for dynamic keys. Its `.field` preserves the API described here.
+
 Use a shape field when an object has dynamic keys. A form schema is static by
 default, but real screens often let users add arbitrary links, attributes,
 filters, feature flags, or localized values.

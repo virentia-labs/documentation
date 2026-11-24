@@ -55,11 +55,11 @@ scoped(appScope, () => {
 });
 ```
 
-Use `scoped(scope, fn)` when you need to explicitly run an event or effect in a specific scope — in a test, server loader, command, or adapter — or when plain code must read or write stores, including after `await`; its promise waits for the async work the callback triggers. If another library will call your callback later, keep it with `scoped(scope).wrap(fn)`.
+Use `scoped(scope, fn)` when you need to explicitly run an event or effect in a specific scope — in a test, server loader, command, or adapter — or when plain code must read or write stores, including after directly awaiting a Virentia unit. After awaiting a native promise, re-enter the scope before accessing stores or units. The returned promise waits for the async work triggered by the synchronous part of the callback. If another library will call your callback later, keep it with `scoped(scope).wrap(fn)`.
 
 ## UI Libraries
 
-A model written with `@virentia/core` does not depend on the UI layer. Read [`@virentia/react`](/react/) to connect it to React. Other UI adapters should follow the same shape: the UI chooses a scope, while the model stays plain Virentia code.
+A model written with `@virentia/core` does not depend on the UI layer. Read [`@virentia/react`](/react/) to connect it to React, or [`@virentia/ui`](/ui/) for compiled JSX with fine-grained DOM updates and no component rerenders. The UI chooses a scope; the model stays plain Virentia code.
 
 ## Next Sections
 

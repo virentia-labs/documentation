@@ -4,6 +4,8 @@ title: Custom Fields
 
 # Custom Fields
 
+For model-owned domain fields composed of scalar/array/shape definitions, see [static field models](./models). The field contract below remains available for custom native APIs; a model factory built on `createField` can preserve additional methods.
+
 Use a custom field when the UI is made of several internal fields, but the form
 should see one domain value. The form should not know that `Money` is rendered
 as amount and currency, or that an address is rendered as country, city, and
@@ -65,6 +67,8 @@ What matters:
 - `read()` returns a scoped snapshot;
 - `readFields()` lets forms discover child fields for validation and errors;
 - `fill` and `reset` wait for every internal operation.
+
+If either method accesses a store after awaiting a native promise, capture the scope before the await and re-enter it with `scoped(scope, fn)` for that access.
 
 ## Inside A Form
 

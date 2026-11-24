@@ -1,0 +1,607 @@
+{
+  "measuredOn": "2026-11-08",
+  "commit": "fc3378e8313df7feea0bde2cd93fdbc2ceb92ae2",
+  "worktree": true,
+  "environment": {
+    "cpu": "Apple M1 Max",
+    "cpuCount": 10,
+    "node": "24.14.0",
+    "browser": "Chromium 153"
+  },
+  "results": {
+    "node": "/benchmarks/performance/node-results.json",
+    "ui": "/benchmarks/performance/ui-results.json",
+    "core-comparison": "/benchmarks/comparison/core-results.jsonl",
+    "ui-comparison": "/benchmarks/comparison/ui-results.json"
+  },
+  "tests": {
+    "mutable-1000": {
+      "suite": "node",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 0.5283
+        },
+        {
+          "variant": "immer",
+          "value": 12.709
+        },
+        {
+          "variant": "mutative",
+          "value": 0.9973
+        }
+      ]
+    },
+    "mutable-5000": {
+      "suite": "node",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 2.3021
+        },
+        {
+          "variant": "immer",
+          "value": 15.87
+        },
+        {
+          "variant": "mutative",
+          "value": 4.1411
+        }
+      ]
+    },
+    "mutable-50000": {
+      "suite": "node",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 22.986
+        },
+        {
+          "variant": "immer",
+          "value": 46.07
+        },
+        {
+          "variant": "mutative",
+          "value": 47.059
+        }
+      ]
+    },
+    "models-create": {
+      "suite": "node",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 9.9097
+        },
+        {
+          "variant": "mobx",
+          "value": 27.136
+        },
+        {
+          "variant": "reatom",
+          "value": 46.92
+        },
+        {
+          "variant": "effector-factory",
+          "value": 363.402
+        }
+      ]
+    },
+    "models-heap": {
+      "suite": "node",
+      "unit": "MiB",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 5.3875
+        },
+        {
+          "variant": "mobx",
+          "value": 15.551
+        },
+        {
+          "variant": "reatom",
+          "value": 53.576
+        },
+        {
+          "variant": "effector-factory",
+          "value": 348.367
+        }
+      ]
+    },
+    "models-records-create": {
+      "suite": "node",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia-records",
+          "value": 1.8815
+        },
+        {
+          "variant": "effector",
+          "value": 1.9173
+        },
+        {
+          "variant": "redux",
+          "value": 26.458
+        }
+      ]
+    },
+    "models-records-heap": {
+      "suite": "node",
+      "unit": "MiB",
+      "rows": [
+        {
+          "variant": "virentia-records",
+          "value": 0.8372
+        },
+        {
+          "variant": "effector",
+          "value": 0.8181
+        },
+        {
+          "variant": "redux",
+          "value": 1.0053
+        }
+      ]
+    },
+    "todos-create": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 10.357
+        },
+        {
+          "variant": "virentia-noindex",
+          "value": 27.149
+        },
+        {
+          "variant": "mobx",
+          "value": 29.45
+        },
+        {
+          "variant": "reatom",
+          "value": 22.824
+        },
+        {
+          "variant": "effector",
+          "value": 62.519
+        },
+        {
+          "variant": "redux",
+          "value": 28.504
+        }
+      ]
+    },
+    "todos-toggle": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 0.9918
+        },
+        {
+          "variant": "virentia-noindex",
+          "value": 15.377
+        },
+        {
+          "variant": "mobx",
+          "value": 14.53
+        },
+        {
+          "variant": "reatom",
+          "value": 10.659
+        },
+        {
+          "variant": "effector",
+          "value": 45.028
+        },
+        {
+          "variant": "redux",
+          "value": 33.462
+        }
+      ]
+    },
+    "todos-toggle-all": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 10.743
+        },
+        {
+          "variant": "virentia-noindex",
+          "value": 16.46
+        },
+        {
+          "variant": "mobx",
+          "value": 11.844
+        },
+        {
+          "variant": "reatom",
+          "value": 10.397
+        },
+        {
+          "variant": "effector",
+          "value": 20.79
+        },
+        {
+          "variant": "redux",
+          "value": 24.001
+        }
+      ]
+    },
+    "todos-remove": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 3.9055
+        },
+        {
+          "variant": "virentia-noindex",
+          "value": 10.787
+        },
+        {
+          "variant": "mobx",
+          "value": 5.0764
+        },
+        {
+          "variant": "reatom",
+          "value": 2.8633
+        },
+        {
+          "variant": "effector",
+          "value": 30.641
+        },
+        {
+          "variant": "redux",
+          "value": 1.1963
+        }
+      ]
+    },
+    "ui-table-mount": {
+      "suite": "ui",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 4.8
+        },
+        {
+          "variant": "react",
+          "value": 4.1
+        },
+        {
+          "variant": "vue",
+          "value": 4.75
+        },
+        {
+          "variant": "vue-vapor",
+          "value": 4.1
+        },
+        {
+          "variant": "solid",
+          "value": 2.35
+        },
+        {
+          "variant": "mol",
+          "value": 12.1
+        },
+        {
+          "variant": "vanilla",
+          "value": 1.9
+        }
+      ]
+    },
+    "ui-table-update": {
+      "suite": "ui",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 7.75
+        },
+        {
+          "variant": "react",
+          "value": 40.75
+        },
+        {
+          "variant": "vue",
+          "value": 8.6
+        },
+        {
+          "variant": "vue-vapor",
+          "value": 5.3
+        },
+        {
+          "variant": "solid",
+          "value": 4.9
+        },
+        {
+          "variant": "mol",
+          "value": 20.75
+        },
+        {
+          "variant": "vanilla",
+          "value": 3.1
+        }
+      ]
+    },
+    "ui-rows-1000": {
+      "suite": "ui-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 8.4
+        },
+        {
+          "variant": "react",
+          "value": 6.5
+        },
+        {
+          "variant": "vue",
+          "value": 7.7
+        },
+        {
+          "variant": "vue-vapor",
+          "value": 10.2
+        },
+        {
+          "variant": "solid",
+          "value": 3.1
+        },
+        {
+          "variant": "mol",
+          "value": 23.9
+        },
+        {
+          "variant": "vanilla",
+          "value": 3.2
+        }
+      ]
+    },
+    "ui-rows-10000": {
+      "suite": "ui-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 66.95
+        },
+        {
+          "variant": "react",
+          "value": 55.2
+        },
+        {
+          "variant": "vue",
+          "value": 71.5
+        },
+        {
+          "variant": "vue-vapor",
+          "value": 94.3
+        },
+        {
+          "variant": "solid",
+          "value": 28.75
+        },
+        {
+          "variant": "mol",
+          "value": 236.65
+        },
+        {
+          "variant": "vanilla",
+          "value": 24.4
+        }
+      ]
+    },
+    "ui-create-10000": {
+      "suite": "ui-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 55.15
+        },
+        {
+          "variant": "react",
+          "value": 176.05
+        },
+        {
+          "variant": "vue",
+          "value": 63.6
+        },
+        {
+          "variant": "vue-vapor",
+          "value": 91.75
+        },
+        {
+          "variant": "solid",
+          "value": 25.4
+        },
+        {
+          "variant": "mol",
+          "value": 226.85
+        },
+        {
+          "variant": "vanilla",
+          "value": 24.95
+        }
+      ]
+    },
+    "ui-update-tenth": {
+      "suite": "ui-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 1.5
+        },
+        {
+          "variant": "react",
+          "value": 3.8
+        },
+        {
+          "variant": "vue",
+          "value": 2.4
+        },
+        {
+          "variant": "vue-vapor",
+          "value": 1.6
+        },
+        {
+          "variant": "solid",
+          "value": 1.1
+        },
+        {
+          "variant": "mol",
+          "value": 8.1
+        },
+        {
+          "variant": "vanilla",
+          "value": 0.6
+        }
+      ]
+    },
+    "core-events": {
+      "suite": "node",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 17.992
+        },
+        {
+          "variant": "mobx",
+          "value": 5.8077
+        },
+        {
+          "variant": "reatom",
+          "value": 22.046
+        },
+        {
+          "variant": "effector",
+          "value": 46.646
+        },
+        {
+          "variant": "redux",
+          "value": 75.672
+        }
+      ]
+    },
+    "graph-create": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 7.5758
+        },
+        {
+          "variant": "mobx",
+          "value": 10.36
+        },
+        {
+          "variant": "reatom",
+          "value": 22.597
+        },
+        {
+          "variant": "effector",
+          "value": 172.347
+        },
+        {
+          "variant": "redux",
+          "value": 11.369
+        }
+      ]
+    },
+    "graph-fanout": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 11.733
+        },
+        {
+          "variant": "mobx",
+          "value": 37.528
+        },
+        {
+          "variant": "reatom",
+          "value": 60.807
+        },
+        {
+          "variant": "effector",
+          "value": 113.681
+        },
+        {
+          "variant": "redux",
+          "value": 29.581
+        }
+      ]
+    },
+    "graph-chain": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 0.6581
+        },
+        {
+          "variant": "mobx",
+          "value": 1.2822
+        },
+        {
+          "variant": "reatom",
+          "value": 1.9313
+        },
+        {
+          "variant": "effector",
+          "value": 1.2107
+        },
+        {
+          "variant": "redux",
+          "value": 0.983
+        }
+      ]
+    },
+    "graph-batch": {
+      "suite": "core-comparison",
+      "unit": "ms",
+      "rows": [
+        {
+          "variant": "virentia",
+          "value": 3.1992
+        },
+        {
+          "variant": "mobx",
+          "value": 6.113
+        },
+        {
+          "variant": "reatom",
+          "value": 14.261
+        },
+        {
+          "variant": "effector",
+          "value": 49.785
+        },
+        {
+          "variant": "redux",
+          "value": 2.305
+        }
+      ]
+    }
+  }
+}

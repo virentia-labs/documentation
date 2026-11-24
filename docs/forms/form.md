@@ -4,6 +4,8 @@ title: Form Model
 
 # Form Model
 
+For model-owned fields, declare `schema: () => ...` in `staticModel.setup` and resolve the instance’s children there. See the [complete owned-form example](./models). The bound form keeps this API, including projections and validation.
+
 A form composes fields into one model. Use it when several values should behave
 as one payload: fill draft data, validate fields together, submit, reset, track
 changes, or receive backend errors.

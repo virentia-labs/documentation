@@ -4,6 +4,8 @@ title: Core
 
 # Core
 
+Routes and routers declared in `staticModel.setup` work with ordinary `.create()` instances. See [model-owned routing](./models) for history setup, bound route tables and cleanup.
+
 The core of Virentia Router is two framework-agnostic packages:
 
 | Package | Purpose |

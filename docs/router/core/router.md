@@ -4,6 +4,8 @@ title: Router and history
 
 # Router And History
 
+For a model-owned router, declare it once in `staticModel.setup` and connect history per instance. Its route tables stay bound and disposal releases the history listener. See [the checked example](./models).
+
 A router is the model that knows which routes exist under one URL space. It
 matches incoming locations, activates route models, and exposes the current path,
 query, history adapter, and active route list.

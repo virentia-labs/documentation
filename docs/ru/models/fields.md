@@ -11,7 +11,7 @@ title: Поля и данные
 синхронизировать, нет.
 
 Примеры на этой странице выполняются в активном скоупе - см.
-[Коллекции и экземпляры](./instances).
+[Экземпляры моделей](./instances).
 
 ## Объявление полей
 
@@ -23,8 +23,7 @@ const Todo = staticModel({
   },
 });
 
-const todos = collection(Todo);
-const t = todos.add({ title: "написать доку" });
+const t = Todo.create({ title: "написать доку" });
 
 t.title.value; // "написать доку"
 t.done.value;  // false - дефолт
@@ -40,8 +39,8 @@ t.json();      // { id: "...", title: "написать доку", done: false }
 Недостающие обязательные ключи и неверные типы падают до любой записи:
 
 ```ts
-todos.add({});             // Error: creating requires missing keys: title
-todos.add({ title: 42 });  // Error: invalid "title" - Expected string
+Todo.create({});             // Error: creating requires missing keys: title
+Todo.create({ title: 42 });  // Error: invalid "title" - Expected string
 ```
 
 ## Даты
@@ -53,7 +52,7 @@ const Task = staticModel({
   data: { due: f.date().optional() },
 });
 
-const task = collection(Task).add({ due: "2026-08-08T10:00:00.000Z" });
+const task = Task.create({ due: "2026-08-08T10:00:00.000Z" });
 
 task.due.value;  // экземпляр Date
 task.json().due; // "2026-08-08T10:00:00.000Z"
@@ -76,7 +75,7 @@ const Todo = staticModel({
   }),
 });
 
-const t = collection(Todo).add({ name: "написать доку" });
+const t = Todo.create({ name: "написать доку" });
 
 t.title.value;  // "написать доку"
 t.json();       // { id: "...", name: "написать доку", is_done: false }
@@ -98,7 +97,7 @@ const Todo = staticModel({
   }),
 });
 
-const t = collection(Todo).add({ name: "x" });
+const t = Todo.create({ name: "x" });
 
 t.draft.value = "несохранённая правка";
 t.json(); // { id: "...", name: "x" } - без draft
@@ -141,7 +140,7 @@ const Track = staticModel({
   },
 });
 
-const track = collection(Track).add({
+const track = Track.create({
   marks: ["2026-08-08T10:00:00.000Z"],
   meta: { due: "2026-08-08T10:00:00.000Z", note: "hi" },
   entry: ["deploy", 1],

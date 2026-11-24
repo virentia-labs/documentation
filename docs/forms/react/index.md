@@ -4,6 +4,8 @@ title: Overview
 
 # Forms · React
 
+Pass the bound `.field`, form or wizard from an ordinary model instance directly to the hooks. See [owned fields and static models](../models); no `.static()` graph or flattened store aliases are needed for instance binding.
+
 `@virentia/forms` is UI-independent. That is useful for tests, SSR, and reusable
 feature models, but components still need a simple way to read stores and call
 form methods in the correct Virentia scope.

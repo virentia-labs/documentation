@@ -4,6 +4,8 @@ title: Field Model
 
 # Field Model
 
+Use [fieldModel](./models) for an owned field instantiated separately in each form. The same definition gives independent children; sharing an existing field uses refs. This page describes the native scalar field API that remains available through the model’s `.field`.
+
 A field is the smallest model unit in Virentia Forms. Use it when a single value
 needs behavior around it: changing, resetting, validation, focus state,
 metadata, or server errors.

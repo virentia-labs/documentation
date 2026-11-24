@@ -12,7 +12,7 @@ Variants are identified by model references - there are no type-name strings
 to invent or keep unique.
 
 Examples on this page run inside an active scope - see
-[Collections and instances](./instances).
+[Model instances](./instances).
 
 ## Declaring A Union
 
@@ -37,22 +37,20 @@ const FeedItem = union(Post, Ad).by((json) =>
   "budget" in json ? Ad : Post,
 );
 
-const feed = collection(FeedItem);
 ```
 
-`by` tells the union which variant a JSON object belongs to. The union
-collection is a view: instances live in `collection(Post)` and
-`collection(Ad)`, and both directions see the same data.
+`by` tells the union which variant a JSON object belongs to. The union is a view: instances live in `Post.instances` and
+`Ad.instances`, and both directions see the same data.
 
 ## Adding Through The Union
 
 ```ts
-feed.add({ title: "hello", likes: 3 }); // by → Post
-feed.add({ budget: 100 });              // by → Ad
+FeedItem.create({ title: "hello", likes: 3 }); // by → Post
+FeedItem.create({ budget: 100 });              // by → Ad
 
-feed.count;             // 2
-collection(Post).count; // 1
-collection(Ad).count;   // 1
+FeedItem.instances.count;             // 2
+Post.instances.count; // 1
+Ad.instances.count;   // 1
 ```
 
 What happens:
@@ -62,7 +60,7 @@ What happens:
   do not need discriminating keys;
 - a full object of another variant with a taken id is an error: variants do
   not migrate;
-- without `.by(...)` the union has no `add` - neither in types nor at run
+- without `.by(...)` the union has no `create` - neither in types nor at run
   time.
 
 ## Shared Fields
@@ -70,8 +68,8 @@ What happens:
 A field is shared by the union when every variant gets it from the same trait:
 
 ```ts
-feed.where(FeedItem.createdAt.gte(today)).count;
-feed.sort(FeedItem.createdAt.desc).items;
+FeedItem.where(FeedItem.createdAt.gte(today)).count;
+FeedItem.sort(FeedItem.createdAt.desc).items;
 ```
 
 Both work because `Post` and `Ad` compose `Timestamped`. Each variant uses its
@@ -86,7 +84,7 @@ so. Put shared fields in a trait.
 Variant-specific conditions go through `match`, one branch per variant:
 
 ```ts
-feed.match(
+FeedItem.match(
   [Post, (p) => p.likes.gte(100)],  // p is Post's descriptors
   [Ad, (a) => a.active.eq(true)],
 );
@@ -98,8 +96,7 @@ message names it) and a runtime error. It chains with `where`, `sort`, and
 `take`:
 
 ```ts
-feed
-  .where(FeedItem.createdAt.gte(today))
+FeedItem  .where(FeedItem.createdAt.gte(today))
   .match([Post, (p) => p.likes.gte(10)], [Ad, () => false])
   .sort(FeedItem.createdAt.desc)
   .take(20);
@@ -110,7 +107,7 @@ feed
 Results are typed as a union of variant instances; `in` narrows:
 
 ```ts
-for (const item of feed.items) {
+for (const item of FeedItem.instances.items) {
   if ("likes" in item) {
     item.likes.value;  // Post
   } else {
@@ -146,14 +143,14 @@ them on load.
 function union(...variants: Model[]): Union;
 
 // the input discriminator: json is typed as Dto<V1> | Dto<V2> | ...
-// until .by(...) is declared the union has no add - in types or at run time
+// until .by(...) is declared the union has no create - in types or at run time
 union.by((json) => Variant): Union;
 
-// the union collection is a Query over all variants, plus:
-feed.add(json)      // routes through by / known-id merge
-feed.get(id)        // searches the variants
-feed.remove(id)
-feed.match(...[Variant, (descriptors) => Predicate | boolean][])
+// instances is the unfiltered query over all variants:
+FeedItem.create(json)      // routes through by / known-id merge
+FeedItem.get(id)        // searches the variants
+FeedItem.instances.remove(id)
+FeedItem.match(...[Variant, (descriptors) => Predicate | boolean][])
 ```
 
 Shared descriptors (`FeedItem.field`) exist for fields every variant carries

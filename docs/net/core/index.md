@@ -4,6 +4,8 @@ title: Core
 
 # Core
 
+For per-instance requests and automatic cancellation on disposal, start with [queries in static models](./models). The native query/mutation APIs remain the same.
+
 The core of Virentia Net is one framework-agnostic package:
 
 | Package | Purpose |

@@ -37,7 +37,7 @@ const previewSize = { height: 90, width: 172 };
 const fullscreenSize = { height: 126, width: 240 };
 const previewViewport = { x: 20, y: 34, zoom: 0.78 };
 const fullscreenViewport = { x: 88, y: 76, zoom: 0.56 };
-const edgeColor = "#64748b";
+const edgeColor = "var(--vi-subtle)";
 
 const fullscreenPositions: Record<FlowKind, Record<string, { x: number; y: number }>> = {
   effect: {
@@ -394,13 +394,13 @@ function fitFullscreenControl(): void {
 .node-flow-open,
 .node-flow-close {
   flex: 0 0 auto;
-  min-height: 34px;
+  min-height: 44px;
   padding: 0 14px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 7px;
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-1);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
   line-height: 1;
   transition:
@@ -450,13 +450,13 @@ function fitFullscreenControl(): void {
 }
 
 .node-flow-controls button {
-  min-width: 34px;
-  height: 34px;
+  min-width: 44px;
+  height: 44px;
   padding: 0 10px;
   border-right: 1px solid var(--vp-c-divider);
   color: var(--vp-c-text-1);
   font-size: 14px;
-  font-weight: 760;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -470,7 +470,7 @@ function fitFullscreenControl(): void {
 
 .node-flow-controls .node-flow-fit {
   min-width: 42px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .node-flow-controls-full {
@@ -497,7 +497,7 @@ function fitFullscreenControl(): void {
   overflow-wrap: anywhere;
   color: var(--vp-c-text-1);
   font-size: 18px;
-  font-weight: 760;
+  font-weight: 500;
   line-height: 1.18;
 }
 
@@ -505,8 +505,8 @@ function fitFullscreenControl(): void {
   display: block;
   overflow-wrap: anywhere;
   color: var(--vp-c-text-2);
-  font-size: 13px;
-  font-weight: 620;
+  font-size: 14px;
+  font-weight: 400;
   line-height: 1.28;
 }
 
@@ -527,28 +527,28 @@ function fitFullscreenControl(): void {
 }
 
 .tone-green {
-  --node-bg: #ecfdf5;
-  --node-border: #10b981;
+  --node-bg: #edf5f0;
+  --node-border: #76a88c;
 }
 
 .tone-blue {
-  --node-bg: #eff6ff;
-  --node-border: #3b82f6;
+  --node-bg: #eef1f9;
+  --node-border: #9594bd;
 }
 
 .tone-amber {
-  --node-bg: #fffbeb;
-  --node-border: #d97706;
+  --node-bg: #faf3e9;
+  --node-border: #ba9562;
 }
 
 .tone-red {
-  --node-bg: #fef2f2;
-  --node-border: #ef4444;
+  --node-bg: #fbf0f4;
+  --node-border: #c7879d;
 }
 
 .tone-neutral {
-  --node-bg: #f8fafc;
-  --node-border: #64748b;
+  --node-bg: #f4eef8;
+  --node-border: #a18aaa;
 }
 
 .node-flow-fullscreen {
@@ -618,7 +618,7 @@ function fitFullscreenControl(): void {
 .node-flow :deep(.vue-flow__edge-text),
 .node-flow-fullscreen :deep(.vue-flow__edge-text) {
   fill: var(--vp-c-text-2);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -639,28 +639,28 @@ function fitFullscreenControl(): void {
 }
 
 .dark .node-flow-card.tone-green {
-  --node-bg: #10251d;
-  --node-border: #10b981;
+  --node-bg: #122019;
+  --node-border: #76a88c;
 }
 
 .dark .node-flow-card.tone-blue {
-  --node-bg: #101f35;
-  --node-border: #3b82f6;
+  --node-bg: #171625;
+  --node-border: #9594bd;
 }
 
 .dark .node-flow-card.tone-amber {
-  --node-bg: #2d220f;
-  --node-border: #d97706;
+  --node-bg: #241c14;
+  --node-border: #ba9562;
 }
 
 .dark .node-flow-card.tone-red {
-  --node-bg: #2f1518;
-  --node-border: #ef4444;
+  --node-bg: #28151d;
+  --node-border: #c7879d;
 }
 
 .dark .node-flow-card.tone-neutral {
-  --node-bg: #191b20;
-  --node-border: #64748b;
+  --node-bg: #18131f;
+  --node-border: #a18aaa;
 }
 
 @media (max-width: 640px) {

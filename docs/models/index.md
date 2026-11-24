@@ -24,7 +24,7 @@ pnpm add @virentia/core @sinclair/typebox
 ```
 
 ```ts
-import { collection, f, staticModel } from "@virentia/core/models";
+import { f, staticModel } from "@virentia/core/models";
 ```
 
 Apps that never import `@virentia/core/models` skip `@sinclair/typebox`
@@ -36,7 +36,7 @@ entirely - nothing is installed or bundled for them.
 | ------------------------------------------ | ------------------------------------------------------------------ |
 | [Fields and data](./fields)                | An entity has typed fields that arrive from and return to JSON.    |
 | [Traits](./traits)                         | Several models share fields and behavior.                          |
-| [Collections and instances](./instances)   | Entities need a home: creation, merging, lifecycle.                |
+| [Model instances](./instances)   | Entities need a home: creation, merging, lifecycle.                |
 | [Model kinds](./kinds)                     | Choosing between `staticModel`, `model`, and a plain `owner`.      |
 | [Relations](./relations)                   | Entities reference other entities or own child entities.           |
 | [Queries and indexes](./queries)           | Lists need filtering, sorting, and fast lookups.                   |
@@ -46,12 +46,11 @@ entirely - nothing is installed or bundled for them.
 
 ## First Model
 
-Describe the entity, create a collection in a scope, load JSON, query, and
-serialize back.
+Describe the entity, create its instances in a scope, query them, and serialize back.
 
 ```ts
 import { scope, scoped } from "@virentia/core";
-import { collection, f, staticModel } from "@virentia/core/models";
+import { f, staticModel } from "@virentia/core/models";
 
 const Todo = staticModel({
   data: {
@@ -63,20 +62,18 @@ const Todo = staticModel({
 const appScope = scope();
 
 scoped(appScope, () => {
-  const todos = collection(Todo);
-
-  todos.add([
+  Todo.create([
     { id: "1", title: "write docs" },
     { id: "2", title: "ship release", done: true },
   ]);
 
-  todos.count;                              // 2
-  todos.where(Todo.done.eq(false)).ids;     // ["1"]
+  Todo.instances.count;                              // 2
+  Todo.where(Todo.done.eq(false)).ids;     // ["1"]
 
-  const first = todos.get("1")!;
+  const first = Todo.get("1")!;
 
   first.done.value = true;
-  todos.where(Todo.done.eq(false)).count;   // 0
+  Todo.where(Todo.done.eq(false)).count;   // 0
 
   first.json(); // { id: "1", title: "write docs", done: true }
 });
@@ -86,9 +83,8 @@ What happens:
 
 - `staticModel` declares the entity once; `Todo.done` is a field descriptor
   usable in queries;
-- `collection(Todo)` is get-or-create per scope - the same call returns the
-  same collection, different scopes hold independent data;
-- `add` validates the JSON and creates instances; a known id merges instead of
+- `Todo.instances` is the full reactive query; different scopes hold independent instances;
+- `create` validates the JSON and creates instances; a known id merges instead of
   duplicating;
 - `first.done.value` is a regular store write - the index and every query
   update immediately;
@@ -113,5 +109,5 @@ a plain core `owner` is the better tool than any model - is on
 ## Related
 
 - [Fields and data](./fields) - how `f.*` declarations describe both storage and JSON.
-- [Collections and instances](./instances) - the collection API and instance lifecycle.
+- [Model instances](./instances) - creation, lookup, and instance lifecycle.
 - [UI bindings](./bindings) - rendering queries and instances in React and Vue.

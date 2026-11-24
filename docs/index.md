@@ -1,32 +1,16 @@
 ---
-layout: home
-
-hero:
-  name: Virentia
-  text: The reactive stack for describing any business logic
-  tagline: Build apps of any complexity. Scale them without the complications.
-  image:
-    src: /logo.svg
-    alt: Virentia logo
-  actions:
-    - theme: brand
-      text: Get Started
-      link: /guide/getting-started
-    - theme: alt
-      text: Why Virentia
-      link: /guide/ideology
-
-features:
-  - title: Learn once, create anything
-    details: From a counter to a whole product, without changing the approach.
-  - title: Real isolation
-    details: "App, test, SSR request: separate states of one model."
-  - title: Async included
-    details: Cancellation, pending, and errors are part of the effect, not wiring around it.
+layout: page
+pageClass: virentia-landing
+description: "Your next framework to create web applications. A reactive foundation for state, business logic, and async work."
 ---
 
-<CodeRow>
-<template #left>
+<script setup>
+import HomePage from "./.vitepress/theme/components/HomePage.vue";
+</script>
+
+<HomePage>
+
+<template #model>
 
 ```ts
 import { event, reaction, store } from "@virentia/core";
@@ -48,7 +32,7 @@ export function createCounterModel() {
 
 </template>
 
-<template #right>
+<template #view>
 
 ```tsx
 import { component } from "@virentia/react";
@@ -59,10 +43,15 @@ export const Counter = component({
   view({ model }) {
     const increment = () => model.incremented();
 
-    return <button onClick={increment}>{model.count}</button>;
+    return (
+      <button onClick={increment}>
+        {model.count}
+      </button>
+    );
   },
 });
 ```
 
 </template>
-</CodeRow>
+
+</HomePage>

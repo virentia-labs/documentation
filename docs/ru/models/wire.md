@@ -10,12 +10,12 @@ title: Загрузка и сериализация
 почему по дороге ничего не ломается.
 
 Примеры на этой странице выполняются в активном скоупе - см.
-[Коллекции и экземпляры](./instances).
+[Экземпляры моделей](./instances).
 
 ## Сериализация
 
 ```ts
-const t = todos.add({ id: "1", title: "написать доку" });
+const t = Todo.create({ id: "1", title: "написать доку" });
 
 t.json();           // { id: "1", title: "написать доку", done: false }
 JSON.stringify(t);  // то же - toJSON подключён к json()
@@ -33,7 +33,7 @@ JSON.stringify(t);  // то же - toJSON подключён к json()
 он работает везде, но не сериализуется никогда:
 
 ```ts
-const t = todos.add({ title: "новая" });
+const t = Todo.create({ title: "новая" });
 
 t.id;     // "~tmp1" - годится для роутов, get(), ссылок
 t.json(); // { title: "новая", done: false } - без id: его назначит сервер
@@ -47,7 +47,7 @@ t.json(); // { title: "новая", done: false } - без id: его назна
 Оптимистичный сценарий создания, от начала до конца:
 
 ```ts
-const t = todos.add({ name });          // временный id
+const t = Todo.create({ name });          // временный id
 navigate(`/todo/${t.id}`);              // URL со временным id
 
 const saved = await api.save(t.json()); // в payload нет id
@@ -57,7 +57,7 @@ t.rebind(saved.id);                     // теперь серверный
 Что происходит на `rebind`:
 
 - каждая связь, указывающая на экземпляр, переписывается на новый id;
-- старый id продолжает разрешаться: `todos.get("~tmp1")` возвращает тот же
+- старый id продолжает разрешаться: `Todo.get("~tmp1")` возвращает тот же
   экземпляр - открытый роут и компоненты со старым id работают дальше;
 - этот форвардинг существует только для поиска - он не попадает в индексы,
   результаты запросов и `json()`;
@@ -70,12 +70,12 @@ t.rebind(saved.id);                     // теперь серверный
 переименования:
 
 ```ts
-const t = todos.add({ id: "draft-7", title: "x" });
+const t = Todo.create({ id: "draft-7", title: "x" });
 
 t.rebind("42");
 
-todos.get("draft-7") === t; // true - алиас разрешается
-todos.get("42") === t;      // true - настоящий id, всегда сильнее алиаса
+Todo.get("draft-7") === t; // true - алиас разрешается
+Todo.get("42") === t;      // true - настоящий id, всегда сильнее алиаса
 t.json().id;                // "42" - алиасы никогда не сериализуются
 ```
 
@@ -83,7 +83,7 @@ t.json().id;                // "42" - алиасы никогда не сери�
 
 - разрешение - только фолбэк: настоящий id в коллекции всегда побеждает
   алиас с тем же написанием;
-- алиасы живут только в `get` (и в `useModel(todos.get(...))`) - никогда в
+- алиасы живут только в `get` (и в `useModel(Todo.get(...))`) - никогда в
   индексах, результатах запросов и связях;
 - алиас умирает вместе со своим экземпляром: таблица хранит живые
   переименования, а не историю;
@@ -112,7 +112,7 @@ articles.where(Article.slug.eq("intro")).first; // поиск по вторич�
 `instance.key` - идентичность для UI-списков:
 
 ```tsx
-{todos.items.map((t) => <Row key={t.key} todo={t} />)}
+{Todo.instances.items.map((t) => <Row key={t.key} todo={t} />)}
 ```
 
 Это не id: он переживает `rebind` (строка не ремаунтится, когда сервер
@@ -138,7 +138,7 @@ articles.where(Article.slug.eq("intro")).first; // поиск по вторич�
 
 ```ts
 function fromLegacy(row: LegacyRow) {
-  return todos.add({ name: row.title_text, done: row.state === 2 });
+  return Todo.create({ name: row.title_text, done: row.state === 2 });
 }
 ```
 
@@ -150,7 +150,7 @@ instance.toJSON();                        // алиас для JSON.stringify
 instance.rebind(newId: string): void;     // переписывает ссылки, оставляет форвардинг
 instance.key: string;                     // стабильная UI-идентичность
 
-collection.get(oldId); // разрешает форвардинг после rebind
+Todo.get(oldId); // разрешает форвардинг после rebind
 ```
 
 ## Частые кейсы

@@ -13,7 +13,7 @@ title: Трейты
 нужно регистрировать и которые могут столкнуться.
 
 Примеры на этой странице выполняются в активном скоупе - см.
-[Коллекции и экземпляры](./instances).
+[Экземпляры моделей](./instances).
 
 ## Общие поля
 
@@ -30,7 +30,7 @@ const Post = staticModel({
   data: { title: f.string() },
 });
 
-const post = collection(Post).add({
+const post = Post.create({
   title: "привет",
   createdAt: "2026-08-08T10:00:00.000Z",
 });
@@ -77,7 +77,7 @@ const Todo = staticModel({
   },
 });
 
-const t = collection(Todo).add({ title: "x" });
+const t = Todo.create({ title: "x" });
 
 await t.toggle();   // событие трейта, доступно на экземпляре
 t.selected.value;   // true
@@ -119,8 +119,8 @@ function selectAll<M extends Impl<typeof Selectable>>(items: readonly M[]) {
   }
 }
 
-selectAll(collection(Todo).items); // ок
-selectAll(collection(User).items); // ошибка компиляции - User не реализует
+selectAll(Todo.instances.items); // ок
+selectAll(User.instances.items); // ошибка компиляции - User не реализует
 ```
 
 ## Параметризованные трейты
@@ -167,4 +167,4 @@ type Impl<T extends Trait>; // констрейнт для обобщённог�
 
 - [Поля и данные](./fields) - что принимают `data` и `requires`.
 - [Объединения](./unions) - почему общие поля должны идти из одного трейта.
-- [Коллекции и экземпляры](./instances) - как ведут себя `setup` и `self`.
+- [Экземпляры моделей](./instances) - как ведут себя `setup` и `self`.

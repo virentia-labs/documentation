@@ -1,74 +1,106 @@
 ---
-title: Коллекции и экземпляры
+title: Экземпляры моделей
 ---
 
-# Коллекции и экземпляры
+# Экземпляры моделей
 
-Коллекция - это место, где живут экземпляры модели: единственный способ их
-создать, место выполнения запросов и владелец их жизненного цикла.
-Используйте её как единственный источник истины «какие сущности сейчас
-существуют» - компоненты, эффекты и тесты читают одну и ту же коллекцию через
-скоуп.
+Создавайте и находите экземпляры через саму модель. Её реестр хранится в
+scoped-сторе: одно определение работает с независимыми приложениями,
+SSR-запросами и параллельными тестами.
 
-## Создание коллекции
+## Создание и поиск
 
-`collection(Model)` - get-or-create на скоуп:
+`create` использует активный скоуп приложения. `get` только ищет существующий
+экземпляр и возвращает `null`, если такого ID нет.
 
 ```ts
 import { scope, scoped } from "@virentia/core";
-import { collection } from "@virentia/core/models";
+import { f, staticModel } from "@virentia/core/models";
 
+const Todo = staticModel({ data: { title: f.string(), done: f.boolean(false) } });
 const appScope = scope();
 
-scoped(appScope, () => {
-  const todos = collection(Todo);
-
-  collection(Todo) === todos; // true - тот же скоуп, та же коллекция
-});
+const todo = scoped(appScope, () => Todo.create({ id: "1", title: "Написать доку" }));
+scoped(appScope, () => Todo.get("1") === todo); // true
+scoped(scope(), () => Todo.get("1"));          // null: другой скоуп
 ```
 
-Разные скоупы держат полностью независимые популяции - SSR-запросы и тесты не
-видят сущностей друг друга. Остальные примеры предполагают активный скоуп.
+Полученный экземпляр привязан к своему скоупу: его поля и юниты доступны и
+вне `scoped`. Остальные примеры выполняются в активном скоупе.
 
-## Добавление и мерж
+## Создание и мерж
 
-`add` принимает JSON. Новый id создаёт, известный - мержит: присутствующие
-ключи побеждают, отсутствующие остаются:
+`create` принимает JSON. Новый ID создаёт экземпляр, известный ID обновляет
+тот же экземпляр. Присутствующие ключи записываются, отсутствующие не меняются.
 
 ```ts
-const todos = collection(Todo);
+Todo.create({ id: "1", title: "Написать доку" });
+Todo.create({ id: "1", done: true });
+Todo.get("1")!.title.value; // "Написать доку"
 
-todos.add({ id: "1", title: "написать доку" });     // создание
-todos.add({ id: "1", done: true });                 // мерж - title не тронут
-todos.get("1")!.title.value;                        // "написать доку"
+Todo.create({ id: "1", title: "Переписать" }, { replace: true });
+// Отсутствующие опциональные поля сбрасываются в дефолты; локальные не меняются.
 
-todos.add({ id: "1", title: "переписать" }, { replace: true });
-// replace - отсутствующие опциональные ключи сбрасываются в дефолты
+const batch = Todo.create([{ title: "A" }, { title: "B" }]);
 ```
 
-Массив - один батч: валидируется заранее, а при падении элемента созданное
-откатывается:
+Частичный вход с неизвестным ID завершится ошибкой, если не хватает обязательных
+полей. Массив сначала валидируется; при ошибке создания новые экземпляры этого
+батча освобождаются.
+
+## Все экземпляры и LINQ
+
+`Todo.instances` — реактивный запрос без фильтра для текущего скоупа.
+Он фиксирует этот скоуп: запрос можно передать рендереру или читать позже.
+Отфильтрованная выборка начинается прямо с модели:
 
 ```ts
-todos.add([{ title: "a" }, { title: "b" }]); // оба или ни одного
+Todo.instances.count;
+Todo.instances.items;
+Todo.where(Todo.done.eq(false)).take(10).first;
+Todo.instances.select(Todo.title);
 ```
 
-Что происходит:
+Терминалы полной выборки находятся под `instances`, чтобы поле вроде
+`Todo.count` оставалось дескриптором. Сортировка, проекции, массовые изменения
+и реактивный поиск описаны в [Запросах и индексах](./queries).
 
-- мерж - это то, как работают обновления с сервера: пере-`add` загруженного
-  списка обновляет существующие экземпляры на месте, ссылки на них остаются
-  валидными;
-- частичный вход с неизвестным id - ошибка с перечислением недостающих
-  ключей: полусозданных сущностей не бывает;
-- `Model.create(props)` - сокращение для `collection(Model).add(props)` в
-  активном скоупе.
+## Синглтон из существующей модели {#model-singleton}
+
+Каждый вызов `Todo.static(input?)` создаёт новую независимую модель с
+собственными нативными сторами, событиями и эффектами. Результаты не
+кешируются и не входят в `Todo.instances`; обычные экземпляры `Todo.create`
+также остаются независимыми.
+
+```ts
+const draft = Todo.static({ title: "Черновик" }); // активный scope не нужен
+const other = Todo.static({ title: "Черновик" }); // другие нативные юниты
+draft === other;                                // false
+
+const first = scope(), second = scope();
+scoped(first, () => { draft.title.value = "Изменено"; });
+scoped(first, () => other.title.value);         // "Черновик": другая модель
+scoped(second, () => draft.title.value);         // "Черновик"
+```
+
+У каждого результата значения изолированы скоупом приложения. Читайте и
+вызывайте юниты внутри `scoped` или передайте модель через пропс `model`: рендерер привяжет
+его к своему скоупу. Нативные юниты работают в `reaction` и `scope({ values,
+handlers })`, включая подмену обработчиков эффектов.
+
+Метод есть у `model` и `staticModel`. Вход можно опустить, если у всех полей
+есть дефолты; иначе передайте обязательные поля DTO. У каждого вызова свой
+начальный вход и новый запуск `setup`. Ресурсы каждого скоупа инициализируйте
+в `onCreate`. Для SSR задайте исходной модели стабильный `sid` либо `name` и
+сохраняйте одинаковый порядок её вызовов `.static()` на сервере и клиенте:
+отдельное пространство SID каждого результата включает номер объявления.
 
 ## Чтение и запись
 
 Поля - сторы; члены из `setup` вызываются на экземпляре:
 
 ```ts
-const t = todos.add({ title: "x" });
+const t = Todo.create({ title: "x" });
 
 t.title.value;          // "x"
 t.done.value = true;    // обычная запись в стор - запросы обновляются сразу
@@ -108,8 +140,8 @@ const Todo = staticModel({
   },
 });
 
-const a = todos.add({});
-const b = todos.add({});
+const a = Todo.create({});
+const b = Todo.create({});
 
 await a.toggled();
 
@@ -147,7 +179,7 @@ const Todo = staticModel({
 
 ## Уничтожение
 
-`dispose()` (или `collection.remove(id)`) каскадирует детей, применяет
+`dispose()` (или `Model.instances.remove(id)`) каскадирует детей, применяет
 [политики удаления](./relations#политики-удаления) и убирает экземпляр из
 индексов и запросов. После этого:
 
@@ -158,7 +190,7 @@ const Todo = staticModel({
 ```ts
 const label = computed(() => (t.alive ? t.title.value : "удалено"));
 
-todos.remove(t.id);
+Todo.instances.remove(t.id);
 label.value; // "удалено"
 ```
 
@@ -349,7 +381,7 @@ const Room = staticModel({
     reaction({
       on: joined,
       run: () => {
-        const me = collection(Room).get(self.id)!; // колбэки бегут вне модельного контекста
+        const me = Room.get(self.id)!; // колбэки бегут вне модельного контекста
 
         const socket = new WebSocket(`wss://chat.example/${self.channel.value}`);
 
@@ -399,7 +431,7 @@ const Monitor = staticModel({
     reaction({
       on: started,
       run: () => {
-        const me = collection(Monitor).get(self.id)!; // фасад живёт и вне тел юнитов
+        const me = Monitor.get(self.id)!; // фасад живёт и вне тел юнитов
 
         const timer = setInterval(() => void me.check(), 5_000);
 
@@ -415,13 +447,15 @@ const Monitor = staticModel({
 ## Контракт
 
 ```ts
-function collection<M>(model: M, scope?: Scope): Collection<M>;
-
-interface Collection<M> extends Query<InstanceOf<M>> {
-  add(input: Dto | ({ id: string } & Partial<Dto>), options?: { replace?: boolean }): InstanceOf<M>;
-  add(input: readonly Input[], options?: { replace?: boolean }): InstanceOf<M>[];
-  get(id: string): InstanceOf<M> | null; // реактивен, разрешает алиасы rebind
-  remove(id: string): void;
+interface ModelAccess<M> {
+  static(...args: {} extends Dto<M> ? [input?: Dto<M>] : [input: Dto<M>]): SingletonOf<M>;
+  create(input: AddInput<M>, options?: { replace?: boolean }): InstanceOf<M>;
+  create(input: readonly AddInput<M>[], options?: { replace?: boolean }): InstanceOf<M>[];
+  get(id: string): InstanceOf<M> | null;
+  readonly instances: TypedQuery<InstanceOf<M>>;
+  where(predicate: Predicate | ((item: InstanceOf<M>) => boolean)): TypedQuery<InstanceOf<M>>;
+  sort(by: SortToken): TypedQuery<InstanceOf<M>>;
+  take(count: number): TypedQuery<InstanceOf<M>>;
 }
 
 interface InstanceApi {
@@ -429,23 +463,27 @@ interface InstanceApi {
   readonly key: string;
   readonly alive: boolean;
   json(): Record<string, unknown>;
-  dispose(): void;
+  dispose(): void | Promise<void>;
   rebind(newId: string): void;
   onCleanup(cleanup: () => void): () => void; // возвращает отмену регистрации
 }
 ```
 
+`SingletonOf<M>` содержит поля как полноценные юниты `StoreWritable<T>`,
+члены setup, связи и API экземпляра. Он не фиксирует скоуп: новый скоуп
+начинается с исходных значений.
+
 ## Частые кейсы
 
-Используйте коллекции для:
+Используйте реестр модели для:
 
-- кеша серверных списков - `add` ответа, мерж сохраняет ссылки валидными;
-- реестров сущностей на несколько экранов - одна коллекция на скоуп;
-- оптимистичного создания - `add` без id, [rebind позже](./wire#смена-id-rebind);
+- кеша серверных списков - `create` ответа, мерж сохраняет ссылки валидными;
+- реестров сущностей на несколько экранов - один реестр модели на скоуп;
+- оптимистичного создания - `create` без id, [rebind позже](./wire#смена-id-rebind);
 - тестовых сетапов - свежий скоуп даёт свежую изолированную популяцию.
 
 ## Связанные разделы
 
-- [Запросы и индексы](./queries) - каждая коллекция одновременно запрос.
+- [Запросы и индексы](./queries) - `Model.instances` — запрос без фильтра.
 - [Связи](./relations) - дети создаются через родителя.
 - [Загрузка и сериализация](./wire) - `json()`, временные id, `rebind`.
