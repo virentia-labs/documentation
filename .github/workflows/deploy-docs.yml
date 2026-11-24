@@ -1,61 +1,65 @@
-name: Deploy docs
+name: Diagnose docs SFTP
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - docs/**
-      - package.json
-      - pnpm-lock.yaml
-      - .github/workflows/deploy-docs.yml
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  group: docs
-  cancel-in-progress: false
+permissions: {}
 
 jobs:
-  deploy:
-    if: github.repository == 'virentia-labs/documentation'
+  diagnose:
     runs-on: ubuntu-latest
+    timeout-minutes: 4
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Check SFTP authentication and target directory
+        env:
+          SFTP_HOST: ${{ secrets.SERVER }}
+          SFTP_USER: ${{ secrets.SERVER_LOGIN }}
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
+          SFTP_TARGET: ${{ secrets.TARGET_DIR }}
+        run: |
+          set -euo pipefail
+          : "${SFTP_HOST:?Missing SERVER}"
+          : "${SFTP_USER:?Missing SERVER_LOGIN}"
+          : "${SSHPASS:?Missing SERVER_PASSWORD}"
+          : "${SFTP_TARGET:?Missing TARGET_DIR}"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.0.9
+          if ! command -v sshpass >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends sshpass
+          fi
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
+          known_hosts="$(mktemp "$RUNNER_TEMP/docs-known-hosts.XXXXXX")"
+          if ! ssh-keyscan -H -T 8 -p 22 "$SFTP_HOST" > "$known_hosts" 2>/dev/null || [[ ! -s "$known_hosts" ]]; then
+            echo "::error::The configured server did not present an SSH host key"
+            exit 1
+          fi
+          echo "SSH host-key exchange succeeded"
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          if [[ "$SFTP_TARGET" == *\"* || "$SFTP_TARGET" == *\\* || "$SFTP_TARGET" == *$'\r'* || "$SFTP_TARGET" == *$'\n'* ]]; then
+            echo "::error::TARGET_DIR contains characters this SFTP probe cannot quote"
+            exit 1
+          fi
 
-      - name: Build docs
-        run: pnpm docs:build
-
-      - name: Deploy docs
-        uses: pressidium/lftp-mirror-action@v1
-        timeout-minutes: 15
-        with:
-          host: ${{ secrets.SERVER }}
-          port: 22
-          user: ${{ secrets.SERVER_LOGIN }}
-          pass: ${{ secrets.SERVER_PASSWORD }}
-          localDir: ./docs/.vitepress/dist
-          remoteDir: ${{ secrets.TARGET_DIR }}
-          reverse: true
-          parallel: 4
-          options: --verbose=1
-          settings: cmd:fail-exit=yes
+          result=0
+          printf 'cd "%s"\npwd\nquit\n' "$SFTP_TARGET" |
+            timeout 45s sshpass -e sftp -v -P 22 -o ConnectTimeout=12 -o ConnectionAttempts=1 \
+              -o BatchMode=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$known_hosts" \
+              -o PreferredAuthentications=password,keyboard-interactive -b - "$SFTP_USER@$SFTP_HOST" \
+              > "$RUNNER_TEMP/docs-sftp-output" 2> "$RUNNER_TEMP/docs-sftp-error" || result=$?
+          if [[ "$result" == 0 ]]; then
+            echo "SFTP authentication and access to TARGET_DIR succeeded"
+          else
+            if grep -qi 'Authenticated to' "$RUNNER_TEMP/docs-sftp-error"; then
+              echo "SSH authentication succeeded"
+            fi
+            case "$result" in
+              124) echo "::error::The SFTP session or target directory check timed out after 45 seconds" ;;
+              5) echo "::error::The server rejected the configured SFTP password" ;;
+              *)
+                grep -E -i 'permission denied|authentication failed|host key verification failed|timed out|connection closed|connection refused|remote chdir|no such file|subsystem request failed|couldn.t canonicalize' "$RUNNER_TEMP/docs-sftp-error" || true
+                echo "::error::SFTP target check exited with status $result"
+                ;;
+            esac
+            exit "$result"
+          fi
