@@ -47,6 +47,7 @@ jobs:
 
       - name: Deploy docs
         uses: pressidium/lftp-mirror-action@v1
+        timeout-minutes: 15
         with:
           host: ${{ secrets.SERVER }}
           port: 22
@@ -55,3 +56,6 @@ jobs:
           localDir: ./docs/.vitepress/dist
           remoteDir: ${{ secrets.TARGET_DIR }}
           reverse: true
+          parallel: 4
+          options: --verbose=1
+          settings: cmd:fail-exit=yes
