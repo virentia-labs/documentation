@@ -30,11 +30,7 @@ jobs:
           fi
 
           known_hosts="$(mktemp "$RUNNER_TEMP/docs-known-hosts.XXXXXX")"
-          if ! ssh-keyscan -H -T 8 -p 22 "$SFTP_HOST" > "$known_hosts" 2>/dev/null || [[ ! -s "$known_hosts" ]]; then
-            echo "::error::The configured server did not present an SSH host key"
-            exit 1
-          fi
-          echo "SSH host-key exchange succeeded"
+          echo "Opening one SFTP connection to the configured server"
 
           if [[ "$SFTP_TARGET" == *\"* || "$SFTP_TARGET" == *\\* || "$SFTP_TARGET" == *$'\r'* || "$SFTP_TARGET" == *$'\n'* ]]; then
             echo "::error::TARGET_DIR contains characters this SFTP probe cannot quote"
@@ -44,11 +40,20 @@ jobs:
           result=0
           printf 'cd "%s"\npwd\nquit\n' "$SFTP_TARGET" |
             timeout 45s sshpass -e sftp -v -P 22 -o ConnectTimeout=12 -o ConnectionAttempts=1 \
-              -o BatchMode=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$known_hosts" \
+              -o BatchMode=no -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile="$known_hosts" \
               -o PreferredAuthentications=password,keyboard-interactive -b - "$SFTP_USER@$SFTP_HOST" \
               > "$RUNNER_TEMP/docs-sftp-output" 2> "$RUNNER_TEMP/docs-sftp-error" || result=$?
           if [[ "$result" == 0 ]]; then
             echo "SFTP authentication and access to TARGET_DIR succeeded"
+            if timeout 20s sshpass -e ssh -p 22 -o ConnectTimeout=10 -o ConnectionAttempts=1 \
+                -o BatchMode=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$known_hosts" \
+                -o PreferredAuthentications=password,keyboard-interactive "$SFTP_USER@$SFTP_HOST" \
+                'command -v tar >/dev/null && echo docs-tar-available' \
+                > "$RUNNER_TEMP/docs-ssh-probe" 2>/dev/null && grep -qx docs-tar-available "$RUNNER_TEMP/docs-ssh-probe"; then
+              echo "Authenticated remote shell can run tar"
+            else
+              echo "Authenticated remote shell did not confirm tar access"
+            fi
           else
             if grep -qi 'Authenticated to' "$RUNNER_TEMP/docs-sftp-error"; then
               echo "SSH authentication succeeded"
