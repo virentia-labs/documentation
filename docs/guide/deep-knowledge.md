@@ -143,7 +143,7 @@ resume node
 enqueue downstream work
 ```
 
-The runtime deliberately does not keep drafts alive across `await`. A long-lived draft would make stale writes, conflict resolution, and memory lifetime much harder to explain and debug. `scoped` preserves scope and causal context through async work; it does not preserve the transaction draft.
+The runtime deliberately does not keep drafts alive across `await`. A long-lived draft would make stale writes, conflict resolution, and memory lifetime much harder to explain and debug. Direct awaits of Virentia units carry scope and causal context into the continuation. The runtime opens a new transaction draft for subsequent writes.
 
 Effect lifecycle stores are an exception to domain-state batching. `pending` and `inFlight` are runtime execution signals, so they update immediately when async work starts or settles. Lifecycle events such as `started`, `doneData`, `failData`, and `settled` remain normal units; reactions to those events write business stores through the normal transactional path.
 
@@ -164,9 +164,9 @@ Warnings about read-after-write between sibling reactions and several sibling wr
 
 Running a unit inside `scoped(scope, () => unit(payload))` is the cleanest boundary because the scope is explicit. It runs the unit's graph work in the given scope, and the returned promise waits until the async graph work it triggers settles.
 
-`scoped(scope, fn)` is a short execution frame. It puts the scope into the current execution context so store reads and writes can happen in plain code. When the callback returns, the previous scope context is restored.
+`scoped(scope, fn)` is a short execution frame. It puts the scope into the current execution context so store reads and writes can happen in plain code. When the synchronous part of the callback returns, the caller's scope is restored.
 
-If the callback returns a promise, `scoped(scope, fn)` keeps that scope for the promise chain until it settles. It is useful for application-owned async work, but it should not be treated as a universal async context system for every parallel flow.
+The callback keeps its scope when it directly awaits a Virentia unit. Awaiting a native promise drops that scope. Use an effect for external async work, or explicitly re-enter the scope with `scoped(scope, fn)` before the next scoped operation.
 
 `scoped(scope).wrap(fn)` is the integration tool. It captures a scope once and reopens it when another library calls your callback later.
 

@@ -41,7 +41,7 @@ Scope is lost at any boundary where control leaves your scoped execution and com
 - `.then(...)` / a raw `await fetch()` / any bare promise
 - third-party async APIs that call you back
 
-The common thread: **the scope is a contextual value set during synchronous execution; a raw `await` or an externally-invoked callback resumes with that context gone.** This is JavaScript's asynchronicity, not a quirk of Virentia — the same reason `this` or an AsyncLocalStorage value would be gone.
+The common thread: **the scope is a contextual value set during synchronous execution; a raw `await` or an externally-invoked callback resumes with that context gone.**
 
 ## Fixing it
 

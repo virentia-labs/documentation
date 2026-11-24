@@ -68,6 +68,8 @@ What matters:
 - `readFields()` lets forms discover child fields for validation and errors;
 - `fill` and `reset` wait for every internal operation.
 
+If either method accesses a store after awaiting a native promise, capture the scope before the await and re-enter it with `scoped(scope, fn)` for that access.
+
 ## Inside A Form
 
 ```ts

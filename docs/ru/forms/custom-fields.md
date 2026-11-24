@@ -67,6 +67,8 @@ function createMoneyField(initial: Money): FieldContract<Money> {
 - `readFields()` позволяет формам найти дочерние поля для валидации и ошибок;
 - `fill` и `reset` ждут все внутренние операции.
 
+Если метод обращается к стору после ожидания обычного промиса, захватите scope до `await` и выполните обращение внутри `scoped(scope, fn)`.
+
 ## Внутри формы
 
 ```ts

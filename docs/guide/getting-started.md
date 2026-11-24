@@ -55,7 +55,7 @@ scoped(appScope, () => {
 });
 ```
 
-Use `scoped(scope, fn)` when you need to explicitly run an event or effect in a specific scope — in a test, server loader, command, or adapter — or when plain code must read or write stores, including after `await`; its promise waits for the async work the callback triggers. If another library will call your callback later, keep it with `scoped(scope).wrap(fn)`.
+Use `scoped(scope, fn)` when you need to explicitly run an event or effect in a specific scope — in a test, server loader, command, or adapter — or when plain code must read or write stores, including after directly awaiting a Virentia unit. After awaiting a native promise, re-enter the scope before accessing stores or units. The returned promise waits for the async work triggered by the synchronous part of the callback. If another library will call your callback later, keep it with `scoped(scope).wrap(fn)`.
 
 ## UI Libraries
 
